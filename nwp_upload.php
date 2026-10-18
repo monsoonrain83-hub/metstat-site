@@ -107,7 +107,7 @@ if ($a === 'put') {
     $meta = json_decode((string)($body['meta'] ?? '{}'), true) ?: [];
     [$reg, $nm] = explode('/', $file); [$p, $v] = explode('_', preg_replace('~\.(png|webp)$~', '', $nm));
     $dst = "$MD/$run/$file"; @mkdir(dirname($dst), 0755, true); file_put_contents("$dst.tmp", $b); rename("$dst.tmp", $dst);
-    if (substr($p, -1) === 'L') jout(['ok' => true, 'line' => true]);          // لایهٔ خطوطِ کاشی؛ در فهرست جدا نمی‌آید
+    if (substr($p, -1) === 'L' || substr($p, -1) === 'V') jout(['ok' => true, 'line' => true]);          // لایهٔ خطوطِ کاشی؛ در فهرست جدا نمی‌آید
     $S['items'][$file] = ['r' => $reg, 'p' => $p, 'v' => $v, 's' => (int)($meta['s'] ?? 0)];
     if (isset($meta['w']) && preg_match('~^[a-z0-9:,]{1,90}$~', (string)$meta['w'])) $S['items'][$file]['w'] = (string)$meta['w'];          // مالتی‌مدل: مدل‌های به‌کاررفته و وزن‌ها
     jsave($SF, $S);

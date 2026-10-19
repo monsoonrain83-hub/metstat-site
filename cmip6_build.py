@@ -43,7 +43,7 @@ def retrieve(client, model, exp, var, years, workdir, log):
         except Exception as e:
             last = str(e).strip().splitlines()[-1][:300] if str(e).strip() else repr(e)
             log(f"    ✗ {model}/{exp}/{var} شکل درخواست {list(req)[-2:]}: {last}")
-            if "not found" in last.lower() or "no data" in last.lower(): break      # فرق نمی‌کند شکل را عوض کنیم
+            if "not found" in last.lower() or "no data" in last.lower() or "500" in last: break      # فرق نمی‌کند شکل را عوض کنیم
     return None
 
 def read_nc(path, var):
@@ -123,13 +123,14 @@ def main():
     if a.upload: upload(a.upload, a.host, a.key); return
     if a.merge:
         parts = [load_part(f) for f in sorted(glob.glob(os.path.join(a.merge, "**", "*.npz"), recursive=True))]; J = merge(parts); json.dump(J, open(a.out, "w"), separators=(",", ":")); print("merged", len(J["models"]), "models →", a.out, os.path.getsize(a.out) // 1024, "KB; ناقص:", J["missing"]); return
-    import cdsapi; client = cdsapi.Client(quiet=True)
+    import cdsapi; client = cdsapi.Client(quiet=True, retry_max=2, sleep_max=20, timeout=120)   # پیش‌فرض cdsapi روی خطای ۵۰۰ تا ۵۰۰ بار×۱۲۰ث تکرار می‌کند؛ این‌جا فقط ۲ بار
     if a.probe:
-        ok_n = 0; tot = 0
+        import time as _t; T0 = _t.time(); ok_n = 0; tot = 0
         with tempfile.TemporaryDirectory() as wd:
             for m in a.models.split(","):
                 for exp in EXPS:
                     for var in VARS:
+                        if _t.time() - T0 > 40 * 60: log("⏹ سقف ۴۰ دقیقه"); log(f"\nخلاصه: {ok_n}/{tot} ترکیب در دسترس"); return
                         tot += 1; y = C.HIST[1] if exp == "historical" else C.FUT[0]; fs = retrieve(client, m, exp, var, [y], wd, log); ok = bool(fs); ok_n += ok; log(f"{'✓' if ok else '✗'} {m:16s} {exp:11s} {var}")
         log(f"\nخلاصه: {ok_n}/{tot} ترکیب در دسترس"); return
     if not a.model or not a.part: ap.error("--model و --part لازم است")

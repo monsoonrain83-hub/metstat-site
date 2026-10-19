@@ -32,6 +32,15 @@ if ($a === 'clim') {                       // اقلیم ایستگاهی شبک
     $f = "$DIR/clim_tmean.npz"; if (!is_file($f)) jout(['error' => 'no clim'], 404);
     header('Content-Type: application/octet-stream'); readfile($f); exit;
 }
+if ($a === 'cmipput') {                    // r55: دادهٔ پیش‌نگری CMIP6 (JSON فشرده ≤ ۱۲ مگابایت) ← data/cmip6/<name>.json
+    $CD = "$DATA/cmip6"; @mkdir($CD, 0755, true); $nm = (string)($_POST['name'] ?? '');
+    if (!preg_match('~^cmip6_[a-z0-9_]{2,24}\.json$~', $nm)) jout(['error' => 'name'], 400);
+    if (empty($_FILES['f']['tmp_name']) || !is_uploaded_file($_FILES['f']['tmp_name'])) jout(['error' => 'no file'], 400);
+    if (filesize($_FILES['f']['tmp_name']) > 12 * 1024 * 1024) jout(['error' => 'too big'], 400);
+    $b = (string)file_get_contents($_FILES['f']['tmp_name']); $j = json_decode($b, true);
+    if (!is_array($j) || ($j['v'] ?? 0) !== 1 || !isset($j['models'], $j['tas'], $j['pr'])) jout(['error' => 'not cmip6 json'], 400);
+    file_put_contents("$CD/$nm.tmp", $b); rename("$CD/$nm.tmp", "$CD/$nm"); jout(['ok' => true, 'bytes' => strlen($b)]);
+}
 if ($a === 'idxput' || $a === 'idxend') {      // نمودار شاخص‌های اقلیمی (تصویر)؛ بدون وابستگی به مدل/اجرا
     $ID = "$DATA/idx"; @mkdir($ID, 0755, true); $F = "$ID/index.json"; $X = jload($F, ['items' => [], 'updated' => null]);
     if ($a === 'idxend') { $X['updated'] = gmdate('c'); jsave($F, $X); jout(['ok' => true]); }
@@ -64,7 +73,7 @@ function manifest(): void {
         $man['models'][$m] = ['fa' => $S['label'] ?? $m, 'name' => $S['name'] ?? $m, 'run' => $S['run'], 'status' => $S['status'] ?? 'downloading', 'done' => count($S['items']), 'info' => $S['info'] ?? (object)[]];
         if ($man['run'] === null || $S['run'] > $man['run']) $man['run'] = $S['run'];
         if (($S['status'] ?? '') !== 'complete') $man['status'] = 'downloading';
-        foreach ($S['items'] as $file => $i) { $it = ['f' => "data/nwp/$m/{$S['run']}/$file", 'r' => $i['r'], 'm' => $m, 'p' => $i['p'], 's' => (int)$i['s'], 'v' => $i['v'], 'run' => $S['run']]; if (isset($i['w'])) $it['w'] = $i['w']; $man['items'][] = $it; }
+        foreach ($S['items'] as $file => $i) $man['items'][] = ['f' => "data/nwp/$m/{$S['run']}/$file", 'r' => $i['r'], 'm' => $m, 'p' => $i['p'], 's' => (int)$i['s'], 'v' => $i['v'], 'run' => $S['run']];
         // اجرای قبلی همین مدل (دومین اجرای نگه‌داشته‌شده): جدا از items تا صفحه‌های دیگر دوبار نقشه نبینند
         $best = null; foreach (glob(dirname($f) . '/20*/state.json') ?: [] as $pf) { $q = jload($pf, null); if ($q && !empty($q['run']) && $q['run'] !== $S['run'] && $q['run'] < $S['run'] && ($best === null || $q['run'] > $best['run'])) $best = $q; }
         if ($best) {
@@ -107,9 +116,8 @@ if ($a === 'put') {
     $meta = json_decode((string)($body['meta'] ?? '{}'), true) ?: [];
     [$reg, $nm] = explode('/', $file); [$p, $v] = explode('_', preg_replace('~\.(png|webp)$~', '', $nm));
     $dst = "$MD/$run/$file"; @mkdir(dirname($dst), 0755, true); file_put_contents("$dst.tmp", $b); rename("$dst.tmp", $dst);
-    if (substr($p, -1) === 'L' || substr($p, -1) === 'V') jout(['ok' => true, 'line' => true]);          // لایهٔ خطوطِ کاشی؛ در فهرست جدا نمی‌آید
+    if (substr($p, -1) === 'L') jout(['ok' => true, 'line' => true]);          // لایهٔ خطوطِ کاشی؛ در فهرست جدا نمی‌آید
     $S['items'][$file] = ['r' => $reg, 'p' => $p, 'v' => $v, 's' => (int)($meta['s'] ?? 0)];
-    if (isset($meta['w']) && preg_match('~^[a-z0-9:,]{1,90}$~', (string)$meta['w'])) $S['items'][$file]['w'] = (string)$meta['w'];          // مالتی‌مدل: مدل‌های به‌کاررفته و وزن‌ها
     jsave($SF, $S);
     // فهرست کلی هر ۲۰ نقشه (و در پایان) بازسازی می‌شود تا هاست کند نشود
     if (count($S['items']) % 20 === 1) manifest();

@@ -1,5 +1,5 @@
 # سنجش پوشش OGIMET (خلاصهٔ روزانهٔ SYNOP) برای چند ایستگاه ایران در چند ماهِ نمونه. فقط می‌خواند.
-# نسخهٔ ۳: نتیجه بعد از هر درخواست ذخیره می‌شود (با لغو/تایم‌اوت چیزی از دست نمی‌رود)، سقف زمان ۳۵ دقیقه، و برای هر تلاش
+# نسخهٔ ۴ (اصلاح شمارش <TR> حساس به حروف؛ در نسخهٔ ۳ همهٔ صفحه‌های سالم ناموفق ثبت می‌شدند). نسخهٔ ۳: نتیجه بعد از هر درخواست ذخیره می‌شود (با لغو/تایم‌اوت چیزی از دست نمی‌رود)، سقف زمان ۳۵ دقیقه، و برای هر تلاش
 # کد وضعیت/طول/تعداد ردیف/ابتدای متن ثبت می‌شود تا معلوم شود محدودیت نرخ است یا ساختار صفحه یا مسدودشدن IP.
 import urllib.request, urllib.error, re, time, calendar, io, sys
 import pandas as pd
@@ -15,7 +15,7 @@ def get(u):
         return r.status, r.read().decode("latin1")
     except urllib.error.HTTPError as e: return e.code, ""
     except Exception as e: return 0, "ERR " + repr(e)[:150]
-def rows(t): return t.count("<tr")
+def rows(t): return len(re.findall(r"<tr", t, re.I))      # OGIMET تگ‌ها را معمولاً بزرگ می‌نویسد (<TR>)
 log(f"شروع {time.strftime('%H:%M:%S')} · سقف زمان {BUDGET//60} دقیقه")
 saved = False
 for y, m in MONTHS:                     # ماه‌به‌ماه تا همهٔ ایستگاه‌ها زودتر یک نمونه داشته باشند
@@ -25,10 +25,10 @@ for y, m in MONTHS:                     # ماه‌به‌ماه تا همهٔ �
         for a in range(2):
             st, t = get(u); n = rows(t)
             log(f"  {ind} {nm} {y}-{m:02d} تلاش{a+1}: HTTP={st} طول={len(t)} tr={n} | {re.sub(chr(10), ' ', re.sub('<[^>]+>', ' ', t))[:110].strip()!r}")
-            if st == 200 and "Date" in t and n > 10: ok = True; break
+            if st == 200 and "date" in t.lower() and n > 10: ok = True; break
             time.sleep(60)               # محدودیت نرخ یا صفحهٔ کوتاه؛ یک بار با تأخیر
+        if len(t) > 5000 and not saved: open("ogimet_sample.html", "w", encoding="utf-8").write(t); saved = True    # نمونهٔ ساختار صفحه، حتی اگر شناسایی جدول نشد
         if not ok: log(f"{ind} {nm} {y}-{m:02d}: ✗ ناموفق"); time.sleep(20); continue
-        if not saved: open("ogimet_sample.html", "w", encoding="utf-8").write(t); saved = True
         try:
             tb = max(pd.read_html(io.StringIO(t)), key=lambda d: d.shape[0] * d.shape[1]); cols = [" ".join(str(x) for x in c) if isinstance(c, tuple) else str(c) for c in tb.columns]; N = len(tb)
             def cnt(pat):

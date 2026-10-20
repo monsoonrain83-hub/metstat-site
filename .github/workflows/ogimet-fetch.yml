@@ -72,6 +72,7 @@ jobs:
           run-id: ${{ inputs.prev_run }}
           github-token: ${{ github.token }}
       - run: |
+          test -f jcal.py || { echo 'jcal.py در ریشهٔ مخزن نیست!'; exit 1; }
           mkdir -p prev
           python3 ogimet_aggregate.py all prev --out monthly.csv
           cat all/*/done_*.txt | awk '{print $2}' | sort | uniq -c

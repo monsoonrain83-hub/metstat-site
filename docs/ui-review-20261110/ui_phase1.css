@@ -1,0 +1,19 @@
+/* MetStat UI foundation P1 — visual/accessibility only; no DOM or API changes. */
+:root{--msui-focus:#0b65d8;--msui-tap:44px}
+:where(button,a[href],select,input,textarea,summary,[role="button"]):focus-visible{outline:3px solid var(--msui-focus)!important;outline-offset:3px}
+:where(.panel,.card,.nvCard,.mcCard){min-width:0}
+:where(.panel,.card,.nvCard,.mcCard) :where(img,svg,canvas){max-width:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}:where(button,a,summary){transition-duration:.01ms!important}}
+/* Ordinary mobile: controls remain available but dense horizontal rows scroll rather than squeeze. */
+@media(max-width:767px){
+ #onViewer .nvChipRow .wxBar{display:flex;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;justify-content:flex-start;padding:5px 6px;gap:6px}
+ #onViewer .nvChipRow .wxBar>*{flex:0 0 auto}
+ #onViewer .nvTime{max-width:100%;min-width:0}
+ #onViewer .nvTime .btn.sm{min-height:var(--msui-tap);min-width:var(--msui-tap)}
+ #onViewer .nvCard select{max-width:100%;min-width:0}
+ #onViewer .nvCard>header h3{overflow-wrap:anywhere}
+}
+/* Tablet and desktop: preserve established map/control layout; avoid mobile-only squeezing. */
+@media(min-width:768px){#onViewer .nvChipRow .wxBar{flex-wrap:wrap;overflow:visible}}
+/* Desktop Site on a phone is not reliably identified by viewport alone. Do not force
+   responsive mode or change viewport/zoom: keep existing dskPhone behavior intact. */

@@ -1,0 +1,47 @@
+name: UI review P1 (no deploy)
+on:
+  pull_request:
+    paths:
+      - "docs/ui-review-20261110/**"
+      - ".github/workflows/ui-review-p1.yml"
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Extract current source (no upload)
+        run: |
+          set -euo pipefail
+          if ls site_src.part* >/dev/null 2>&1; then
+            cat site_src.part* > /tmp/metstat-site-src.zip
+          else
+            cp site_src.zip /tmp/metstat-site-src.zip
+          fi
+          mkdir -p /tmp/metstat-ui-review
+          unzip -q /tmp/metstat-site-src.zip -d /tmp/metstat-ui-review
+          test -f /tmp/metstat-ui-review/site/src/css/app.css
+      - name: Check source parity and apply CSS candidate to temp copy
+        run: python docs/ui-review-20261110/apply_and_verify.py /tmp/metstat-ui-review
+      - name: Static regression assertions
+        run: python docs/ui-review-20261110/check_source.py /tmp/metstat-ui-review/site
+      - name: Build candidate
+        run: cd /tmp/metstat-ui-review/site && python build_site.py index.html
+      - name: Browser smoke test
+        run: |
+          cd /tmp/metstat-ui-review/site/tests
+          npm init -y >/dev/null
+          npm i playwright@1.47.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          node smoke.js ../index.html
+      - name: Confirm no production files modified
+        run: |
+          test -z "$(git status --porcelain -- site_src.zip site_src.part\* site_patch\*.zip nwp_upload.php)"
+          echo "Review complete; no FTPS, no deploy."

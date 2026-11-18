@@ -1,0 +1,103 @@
+/* MetStat r88 – graphite design system, reference: user-provided Code & Chill dashboard.
+   Layout invariant: primary+secondary page tabs at top, tools aside right in fa,
+   workspace left; exact mirror in en. Same desktop composition on a phone.
+   Domain-specific map palettes, generated canvases and model freshness badges are not changed. */
+:root {
+ --ms88-page:#242527;--ms88-nav:#2c2e30;--ms88-surface:#333537;
+ --ms88-card:#3c3e40;--ms88-over:#46484a;--ms88-edge:#55575a;
+ --ms88-text:#f1f1f2;--ms88-muted:#b8babd;--ms88-active:#f0f0f1;
+ --ms88-shadow:0 9px 30px rgba(0,0,0,.15);--ms88-radius:15px;
+ --ms88-tools:292px;--ms88-space:12px;
+}
+/* Do not load the former r87 fixed global rail. Main navigation remains ABOVE every page. */
+html:not(.nvfOn),html:not(.nvfOn) body {min-width:1180px!important;max-width:none!important;width:100%!important;overflow-x:auto!important}
+body {background:var(--ms88-page)!important;color:var(--ms88-text)!important}
+body>.top {background:var(--ms88-nav)!important;color:var(--ms88-text)!important;border-bottom:1px solid var(--ms88-edge)!important;box-shadow:none!important;position:relative!important;z-index:70!important}
+body>.top :is(h1,h2,h3,.ttl) {color:var(--ms88-text)!important}
+body>.top :is(button,.btn,select) {border:1px solid var(--ms88-edge)!important;background:var(--ms88-card)!important;color:var(--ms88-text)!important;border-radius:10px!important}
+body>.top :is(button,.btn,select):hover {background:var(--ms88-over)!important}
+#msNav {position:sticky!important;top:0!important;inset-inline:auto!important;left:auto!important;right:auto!important;z-index:1005!important;display:block!important;width:100%!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;overflow:visible!important;background:var(--ms88-nav)!important;border:0!important;border-bottom:1px solid var(--ms88-edge)!important;border-radius:0!important;box-shadow:var(--ms88-shadow)!important}
+#msNav #msNavR1,#msNav #msNavR2 {display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important;padding:6px 12px!important;min-height:43px!important;min-width:0!important;width:100%!important;height:auto!important;max-height:none!important;margin:0!important;background:transparent!important;border:0!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain!important;scrollbar-width:thin;box-sizing:border-box!important}
+#msNav #msNavR2 {background:#383a3c!important;border-top:1px solid #505256!important}
+#msNav #msNavR2[hidden]{display:none!important}
+#msNav :is(.msPg,.msSec),#msNav .msNavR1.rot .msPg,#msNav .msNavR2.rot .msSec {position:relative!important;flex:0 0 auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;writing-mode:horizontal-tb!important;white-space:nowrap!important;min-width:max-content!important;max-width:none!important;width:auto!important;min-height:32px!important;max-height:none!important;height:auto!important;padding:7px 12px!important;margin:0!important;border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;color:#d6d8da!important;font-size:12px!important;font-weight:600!important;line-height:1.25!important;box-shadow:none!important;outline:none!important;transform:none!important;text-shadow:none!important;transition:background-color .24s ease,color .24s ease,box-shadow .24s ease,border-color .24s ease!important;cursor:pointer!important}
+#msNav .msNavR2 .msSec {font-size:11.5px!important;color:#c9cbcd!important}
+#msNav :is(.msPg,.msSec):hover {background:#545659!important;color:#fff!important;border-color:#636569!important}
+#msNav :is(.msPg,.msSec).on {background:var(--ms88-active)!important;color:#252627!important;border-color:var(--ms88-active)!important;box-shadow:0 3px 13px rgba(240,240,240,.12)!important}
+#msNav .msNavR2 .msSec.on {background:#dfe0e1!important;color:#252627!important}
+#msNav :is(.msPg,.msSec):focus-visible {outline:2px solid #fff!important;outline-offset:2px!important}
+#msNav .msIc,#msNav .msNavR1.rot .msIc,#msNav .msNavR2.rot .msIc {display:inline-block!important;flex:0 0 15px!important;width:15px!important;height:15px!important;margin:0!important;stroke:currentColor!important;vertical-align:middle!important}
+#msNav .msBadge {color:inherit!important;opacity:.8!important}
+/* Workspace: two independent tracks; NEVER turn either track into an overlay. */
+body>:is(.wrap,.landing,#anApp,#labApp,#synApp,#cqcApp):not([hidden]) {width:calc(100% - 24px)!important;max-width:none!important;min-width:0!important;margin:12px!important;padding:0!important;box-sizing:border-box!important;position:relative!important;left:auto!important;right:auto!important}
+body>.wrap:not([hidden]):has(>aside):not(#caApp) {display:grid!important;grid-template-columns:minmax(0,1fr) var(--ms88-tools)!important;direction:ltr!important;gap:var(--ms88-space)!important;align-items:start!important}
+body>.wrap:not([hidden]):has(>aside):not(#caApp)>aside {grid-column:2!important;grid-row:1!important;direction:rtl!important;position:sticky!important;top:98px!important;z-index:15!important;width:100%!important;min-width:0!important;max-width:100%!important;max-height:calc(100vh - 118px)!important;overflow-x:hidden!important;overflow-y:auto!important;padding:8px!important;margin:0!important;box-sizing:border-box!important;background:var(--ms88-surface)!important;border:1px solid var(--ms88-edge)!important;border-radius:var(--ms88-radius)!important;box-shadow:var(--ms88-shadow)!important;scrollbar-width:thin!important}
+body>.wrap:not([hidden]):has(>aside):not(#caApp)>main {grid-column:1!important;grid-row:1!important;direction:rtl!important;position:relative!important;z-index:1!important;min-width:0!important;width:100%!important;max-width:100%!important;margin:0!important;box-sizing:border-box!important}
+#onApp:not([hidden]) {grid-template-columns:minmax(0,1fr) var(--ms88-tools)!important}
+#onApp #onAside {grid-column:2!important;grid-row:1!important}
+#onApp>main {grid-column:1!important;grid-row:1!important}
+html[dir="ltr"] body>.wrap:not([hidden]):has(>aside):not(#caApp) {grid-template-columns:var(--ms88-tools) minmax(0,1fr)!important;direction:ltr!important}
+html[dir="ltr"] body>.wrap:not([hidden]):has(>aside):not(#caApp)>aside {grid-column:1!important;direction:ltr!important}
+html[dir="ltr"] body>.wrap:not([hidden]):has(>aside):not(#caApp)>main {grid-column:2!important;direction:ltr!important}
+html[dir="ltr"] #onApp:not([hidden]) {grid-template-columns:var(--ms88-tools) minmax(0,1fr)!important}
+html[dir="ltr"] #onApp #onAside {grid-column:1!important;direction:ltr!important}
+html[dir="ltr"] #onApp>main {grid-column:2!important;direction:ltr!important}
+/* Atlas still has its two original narrow panels; never synthesize a new screen. */
+#caApp:not([hidden]) {display:grid!important;grid-template-columns:minmax(0,1fr) 188px 188px!important;direction:ltr!important;gap:10px!important;align-items:start!important}
+#caApp:not([hidden])>main {grid-column:1!important;grid-row:1!important;min-width:0!important;max-width:100%!important}
+#caApp:not([hidden])>#caAside2 {grid-column:2!important;grid-row:1!important;max-width:100%!important;width:100%!important;direction:rtl!important}
+#caApp:not([hidden])>#caAside {grid-column:3!important;grid-row:1!important;max-width:100%!important;width:100%!important;direction:rtl!important}
+html[dir="ltr"] #caApp:not([hidden]) {grid-template-columns:188px 188px minmax(0,1fr)!important}
+html[dir="ltr"] #caApp:not([hidden])>#caAside {grid-column:1!important;direction:ltr!important}
+html[dir="ltr"] #caApp:not([hidden])>#caAside2 {grid-column:2!important;direction:ltr!important}
+html[dir="ltr"] #caApp:not([hidden])>main {grid-column:3!important;direction:ltr!important}
+/* Secondary analytical page grids: protect wider map/chart track. */
+#sfMain .sfGrid,#flMain .flGrid,#obMain .obGrid {display:grid!important;grid-template-columns:minmax(0,1fr) var(--ms88-tools)!important;direction:ltr!important;gap:var(--ms88-space)!important}
+#sfMain .sfGrid>.sfSide,#flMain .flGrid>.p17-fl-side,#obMain .obGrid>.obControls {grid-column:2!important;grid-row:1!important;width:100%!important;max-width:100%!important;min-width:0!important;direction:rtl!important}
+#sfMain .sfGrid>.sfBody,#flMain .flGrid>.flL,#obMain .obGrid>.obCol:first-child {grid-column:1!important;grid-row:1!important;min-width:0!important;width:100%!important;max-width:100%!important;direction:rtl!important}
+html[dir="ltr"] #sfMain .sfGrid,html[dir="ltr"] #flMain .flGrid,html[dir="ltr"] #obMain .obGrid {grid-template-columns:var(--ms88-tools) minmax(0,1fr)!important}
+html[dir="ltr"] #sfMain .sfGrid>.sfSide,html[dir="ltr"] #flMain .flGrid>.p17-fl-side,html[dir="ltr"] #obMain .obGrid>.obControls {grid-column:1!important;direction:ltr!important}
+html[dir="ltr"] #sfMain .sfGrid>.sfBody,html[dir="ltr"] #flMain .flGrid>.flL,html[dir="ltr"] #obMain .obGrid>.obCol:first-child {grid-column:2!important;direction:ltr!important}
+/* Low-chroma glass controls, without overriding meteorological color palettes. */
+body :is(.panel,.card) {background:var(--ms88-surface)!important;border:1px solid var(--ms88-edge)!important;border-radius:var(--ms88-radius)!important;box-shadow:var(--ms88-shadow)!important;color:var(--ms88-text)!important}
+body :is(.panel,.card)>:is(header,h2,h3,h4),body :is(.panel,.card)>header :is(h2,h3) {color:var(--ms88-text)!important}
+body :is(.panel,.card) :is(.hint,.sub,.small) {color:var(--ms88-muted)!important}
+body :is(aside,.panel) :is(button,.btn,select,input:not([type="checkbox"]):not([type="radio"]),textarea) {box-sizing:border-box!important;max-width:100%!important;min-width:0!important;border-radius:9px!important}
+body :is(aside,.panel) :is(button,.btn):not(.msFresh):not(.msStale):not(.wxChip):not(.ms-g):not(.ms-b):not(.ms-r):not([data-m]) {background:#4a4c4e!important;border:1px solid #616367!important;color:var(--ms88-text)!important;box-shadow:none!important;transition:background .2s,border-color .2s,transform .2s!important}
+body :is(aside,.panel) :is(button,.btn):not(.msFresh):not(.msStale):not(.wxChip):not(.ms-g):not(.ms-b):not(.ms-r):not([data-m]):hover {background:#626467!important;border-color:#898b8f!important;transform:translateY(-1px)}
+body :is(aside,.panel) :is(select,input:not([type="checkbox"]):not([type="radio"]),textarea) {background:#292b2d!important;border:1px solid #66686b!important;color:#f4f4f4!important}
+body :is(aside,.panel) label {color:#e3e4e6!important}
+body :is(aside,.panel) :is(details,summary) {max-width:100%!important;box-sizing:border-box!important}
+body :is(aside,.panel) summary {cursor:pointer;transition:background .2s ease;border-radius:8px}
+body :is(aside,.panel) summary:hover {background:#4b4d4f!important}
+#onAside :is(.ovd[open]>.ovp,.ovd[open] .ovp) {position:static!important;inset:auto!important;transform:none!important;width:100%!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important;box-sizing:border-box!important}
+#onAside #p8Tools,#onAside #nvMenus {max-width:100%!important;min-width:0!important;overflow:visible!important}
+#onAside #p8Tools>* {max-width:100%!important;min-width:0!important}
+/* The map surface remains a neutral data canvas; do not colorize raster or chart data. */
+#onApp>main #onViewer, #onApp .nvCard,#onApp .nvStage,#onApp canvas {max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+#onApp .nvStage {overflow:hidden!important;border-radius:11px!important}
+#onApp>main .card {overflow:visible}
+#msEmbeddedFrame {max-width:100%!important;width:100%!important;border-radius:var(--ms88-radius)!important}
+/* Existing loading overlay: graphite glass, spinner and calm mobile-only hint. */
+#msLoad {background:rgba(12,13,14,.64)!important;backdrop-filter:blur(5px)!important;z-index:5000!important}
+#msLoad .mlBox {width:min(650px,75vw)!important;max-width:650px!important;min-width:380px!important;padding:24px 28px 20px!important;border:1px solid #65676a!important;border-radius:18px!important;color:#f7f7f7!important;background:rgba(48,50,52,.95)!important;box-shadow:0 20px 60px #0007!important;box-sizing:border-box!important}
+#msLoad .mlT {font-size:17px!important;font-weight:700!important;display:flex;align-items:center;justify-content:center;gap:13px;line-height:1.65!important}
+#msLoad .mlT::before {content:"";display:inline-block;width:20px;height:20px;flex:none;border:2.5px solid #8d8e90;border-top-color:#fff;border-radius:50%;animation:ms88-spin .9s linear infinite}
+#msLoad .mlBar {background:#606265!important;height:6px!important;margin-block:13px 9px!important}
+#msLoad .mlBar i {background:#dedfe1!important}
+#msMobileRotateHint {margin:15px auto 0;padding:10px 12px;max-width:580px;color:#fff;font-size:15px;line-height:1.8;font-weight:650;direction:rtl;text-align:center;letter-spacing:0;animation:ms88-breathe 1.8s ease-in-out infinite}
+html[dir="ltr"] #msMobileRotateHint {direction:ltr}
+@keyframes ms88-spin {to{transform:rotate(360deg)}}
+@keyframes ms88-breathe {0%,100%{opacity:1}50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){#msLoad .mlT::before,#msMobileRotateHint{animation:none!important}#msNav :is(.msPg,.msSec){transition:none!important}}
+/* Keep desktop tracks on narrow physical screens: viewport meta presents desktop scale. */
+@media(max-width:760px){html:not(.nvfOn),html:not(.nvfOn) body{min-width:1180px!important}body>.wrap:not([hidden]):has(>aside):not(#caApp){grid-template-columns:minmax(0,1fr) var(--ms88-tools)!important}html[dir="ltr"] body>.wrap:not([hidden]):has(>aside):not(#caApp){grid-template-columns:var(--ms88-tools) minmax(0,1fr)!important}}
+
+
+/* The browser scales the desktop viewport on phones. Enlarge ONLY the loading box
+   to keep its advice readable; do not change page layout or map canvas zoom. */
+#msLoad.ms88-mobile .mlBox {width:min(88vw,1100px)!important;max-width:1100px!important;min-width:880px!important;padding:44px 48px 42px!important}
+#msLoad.ms88-mobile .mlT {font-size:43px!important;gap:22px!important}
+#msLoad.ms88-mobile .mlT::before {width:44px;height:44px;border-width:5px}
+#msLoad.ms88-mobile .mlBar {height:13px!important;margin-block:27px 19px!important}
+#msLoad.ms88-mobile #msMobileRotateHint {max-width:970px;font-size:40px;line-height:1.6;margin-top:24px;padding:20px 10px}

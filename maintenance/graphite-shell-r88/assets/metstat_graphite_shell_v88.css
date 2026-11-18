@@ -208,3 +208,14 @@ body :is(aside,.panel,.card) :is(input,textarea)::placeholder {color:#5a7380!imp
     background:#f6fafc!important;backdrop-filter:none!important;
   }
 }
+
+/* Touch devices keep the translucent glass look without GPU-heavy live backdrop blur. */
+@media (pointer:coarse) {
+  body :is(.panel,.card),
+  body>.wrap:not([hidden]):has(>aside):not(#caApp)>aside,
+  #onAside,#caAside,#caAside2 {
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    background:rgba(247,251,252,.95)!important;
+  }
+}

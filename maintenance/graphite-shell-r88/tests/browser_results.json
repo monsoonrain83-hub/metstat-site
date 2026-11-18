@@ -1,0 +1,110 @@
+[
+  {
+    "locale": "fa",
+    "device_width": 1440,
+    "mobile": false,
+    "innerWidth": 1440,
+    "nav": {
+      "x": 0,
+      "width": 1440,
+      "top": 70,
+      "height": 90
+    },
+    "side": {
+      "x": 1136,
+      "width": 292,
+      "top": 172,
+      "height": 273
+    },
+    "map": {
+      "x": 12,
+      "width": 1112,
+      "top": 172,
+      "height": 688
+    },
+    "bodyScroll": 1440
+  },
+  {
+    "locale": "en",
+    "device_width": 1440,
+    "mobile": false,
+    "innerWidth": 1440,
+    "nav": {
+      "x": 0,
+      "width": 1440,
+      "top": 70,
+      "height": 90
+    },
+    "side": {
+      "x": 12,
+      "width": 292,
+      "top": 172,
+      "height": 273
+    },
+    "map": {
+      "x": 316,
+      "width": 1112,
+      "top": 172,
+      "height": 688
+    },
+    "bodyScroll": 1440
+  },
+  {
+    "locale": "fa",
+    "device_width": 390,
+    "mobile": true,
+    "innerWidth": 1360,
+    "nav": {
+      "x": 0,
+      "width": 1360,
+      "top": 70,
+      "height": 90
+    },
+    "side": {
+      "x": 1056,
+      "width": 292,
+      "top": 172,
+      "height": 273
+    },
+    "map": {
+      "x": 12,
+      "width": 1032,
+      "top": 172,
+      "height": 688
+    },
+    "bodyScroll": 1360
+  },
+  {
+    "locale": "en",
+    "device_width": 390,
+    "mobile": true,
+    "innerWidth": 1360,
+    "nav": {
+      "x": 0,
+      "width": 1360,
+      "top": 70,
+      "height": 90
+    },
+    "side": {
+      "x": 12,
+      "width": 292,
+      "top": 172,
+      "height": 273
+    },
+    "map": {
+      "x": 316,
+      "width": 1032,
+      "top": 172,
+      "height": 688
+    },
+    "bodyScroll": 1360
+  },
+  {
+    "loader_mobile": false,
+    "hint_present": false
+  },
+  {
+    "loader_mobile": true,
+    "hint_present": true
+  }
+]

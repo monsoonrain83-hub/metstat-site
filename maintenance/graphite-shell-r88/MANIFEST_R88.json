@@ -1,0 +1,13 @@
+{
+  "version": "r88-graphite-phase1",
+  "source_sha256": "0bae22246d80a2d0c4e390166b9812624d9e100caa85c4de0fbd34a0cf5fdddc",
+  "output_sha256": "2954a992f9381fd54a31c1b5a95253a552bf39c5600dfdd38cf037e8ce91a25a",
+  "css_sha256": "44509b882d3e12dd090de89f5a6d64e84f2eb3e7645f8d929fba29f982ce3a32",
+  "paths": [
+    "public_html/index.html",
+    "public_html/assets/metstat_graphite_shell_v88.css"
+  ],
+  "purpose": "Top two-row navigation, graphite UI skin, preserved desktop map aside, device-only loader hint. Other data and formulas untouched.",
+  "live_deployed": false,
+  "full_e2e_verified": false
+}

@@ -1,0 +1,10 @@
+{
+  "counts": {
+    "province_missing": 480,
+    "county_missing": 609,
+    "province_matched": 58202,
+    "county_matched": 58073
+  },
+  "source_province_polygon_count": 31,
+  "source_county_polygon_count": 489
+}

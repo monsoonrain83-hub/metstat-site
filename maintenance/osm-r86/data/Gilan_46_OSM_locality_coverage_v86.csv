@@ -1,0 +1,47 @@
+row,input_name,precip_mm,reported_province,gis_osm_exact_nodes,settlement_or_agri_nodes,result,suggested_osm_id,suggested_osm_name,osm_category,osm_kind,latitude,longitude,gis_county,osm_url,warning
+1,چابکسر,154.5,گیلان,1,1,unique_eligible_locality,729168422,چابکسر,settlement,town,36.9743391,50.57079,رودسر,https://www.openstreetmap.org/node/729168422,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+2,امامزاده اسحاق,134.2,گیلان,1,1,unique_eligible_locality,5641423956,امامزاده اسحاق,settlement,village,37.0516,49.3228605,شفت,https://www.openstreetmap.org/node/5641423956,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+3,رودسر,101.9,گیلان,3,3,ambiguous_or_multiple,2421209186,رودسر,settlement,town,37.1381592,50.2927862,رودسر,https://www.openstreetmap.org/node/2421209186,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+4,املش,100.7,گیلان,2,2,ambiguous_or_multiple,32673769,املش,settlement,town,37.0961905,50.1844452,املش,https://www.openstreetmap.org/node/32673769,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+5,رضوان شهر,82.4,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+6,گیسوم,75.4,گیلان,1,1,unique_eligible_locality,4426852268,گیسوم,settlement,village,37.664182,49.0236141,طوالش,https://www.openstreetmap.org/node/4426852268,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+7,پیلمبرا,74.4,گیلان,1,1,unique_eligible_locality,4426852005,پیلمبرا,settlement,village,37.5957012,49.0826292,رضوانشهر,https://www.openstreetmap.org/node/4426852005,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+8,آبکنار,74.2,گیلان,1,1,unique_eligible_locality,4072232975,آبکنار,settlement,village,37.459889,49.3293366,انزلی,https://www.openstreetmap.org/node/4072232975,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+9,بندرانزلی,67.4,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+10,خرجگیل,63.0,گیلان,1,1,unique_eligible_locality,4426850289,خرجگیل,settlement,village,37.711495,48.9056155,طوالش,https://www.openstreetmap.org/node/4426850289,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+11,سیاهکل,62.0,گیلان,1,1,unique_eligible_locality,729167975,سیاهکل,settlement,town,37.1521893,49.8716407,سیاهکل,https://www.openstreetmap.org/node/729167975,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+12,صومعه سرا,61.8,گیلان,1,1,unique_eligible_locality,729167674,صومعه سرا,settlement,town,37.301672,49.3147378,صومعه سرا,https://www.openstreetmap.org/node/729167674,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+13,ازبرم,59.7,گیلان,1,1,unique_eligible_locality,4424905352,ازبرم,settlement,village,37.1364162,49.9118343,سیاهکل,https://www.openstreetmap.org/node/4424905352,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+14,استانداری رشت,59.1,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+15,خمام,59.0,گیلان,1,1,unique_eligible_locality,842111611,خمام,settlement,town,37.3904902,49.6607472,خمام,https://www.openstreetmap.org/node/842111611,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+16,توتون رشت,56.9,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+17,فومن,56.8,گیلان,1,1,unique_eligible_locality,729168184,فومن,settlement,town,37.2273234,49.3141954,فومن,https://www.openstreetmap.org/node/729168184,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+18,لاهیجان,55.8,گیلان,1,1,unique_eligible_locality,2623416275,لاهیجان,settlement,town,37.2060727,50.0028774,لاهیجان,https://www.openstreetmap.org/node/2623416275,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+19,فرودگاه رشت,52.3,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+20,کشاورزی رشت,51.9,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+21,آستارا,50.4,گیلان,1,1,unique_eligible_locality,3048675994,آستارا,settlement,city,38.4193239,48.8715278,آستارا,https://www.openstreetmap.org/node/3048675994,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+22,لنگرود,48.6,گیلان,1,1,unique_eligible_locality,2421209184,لنگرود,settlement,town,37.1955948,50.1529566,لنگرود,https://www.openstreetmap.org/node/2421209184,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+23,کیاشهر,48.3,گیلان,1,1,unique_eligible_locality,2571762877,کیاشهر,settlement,town,37.4188972,49.9488125,آستانه اشرفیه,https://www.openstreetmap.org/node/2571762877,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+24,تالش,43.8,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+25,لیسار,42.6,گیلان,1,1,unique_eligible_locality,2461448610,لیسار,settlement,town,37.958973,48.9082044,طوالش,https://www.openstreetmap.org/node/2461448610,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+26,چسلی,36.2,گیلان,1,1,unique_eligible_locality,4426852016,چسلی,settlement,hamlet,37.2887059,49.0348869,ماسال,https://www.openstreetmap.org/node/4426852016,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+27,ماسال,35.8,گیلان,1,1,unique_eligible_locality,842111819,ماسال,settlement,town,37.3640801,49.1328792,ماسال,https://www.openstreetmap.org/node/842111819,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+28,اسب وونی,34.7,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+29,رودبنه,33.9,گیلان,1,1,unique_eligible_locality,729168107,رودبنه,settlement,town,37.2548508,50.0039032,لاهیجان,https://www.openstreetmap.org/node/729168107,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+30,دهشال,31.8,گیلان,1,1,unique_eligible_locality,2623422601,دهشال,settlement,village,37.318322,50.0357261,آستانه اشرفیه,https://www.openstreetmap.org/node/2623422601,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+31,جیرکل,25.4,گیلان,1,1,unique_eligible_locality,4426849757,جیرکل,settlement,village,36.8924886,50.2366316,رودسر,https://www.openstreetmap.org/node/4426849757,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+32,آستانه اشرفیه,24.7,گیلان,1,1,unique_eligible_locality,3965822956,آستانه اشرفیه,settlement,town,37.2607374,49.9456642,آستانه اشرفیه,https://www.openstreetmap.org/node/3965822956,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+33,حیران,23.9,گیلان,1,1,unique_eligible_locality,4416080361,حیران,settlement,village,38.4021131,48.6109479,آستارا,https://www.openstreetmap.org/node/4416080361,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+34,روشنده,20.5,گیلان,1,1,unique_eligible_locality,4426850798,روشنده,settlement,village,37.5187955,48.8772783,رضوانشهر,https://www.openstreetmap.org/node/4426850798,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+35,ماسوله,12.6,گیلان,1,1,unique_eligible_locality,729168345,ماسوله,settlement,town,37.1551276,48.9899692,فومن,https://www.openstreetmap.org/node/729168345,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+36,داماش,12.4,گیلان,1,1,unique_eligible_locality,3328375046,داماش,settlement,village,36.7555519,49.8057859,رودبار,https://www.openstreetmap.org/node/3328375046,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+37,گورج,9.2,گیلان,1,1,unique_eligible_locality,3328407807,گورج,settlement,village,36.8228533,50.1346741,املش,https://www.openstreetmap.org/node/3328407807,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+38,شوییل,5.5,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+39,دیلمان,4.5,گیلان,2,2,ambiguous_or_multiple,842111746,دیلمان,settlement,town,36.8884879,49.906745,سیاهکل,https://www.openstreetmap.org/node/842111746,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+40,رودبار,3.6,گیلان,1,1,unique_eligible_locality,30291253,رودبار,settlement,town,36.8219055,49.4268249,رودبار,https://www.openstreetmap.org/node/30291253,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+41,بره سر,2.2,گیلان,1,1,unique_eligible_locality,4113672461,بره سر,settlement,town,36.7791256,49.752007,رودبار,https://www.openstreetmap.org/node/4113672461,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+42,لشگان,0.6,گیلان,0,0,no_eligible_osm_locality,,,,,,,,,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+43,منجیل,0.2,گیلان,1,1,unique_eligible_locality,2494934629,منجیل,settlement,town,36.7448499,49.4000305,رودبار,https://www.openstreetmap.org/node/2494934629,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+44,ملکوت,0.1,گیلان,1,1,unique_eligible_locality,3294291441,ملکوت,settlement,village,36.8649143,50.0722729,املش,https://www.openstreetmap.org/node/3294291441,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+45,لوشان,0.0,گیلان,1,1,unique_eligible_locality,30214401,لوشان,settlement,town,36.6279334,49.5162305,رودبار,https://www.openstreetmap.org/node/30214401,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست
+46,جیرنده,0.0,گیلان,1,1,unique_eligible_locality,842111537,جیرنده,settlement,town,36.7021301,49.7957151,رودبار,https://www.openstreetmap.org/node/842111537,نام جغرافیایی OSM است؛ هویت و مختصات ابزار هواشناسی تأیید نیست

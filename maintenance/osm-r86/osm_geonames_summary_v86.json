@@ -1,0 +1,41 @@
+{
+  "counts": {
+    "other_categories": 785258,
+    "selected": 58682,
+    "peak_elevation": 2304,
+    "peak_missing_ele": 351,
+    "eligible_unnamed": 5955,
+    "invalid_ele": 1,
+    "bad_coord": 2,
+    "total_xlsx_rows": 849897
+  },
+  "types": {
+    "mountain:volcano": 18,
+    "settlement:city": 87,
+    "settlement:town": 1470,
+    "settlement:village": 39812,
+    "mountain:peak": 2598,
+    "settlement:suburb": 794,
+    "settlement:locality": 2161,
+    "settlement:neighbourhood": 6082,
+    "settlement:hamlet": 4194,
+    "terrain:ridge": 426,
+    "terrain:valley": 249,
+    "terrain:saddle": 111,
+    "mountain:hill": 39,
+    "settlement:quarter": 234,
+    "settlement:farm": 75,
+    "terrain:cliff": 78,
+    "terrain:mountain_range": 9,
+    "settlement:isolated_dwelling": 131,
+    "weather_reference:monitoring_station": 76,
+    "weather_reference:observatory": 13,
+    "agricultural:orchard": 10,
+    "agricultural:farmyard": 1,
+    "settlement:borough": 7,
+    "settlement:municipality": 3,
+    "agricultural:farmland": 4
+  },
+  "input": "iran_osm_nodes_database.xlsx",
+  "source_coverage": "OSM nodes only; ways and relations omitted"
+}

@@ -1,0 +1,30 @@
+{
+  "release": "r87",
+  "base": "r86 source snapshot only; Figma design inaccessible",
+  "files": {
+    "index.html": {
+      "bytes": 5822732,
+      "sha256": "0bae22246d80a2d0c4e390166b9812624d9e100caa85c4de0fbd34a0cf5fdddc"
+    },
+    "assets/metstat_desktop_shell_v87.css": {
+      "bytes": 8876,
+      "sha256": "e84f5388bb87e10e9e92f796f3f588f0ca8504ae41b434eaf41a2477771fac21"
+    },
+    "assets/metstat_osm_settlements_v87.js": {
+      "bytes": 5503,
+      "sha256": "13ed28b5be70dd9dc9cb42b6154cf2ad41542fcd52837d3b87c1bbaf0fabfe52"
+    },
+    "assets/metstat_isohyet_desktop_v87.css": {
+      "bytes": 1799,
+      "sha256": "4bb99a98dcc77dbf8b3df705ce407412e2626f39e14faf78001ad003168ea8ac"
+    },
+    "data/osm_settlements_v87.json": {
+      "bytes": 5234153,
+      "sha256": "34332018223fb358e393de7206e26cbdac1491bf1091fa718a4f9a469684d1bb"
+    },
+    "online/station_isohyet_v26.html": {
+      "bytes": 113270,
+      "sha256": "106bb2573a9d26e57453f57d5ea00d464f199efd426affeb8c9374253de60ca4"
+    }
+  }
+}

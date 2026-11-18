@@ -1,0 +1,15 @@
+{
+  "total": 55065,
+  "by_class": {
+    "city": 87,
+    "town": 1473,
+    "suburb": 1035,
+    "neighbourhood": 6082,
+    "village": 39812,
+    "hamlet": 6486,
+    "agricultural": 90
+  },
+  "source_ids_unique": 55065,
+  "data_bytes": 5234153,
+  "sha256": "34332018223fb358e393de7206e26cbdac1491bf1091fa718a4f9a469684d1bb"
+}

@@ -1,0 +1,104 @@
+/* MetStat r89 – additive visual correction for r88. Load AFTER metstat_graphite_shell_v88.css.
+   Fix idle-button contrast and oppressive black shell; preserve all data/map colors,
+   the existing two-row top navigation, desktop layout, and model-status colors.
+   No JavaScript is required. */
+:root {
+  --ms89-ink: #213846;
+  --ms89-muted: #4c6472;
+  --ms89-head: #405d70;
+  --ms89-head-2: #506c7b;
+  --ms89-glass: rgba(247,251,252,.88);
+  --ms89-control: #e1edf1;
+  --ms89-hover: #d1e5e9;
+  --ms89-edge: #b6cbd4;
+  --ms89-accent: #22758a;
+  --ms89-focus: #097c94;
+  --ms88-page: #eaf2f5;
+  --ms88-nav: var(--ms89-head);
+  --ms88-surface: var(--ms89-glass);
+  --ms88-card: #e2edf1;
+  --ms88-over: var(--ms89-head-2);
+  --ms88-edge: #6f8a99;
+  --ms88-text: #f7fafb;
+  --ms88-muted: #d4e3e9;
+  --ms88-active: #f5fafc;
+  --ms88-shadow: 0 9px 26px rgba(32,65,82,.12);
+}
+html:not(.nvfOn) body {
+  background:radial-gradient(ellipse at 85% 0%, rgba(182,223,226,.78),transparent 36%),
+    linear-gradient(150deg,#edf5f8 0%,#e3edf2 47%,#e9f1ed 100%) fixed!important;
+  color:var(--ms89-ink)!important;
+}
+body>.top,#msNav {background:linear-gradient(120deg,#405d70,#506a79)!important;color:#f7fafc!important;border-color:#7292a1!important}
+body>.top :is(h1,h2,h3,.ttl) {color:#fff!important}
+#msNav #msNavR2 {background:rgba(245,250,252,.105)!important;border-top:1px solid rgba(255,255,255,.21)!important}
+#msNav :is(.msPg,.msSec),#msNav .msNavR2 .msSec {color:#f1f8fa!important}
+#msNav :is(.msPg,.msSec):hover {background:rgba(255,255,255,.19)!important;color:white!important;border-color:rgba(255,255,255,.32)!important}
+#msNav :is(.msPg,.msSec).on,#msNav .msNavR2 .msSec.on {background:#f7fbfd!important;color:#274c5b!important;border-color:#f7fbfd!important;box-shadow:0 2px 10px rgba(13,39,50,.17)!important}
+#msNav :is(.msPg,.msSec):focus-visible {outline:3px solid #8adbe2!important;outline-offset:1px!important}
+body>.top :is(button,.btn,select) {background:#e4f0f3!important;color:#244b5b!important;border-color:#b2ccd5!important}
+body>.top :is(button,.btn,select):hover {background:#cfebef!important;color:#163844!important}
+body :is(.panel,.card),
+body>.wrap:not([hidden]):has(>aside):not(#caApp)>aside,
+#onAside,#caAside,#caAside2 {
+  background:var(--ms89-glass)!important;
+  color:var(--ms89-ink)!important;
+  border-color:var(--ms89-edge)!important;
+  box-shadow:var(--ms88-shadow)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.15);
+  backdrop-filter:blur(14px) saturate(1.15);
+}
+body :is(.panel,.card) :is(h1,h2,h3,h4,h5,h6,header,.ttl),
+body :is(aside,.panel,.card) :is(label,summary,legend,.title,.label) {color:var(--ms89-ink)!important}
+body :is(.panel,.card) :is(.hint,.sub,.small),
+body :is(aside,.panel,.card) :is(.muted,.hint,.small,.sub) {color:var(--ms89-muted)!important}
+body :is(aside,.panel,.card) :is(details,.ovd,.ovp) {color:var(--ms89-ink)!important}
+body :is(aside,.panel,.card) summary:hover {background:var(--ms89-hover)!important;color:var(--ms89-ink)!important}
+body :is(aside,.panel,.card) :is(button,.btn):not(.msFresh):not(.msStale):not(.wxChip):not(.ms-g):not(.ms-b):not(.ms-r):not([data-m]) {
+  background:var(--ms89-control)!important;
+  color:var(--ms89-ink)!important;
+  border:1px solid var(--ms89-edge)!important;
+  text-shadow:none!important;
+  box-shadow:0 1px 3px rgba(28,63,79,.06)!important;
+}
+body :is(aside,.panel,.card) :is(button,.btn):not(.msFresh):not(.msStale):not(.wxChip):not(.ms-g):not(.ms-b):not(.ms-r):not([data-m]):hover {
+  background:var(--ms89-hover)!important;
+  color:#153946!important;
+  border-color:#91b6c4!important;
+}
+body :is(aside,.panel,.card) :is(button,.btn):not(.msFresh):not(.msStale):not(.wxChip):not(.ms-g):not(.ms-b):not(.ms-r):not([data-m]):is(.on,.active,.selected,[aria-selected="true"],[aria-pressed="true"]) {
+  background:#c2e2e8!important;
+  color:#173f51!important;
+  border-color:#6cacba!important;
+  box-shadow:inset 0 0 0 1px rgba(44,115,132,.13)!important;
+}
+body :is(aside,.panel,.card) :is(button,.btn):not(.msFresh):not(.msStale):not(.wxChip):not(.ms-g):not(.ms-b):not(.ms-r):not([data-m]) :is(span,strong,small,b,em) {
+  color:inherit!important;
+  text-shadow:none!important;
+}
+body :is(aside,.panel,.card) :is(select,input:not([type="checkbox"]):not([type="radio"]),textarea),
+body :is(aside,.panel,.card) :is(select,input,textarea) option {
+  color:#244050!important;
+  background:#f6fafb!important;
+  border:1px solid #b5cbd3!important;
+  color-scheme:light;
+}
+body :is(aside,.panel,.card) :is(button,.btn,select,input,textarea,summary):focus-visible {
+  outline:2px solid var(--ms89-focus)!important;
+  outline-offset:2px!important;
+}
+body :is(aside,.panel,.card) :is(input,textarea)::placeholder {color:#5a7380!important;opacity:1}
+#onAside :is(.ovp,.ovd,.ovMenu,.ovList),#onAside :is(.ovp,.ovd,.ovMenu,.ovList) :is(label,span,p,small,li) {color:var(--ms89-ink)!important}
+#onAside :is(.ovp,.ovMenu,.ovList) {background:rgba(248,252,253,.96)!important;border-color:var(--ms89-edge)!important}
+#msLoad {background:rgba(26,54,66,.36)!important;backdrop-filter:blur(7px)!important}
+#msLoad .mlBox {background:rgba(245,250,252,.97)!important;color:#244454!important;border-color:#a8c8d0!important;box-shadow:0 18px 65px rgba(16,51,70,.23)!important}
+#msLoad .mlT {color:#244454!important}
+#msLoad .mlT::before {border-color:#9bbcc7;border-top-color:#226b81}
+#msLoad .mlBar {background:#c8dbe3!important}
+#msLoad .mlBar i {background:#33889a!important}
+#msMobileRotateHint {color:#214758!important}
+@media (prefers-reduced-transparency:reduce) {
+  body :is(.panel,.card),body>.wrap:not([hidden]):has(>aside):not(#caApp)>aside,#onAside {
+    background:#f6fafc!important;backdrop-filter:none!important;
+  }
+}

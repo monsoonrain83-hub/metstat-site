@@ -27,6 +27,8 @@ jobs:
         run: python seasonal_release/release.py
       - name: Install browser test dependencies
         run: pip install playwright && python -m playwright install --with-deps chromium
+      - name: Test AVA toolbox independently of host state
+        run: python seasonal_release/toolbox_smoke.py
       - name: Test patched public route
         run: python seasonal_release/smoke.py
       - name: Deploy only the verified release files

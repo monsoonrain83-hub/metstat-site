@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="جعبه ابزار هواشناسی MetStat و آوا استودیو برای تولید و ویرایش گفتار فارسی">
+<title>جعبه ابزار هواشناسی | MetStat</title>
+<style>
+:root{font-family:Vazirmatn,Tahoma,system-ui,sans-serif;color:#152d43;background:#eef3f8}
+*{box-sizing:border-box}body{margin:0}a{color:inherit}
+header{background:linear-gradient(120deg,#102d48,#184b62);color:white;padding:20px clamp(16px,4vw,48px)}
+header .wrap{max-width:1420px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+h1{font-size:clamp(20px,2.6vw,30px);margin:0}header p{opacity:.85;margin:8px 0 0;font-size:14px}
+main{max-width:1420px;margin:24px auto;padding:0 clamp(12px,3vw,28px)}
+.card{background:white;border:1px solid #d7e1eb;border-radius:18px;overflow:hidden;box-shadow:0 14px 36px #233e5312}
+.card-heading{padding:19px clamp(16px,3vw,30px);display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h2{margin:0 0 8px;font-size:21px}.desc{margin:0;color:#425b6f;line-height:1.9;font-size:14px}
+.controls{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:41px;gap:8px;padding:8px 16px;border-radius:11px;border:1px solid #bccfda;background:white;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
+.btn.primary{background:#007d87;border-color:#007d87;color:white}.btn:focus-visible{outline:3px solid #00a7b7;outline-offset:2px}
+.preview{background:#dce6ee;padding:10px;position:relative}
+iframe{display:block;min-height:640px;height:78vh;max-height:1150px;width:100%;border:1px solid #b8cad9;border-radius:12px;background:white}
+.notice{padding:13px 18px;color:#435e6c;font-size:13px;line-height:1.9;border-top:1px solid #d7e1eb;background:#f7fafc}
+.notice a{color:#006678;text-underline-offset:3px}
+footer{color:#607584;text-align:center;font-size:12px;padding:25px 10px}
+@media(max-width:650px){header{padding:16px}main{margin:12px auto}.card-heading{padding:16px}h2{font-size:18px}iframe{height:75vh;min-height:480px}.btn{flex:1}}
+@media(prefers-color-scheme:dark){:root{background:#0e1b27;color:#eef5f9}.card{background:#142735;border-color:#2b4458}.desc,.notice{color:#c0d0dc}.notice{background:#182d3b;border-color:#2b4458}.preview{background:#203747}.btn{background:#172f40;border-color:#567083;color:white}.btn.primary{background:#007d87}.notice a{color:#82dee8}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div><h1>جعبه ابزار هواشناسی MetStat</h1><p>ابزارهای تخصصی تولید، پردازش و انتشار محتوای هواشناسی</p></div><a class="btn" href="./index.html">بازگشت به صفحه اصلی</a></div></header>
+<main>
+<section class="card" aria-labelledby="ava-title" id="ava-studio">
+<div class="card-heading"><div><h2 id="ava-title">آوا استودیو | AVA STUDIO</h2><p class="desc">تبدیل متن فارسی به گفتار، اعراب‌گذاری، فرهنگ تلفظ، طراحی صدا، تدوین و خروجی صوتی. رابط کامل برنامه در کادر مستقل نمایش داده می‌شود، در صورت پشتیبانی میزبان از نمایش درون‌صفحه.</p></div>
+<div class="controls"><a id="ava-open" class="btn primary" href="https://ai.studio/apps/06513bbb-1b5b-499f-86f5-8fe82acc1d88?fullscreenApplet=true" target="_blank" rel="noopener noreferrer">اجرای کامل آوا استودیو</a><button id="ava-reload" type="button" class="btn">بارگذاری مجدد</button></div></div>
+<div class="preview"><iframe id="ava-frame" title="برنامه آوا استودیو" loading="lazy" referrerpolicy="no-referrer" allow="clipboard-write; fullscreen" allowfullscreen src="https://ai.studio/apps/06513bbb-1b5b-499f-86f5-8fe82acc1d88?fullscreenApplet=true"></iframe></div>
+<div class="notice" role="note">این لینک، نسخه اشتراکی در Google AI Studio است. ممکن است ورود به حساب گوگل لازم باشد یا Google نمایش آن را داخل سایت‌های دیگر مسدود کند. در این صورت از «اجرای کامل آوا استودیو» استفاده کنید. برای اجرای عمومی و مستقل روی دامنه MetStat، بک‌اند Node و کلید Gemini باید در یک سرویس امن منتشر شوند؛ اشتراک‌گذاری این لینک به‌تنهایی معادل استقرار بک‌اند نیست.</div>
+</section>
+</main>
+<footer>MetStat · جعبه ابزار هواشناسی</footer>
+<script>
+document.getElementById('ava-reload').addEventListener('click',()=>{
+  const frame=document.getElementById('ava-frame');
+  frame.src=frame.src;
+});
+</script>
+</body>
+</html>

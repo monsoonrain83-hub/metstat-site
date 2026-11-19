@@ -1,0 +1,37 @@
+--- index.html
++++ index.html
+@@ -18,7 +18,7 @@
+ <meta name="theme-color" content="#f8fafd">
+ <link rel="preload" as="style" href="assets/metstat_base_v105.css?v=105.0">
+ <link rel="preload" as="style" href="assets/metstat_theme_v105.css?v=105.0">
+-<link rel="preload" as="script" href="assets/metstat_core_v105.js?v=113.0">
++<link rel="preload" as="script" href="assets/metstat_core_v105.js?v=115.0">
+ 
+ <meta name="description" content="مت‌استات (MetStat)؛ نقشه‌های آماری هواشناسی، رصد داده‌های ایستگاهی و تحلیل نقشه‌های پیش‌بینی هوا.">
+ <meta property="og:type" content="website">
+@@ -27,6 +27,7 @@
+ <meta property="og:description" content="نقشه‌های آماری هواشناسی، داده‌های ایستگاهی و تحلیل پیش‌بینی‌های جوی در MetStat.">
+ <meta property="og:url" content="https://wtafkik.ir/">
+ <meta name="twitter:card" content="summary">
++<script src="assets/sfc_gallery.js?v=115.0"></script>
+ <script src="assets/map_layers.js?v=4b129a31"></script>
+ <script>window.__LZ={"wu": "assets/wu_zoom_overlays.js?v=86b0f724", "dem": "assets/terrain_dem.js?v=ed829dbe", "clim": "assets/atlas_pack.js?v=079c38e8", "tt": "assets/tt_me_overlay.js?v=b89ffc6f"};window.lzLoad=function(k){var M=lzLoad.m||(lzLoad.m={});return M[k]||(M[k]=new Promise(function(ok,no){var s=document.createElement("script");s.src=__LZ[k];s.onload=function(){ok()};s.onerror=function(){delete M[k];no(new Error("asset "+k))};document.head.appendChild(s)}))};window.addEventListener("load",function(){setTimeout(function(){try{ttOvLoad()}catch(e){}},1500)});</script>
+ 
+@@ -34,7 +35,7 @@
+ <script>
+ /* Compare UI releases independently of the station database build. */
+ (async function () {
+-  const release = 'r113';
++  const release = 'r115';
+   window.MS_BUILD = release;
+   if (location.protocol === 'file:') return;
+   try {
+@@ -1003,7 +1004,7 @@
+ <script src="assets/data_logo_src.js?v=101faa32"></script>
+ <script src="assets/data_borders.js?v=b9b6db16"></script>
+ <script src="assets/data_ubd.js?v=989e5900"></script>
+-<script src="assets/metstat_core_v105.js?v=113.0"></script>
++<script src="assets/metstat_core_v105.js?v=115.0"></script>
+ 
+ <style id="metstat-p8-unified">
+ /* P8 unified desktop layout: intentionally one desktop canvas for every device */

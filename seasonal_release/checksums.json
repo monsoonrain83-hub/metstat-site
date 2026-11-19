@@ -1,0 +1,12 @@
+{
+  "before": {
+    "index.html": "261353be7da40c384bc3cdf86593b4a2a2239fc874ec3b9d7f1685516da3ce81",
+    "version.json": "62eda2fb2d8a2f479b6e2121f969a39f18c92312ce780a84aeac908ab211d549",
+    "assets/metstat_core_v105.js": "5dc249edd81b6b254773d3e38ef4eec882e9639e3cf4d2b9391b5ca506f06b35"
+  },
+  "after": {
+    "index.html": "a697ea6984d3aed93f1789d51389d3f2f47ce1a30b6e6c5cc1b8eeb8ce0e44f8",
+    "version.json": "e0dad58645bb807d5bdfddf9b7f8b7af4a708acd3a4590bb135e624a898a3776",
+    "assets/metstat_core_v105.js": "d46c651b8b6c5f2c7f2f818c7042bd2662200e4cb368919fea0b10206e2d56f7"
+  }
+}

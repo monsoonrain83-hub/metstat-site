@@ -1,7 +1,7 @@
 /* Additive MetStat navigation entry: isolated from meteorological map workflows. */
 (() => {
   'use strict';
-  if (!/^\\/(?:index\\.html)?$/.test(location.pathname)) return;
+  if (location.pathname !== '/' && !location.pathname.endsWith('/index.html')) return;
   const path = 'toolbox.html';
   function insertToolboxEntry() {
     if (document.getElementById('metstat-weather-toolbox-link')) return true;

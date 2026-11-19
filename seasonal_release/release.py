@@ -43,7 +43,7 @@ def prepare():
     if index_text.count(anchor) != 1:
         raise RuntimeError('Verified index insertion point changed')
     if entry not in index_text:
-        index_path.write_text(index_text.replace(anchor, anchor + '\\n' + entry, 1), encoding='utf-8')
+        index_path.write_text(index_text.replace(anchor, anchor + chr(10) + entry, 1), encoding='utf-8')
     for name in ('assets/metstat_core_v105.js','assets/sfc_gallery.js','assets/ava_toolbox_entry.js'):
         subprocess.run(['node','--check',str(OUT/name)],check=True)
     subprocess.run(['php','-l',str(OUT/'online/model_catalog.php')],check=True)

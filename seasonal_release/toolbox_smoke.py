@@ -16,7 +16,8 @@ with sync_playwright() as pw:
     assert page.locator('#ava-open').get_attribute('href') == source
     assert page.locator('a[href="./index.html"]').count() == 1
     page.locator('#ava-reload').click()
-    page.set_content('<header><nav id="mainNav"></nav></header>')
+    page.route('https://wtafkik.ir/index.html', lambda route: route.fulfill(body='<header><nav id="mainNav"></nav></header>', content_type='text/html'))
+    page.goto('https://wtafkik.ir/index.html', wait_until='domcontentloaded')
     page.add_script_tag(path=str(root / 'assets' / 'ava_toolbox_entry.js'))
     page.add_script_tag(path=str(root / 'assets' / 'ava_toolbox_entry.js'))
     assert page.locator('#mainNav > #metstat-weather-toolbox-link').count() == 1

@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parent
 OUT = ROOT / 'dist'
 BACKUP = ROOT / 'backup'
 CHECKS = json.loads((ROOT/'checksums.json').read_text())
-FILES = ['online/model_catalog.php','assets/sfc_gallery.js','assets/metstat_core_v105.js','index.html','version.json']
+EXTRAS = ['assets/ava_toolbox_entry.js','toolbox.html']
+FILES = ['online/model_catalog.php','assets/sfc_gallery.js','assets/metstat_core_v105.js','index.html','version.json'] + EXTRAS
 
 
 def prepare():
@@ -30,11 +31,20 @@ def prepare():
         subprocess.run(['patch','--batch','--fuzz=0',str(dest),str(ROOT/(name.replace('/','_')+'.patch'))],check=True)
         if hashlib.sha256(dest.read_bytes()).hexdigest() != CHECKS['after'][name]:
             raise RuntimeError('Patched file differs: '+name)
-    for name in FILES[:2]:
+    for name in FILES[:2] + EXTRAS:
         dest = OUT/name
         dest.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy(ROOT/name,dest)
-    for name in ('assets/metstat_core_v105.js','assets/sfc_gallery.js'):
+    # Preserve the verified r115 patch hashes; append only an isolated toolbox script.
+    index_path = OUT / 'index.html'
+    index_text = index_path.read_text(encoding='utf-8')
+    anchor = '<script src="assets/sfc_gallery.js?v=115.0"></script>'
+    entry = '<script src="assets/ava_toolbox_entry.js?v=115.1" defer></script>'
+    if index_text.count(anchor) != 1:
+        raise RuntimeError('Verified index insertion point changed')
+    if entry not in index_text:
+        index_path.write_text(index_text.replace(anchor, anchor + '\\n' + entry, 1), encoding='utf-8')
+    for name in ('assets/metstat_core_v105.js','assets/sfc_gallery.js','assets/ava_toolbox_entry.js'):
         subprocess.run(['node','--check',str(OUT/name)],check=True)
     subprocess.run(['php','-l',str(OUT/'online/model_catalog.php')],check=True)
 
@@ -79,6 +89,9 @@ def deploy():
             for name in reversed(written):
                 if original[name] is not None:
                     ftp.storbinary('STOR '+name,io.BytesIO(original[name]))
+                else:
+                    try: ftp.delete(name)
+                    except ftplib.error_perm: pass
             raise
     finally:
         ftp.close()

@@ -1,0 +1,120 @@
+{
+  "release": "r121",
+  "base_release": "r120",
+  "date": "2026-11-20",
+  "target": "cPanel/manual (NOT deployed)",
+  "layout_policy": "Desktop canvas on all devices; no mobile stacking",
+  "scope": "Fullscreen weather model chips in a top horizontal scroll bar; existing side menus unaffected; remote model labels escaped",
+  "precondition": "Current host must match base SHA-256 for index.html, assets/metstat_core_v105.js and version.json. A new CSS file is added.",
+  "changed_upload_files": [
+    "assets/metstat_core_v105.js",
+    "index.html",
+    "version.json",
+    "assets/metstat_r121_fullscreen.css"
+  ],
+  "full_release_subset": [
+    "assets/metstat_core_v105.js",
+    "assets/sfc_gallery.js",
+    "online/meteo_toolbox_v22.html",
+    "online/model_catalog.php",
+    "index.html",
+    "version.json",
+    "assets/metstat_r120_ux.css",
+    "assets/metstat_r120_ux.js",
+    "assets/metstat_r121_fullscreen.css"
+  ],
+  "deleted_files": [],
+  "ui_build_before": "r120",
+  "ui_build_after": "r121",
+  "preserved_contract": {
+    "build": "ms47-guarded-matching-20261116",
+    "base": "ms46-name-recall-20261116b",
+    "database": "private-rain-registry-v45"
+  },
+  "preserved_operational_paths": [
+    "online/data/manifest.json",
+    "online/data/sfc/gallery_latest.json",
+    "metstat-deploy-state.json",
+    "METSTAT_R87_MANIFEST.json"
+  ],
+  "asset_cache_versions": {
+    "assets/metstat_core_v105.js": "121.0",
+    "assets/metstat_r121_fullscreen.css": "121.0",
+    "assets/metstat_r120_ux.js": "120.0 (unchanged)",
+    "assets/metstat_r120_ux.css": "120.0 (unchanged)",
+    "assets/sfc_gallery.js": "118.0 (unchanged)"
+  },
+  "file_hashes": {
+    "assets/metstat_core_v105.js": {
+      "before_sha256": "9c73cc0751bdb4337e86a39e20f4875260dd730baa1ad6b71bbddf9538ce68c9",
+      "after_sha256": "57dcae0cb6a410b450c778f68cb93c2286e5b7e3954890dbf617c122805ad99e",
+      "changed": true,
+      "size_bytes": 4510669
+    },
+    "assets/sfc_gallery.js": {
+      "before_sha256": "577a9462f01be67e7dd0f7fa5ac373696750ad87a52fe1773265197d7e428ad1",
+      "after_sha256": "577a9462f01be67e7dd0f7fa5ac373696750ad87a52fe1773265197d7e428ad1",
+      "changed": false,
+      "size_bytes": 7773
+    },
+    "online/meteo_toolbox_v22.html": {
+      "before_sha256": "7d2037068e621e79925ab6b64a5cba5232773fed450f62e826b534e98d930d87",
+      "after_sha256": "7d2037068e621e79925ab6b64a5cba5232773fed450f62e826b534e98d930d87",
+      "changed": false,
+      "size_bytes": 70825
+    },
+    "online/model_catalog.php": {
+      "before_sha256": "f7d62b6b7dec8c9848788635a89b096cb8e62198ff9254b3b7351fcb262dd87b",
+      "after_sha256": "f7d62b6b7dec8c9848788635a89b096cb8e62198ff9254b3b7351fcb262dd87b",
+      "changed": false,
+      "size_bytes": 1534
+    },
+    "index.html": {
+      "before_sha256": "90dc5d5fd36b0764d1775eb0fa3f85bfbe3d70a274a764f78d58f1b20f8697b5",
+      "after_sha256": "8f26defc10011ce559a7144b71bb15fa9907ca13986d1ff4a873aadd902cb4d0",
+      "changed": true,
+      "size_bytes": 136687
+    },
+    "version.json": {
+      "before_sha256": "ca26e08bb39ffda08a7b12ec3c86f28f306ef97a7ec7ca86dff90c49a98da37a",
+      "after_sha256": "e2f09c603a4dfc212699f81dffadb2630825b1385b014f4b429c5f0a556f1d1b",
+      "changed": true,
+      "size_bytes": 153
+    },
+    "assets/metstat_r120_ux.css": {
+      "before_sha256": "47fff1091a5f02ab7386c4f7daef43c7c6c09a84757d9187337a5bdaec5aa19c",
+      "after_sha256": "47fff1091a5f02ab7386c4f7daef43c7c6c09a84757d9187337a5bdaec5aa19c",
+      "changed": false,
+      "size_bytes": 3232
+    },
+    "assets/metstat_r120_ux.js": {
+      "before_sha256": "8d7295395c5639c74fd0f289e895bc4982d15f399790b18f22aafb53aa2ce232",
+      "after_sha256": "8d7295395c5639c74fd0f289e895bc4982d15f399790b18f22aafb53aa2ce232",
+      "changed": false,
+      "size_bytes": 4649
+    },
+    "assets/metstat_r121_fullscreen.css": {
+      "before_sha256": null,
+      "after_sha256": "9a5f70b97036aaae88f49a27512bd5cba096c027aef2237e8066883981eef89a",
+      "changed": true,
+      "size_bytes": 2618
+    }
+  },
+  "test_summary": {
+    "fullscreen_actual_model_browser": 45,
+    "legacy_toolbox_and_gallery": 25,
+    "legacy_manifest_php": 24,
+    "gallery_expiry": 4,
+    "viewport_and_climate_xss": 32,
+    "a11y_preference": 6,
+    "integrated_page_auth": 12
+  },
+  "test_checks_total": 148,
+  "inline_script_syntax_count": 11,
+  "limitations": [
+    "No live cPanel install or authenticated production E2E",
+    "Actual NWP grid endpoints and private data not exercised",
+    "Legacy CSS and unrelated UI remain backlog",
+    "Screenshots tested with a small synthetic manifest; data rendering unaffected in source"
+  ]
+}

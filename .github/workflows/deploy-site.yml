@@ -2,6 +2,7 @@
   "name": "metstat-deploy-site",
   "on": {
     "push": {
+      "branches": ["main"],
       "paths": [
         "site_src.zip",
         "site_src.part*",
@@ -56,7 +57,13 @@
           "run": "d=\"${D:-/}\"; case \"$d\" in */) ;; *) d=\"$d/\";; esac; echo \"dir=$d\" >> $GITHUB_OUTPUT; echo \"server-dir = $d\""
         },
         {
+          "name": "Validate release hashes before manual FTPS",
+          "if": "${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && vars.METSTAT_CANONICAL_RELEASE_VALIDATED == 'yes' }}",
+          "run": "python3 tools/metstat_release_preflight.py --root dist --manifest releases/MetStat_r121_RELEASE_MANIFEST.json --phase release"
+        },
+        {
           "name": "upload to host (FTPS)",
+          "if": "${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && vars.METSTAT_CANONICAL_RELEASE_VALIDATED == 'yes' }}",
           "uses": "SamKirkland/FTP-Deploy-Action@v4.3.5",
           "with": {
             "server": "${{ secrets.FTP_SERVER }}",

@@ -1,0 +1,19 @@
+name: station-qc-guard
+on:
+  push:
+    paths:
+      - station_qc_guard.js
+      - tests/station_qc_guard.cjs
+      - .github/workflows/station-qc-guard.yml
+  workflow_dispatch: {}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Reject unsafe station matches and verify aliases
+        run: node tests/station_qc_guard.cjs

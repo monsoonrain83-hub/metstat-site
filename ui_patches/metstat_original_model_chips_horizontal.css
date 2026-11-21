@@ -1,0 +1,4 @@
+#nvFs .fsRow.fsA{position:absolute!important;top:4px!important;right:156px!important;left:150px!important;width:auto!important;min-width:0!important;height:43px!important;min-height:43px!important;max-height:43px!important;padding:3px 5px!important;z-index:48!important;display:flex!important;flex-flow:row nowrap!important;align-items:center!important;overflow:hidden!important;border:0!important;background:transparent!important}
+#nvFs .fsRow.fsA #fsMods,#nvFs .fsRow.fsA .fsChips{display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-start!important;flex:1 1 auto!important;min-width:0!important;width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;gap:4px!important;scrollbar-width:thin}
+#nvFs .fsRow.fsA #fsMods>*{display:inline-flex!important;flex:0 0 auto!important;max-width:none!important}
+#nvFs .fsColR .fsModDd{display:none!important}

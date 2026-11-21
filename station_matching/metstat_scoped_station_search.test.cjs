@@ -8,10 +8,14 @@ const rows=[
 {name_fa:'بوژان',province:'خراسان رضوی',county:'نیشابور',lat:'',lon:''}
 ];
 assert.equal(m.parse('نیشابور : بوژان').station,'بوژان');
-assert.equal(m.resolve(rows,'نیشابور: بوژان',{provinces:['خراسان رضوی']}).status,'confirmed');
+assert.equal(m.resolve(rows,'نیشابور: بوژان',{provinces:['خراسان رضوی']}).status,'review');
+// An exact second site with missing coordinates must block auto-confirmation.
+assert.equal(m.resolve(rows,'بوژان',{provinces:['خراسان رضوی']}).status,'review');
 assert.equal(m.resolve(rows.slice(0,4),'نیشابور: بوژان',{provinces:['خراسان رضوی']}).match.name_fa,'بوژان');
 assert.equal(m.resolve(rows,'قاسم آباد',{provinces:['خراسان رضوی']}).match.county,'مشهد');
 assert.equal(m.resolve(rows,'قاسم آباد',{provinces:['گلستان']}).status,'unresolved');
 assert.equal(m.resolve(rows,'نیشابور: بوژان',{provinces:['فارس']}).status,'unresolved');
 assert.equal(m.resolve(rows,'قاسم آباد').status,'review');
-console.log('7 scoped station matching checks passed');
+assert.equal(m.resolve(rows.slice(0,4),'بوژان',{provinces:['خراسان رضوی']}).status,'confirmed');
+assert.equal(m.resolve(rows,'بوژان',{provinces:['گلستان']}).status,'unresolved');
+console.log('10 scoped station matching checks passed');

@@ -18,6 +18,8 @@ function scopeFromText(text,provinces=[],cities=[]){
  }
  return {province,city};
 }
+const SENSOR_TYPES=new Set(['synoptic','synop','climatology','raingauge','rain','rain_gauge','automatic','automatic_station','aws','hydrometric','hydro','hydrostation','weather_station','station','سینوپتیک','اقلیم شناسی','باران سنجی','بارانسنج','هواشناسی خودکار']);
+function isSensor(record){const type=norm(record.type||record.station_type||record.network||record['نوع نقطه / شبکه']);return SENSOR_TYPES.has(type);}
 function rank(record){const type=norm(record.type||record.network);return /synoptic|سینوپتیک/.test(type)?5:/automatic|خودکار/.test(type)?4:/climatology|اقلیم/.test(type)?3:/raingauge|باران/.test(type)?2:/hydro|هیدرو/.test(type)?2:1;}
 function resolve(text,candidates,context={},learned={}){
  const q=parse(text,context);if(!q.station)return {status:'unresolved',reason:'empty_station'};
@@ -27,7 +29,12 @@ function resolve(text,candidates,context={},learned={}){
   if(q.province&&norm(c.province)!==q.province)continue;
   if(q.county&&norm(c.county)!==q.county)continue;
   if(q.city&&norm(c.city)!==q.city&&norm(c.county)!==q.city)continue;
-  if(c.lat==null||c.lon==null||!Number.isFinite(Number(c.lat))||!Number.isFinite(Number(c.lon)))continue;
+  // A matching OSM settlement (or an unknown record) is not a rainfall station.
+  if(!isSensor(c))continue;
+  // Do not interpret empty coordinate strings as 0,0; all station records here are in Iran.
+  if(c.lat==null||c.lon==null||String(c.lat).trim()===''||String(c.lon).trim()==='')continue;
+  const lat=Number(c.lat),lon=Number(c.lon);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<24||lat>41||lon<43||lon>64)continue;
   out.push(c);
  }
  const key=[q.province,q.county,q.city,q.station].join('|');

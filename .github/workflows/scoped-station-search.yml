@@ -4,6 +4,8 @@ on:
     paths:
       - 'station_matching/**'
       - '.github/workflows/scoped-station-search.yml'
+      - 'station_matching/metstat_province_selector.js'
+      - 'station_matching/metstat_province_selector.test.cjs'
   workflow_dispatch:
 jobs:
   test:
@@ -14,4 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: node station_matching/metstat_scoped_station_search.test.cjs
+      - run: |
+          node station_matching/metstat_scoped_station_search.test.cjs
+          node station_matching/metstat_province_selector.test.cjs

@@ -4,6 +4,8 @@ on:
     paths:
       - station_qc_guard.js
       - tests/station_qc_guard.cjs
+      - station_resolver_v1.js
+      - tests/station_resolver_v1.cjs
       - .github/workflows/station-qc-guard.yml
   workflow_dispatch: {}
 jobs:
@@ -16,4 +18,6 @@ jobs:
         with:
           node-version: '20'
       - name: Reject unsafe station matches and verify aliases
-        run: node tests/station_qc_guard.cjs
+        run: |
+          node tests/station_qc_guard.cjs
+          node tests/station_resolver_v1.cjs

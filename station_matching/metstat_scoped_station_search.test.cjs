@@ -8,7 +8,7 @@ const rows=[
 {name_fa:'بوژان',province:'خراسان رضوی',county:'نیشابور',lat:'',lon:''}
 ];
 assert.equal(m.parse('نیشابور : بوژان').station,'بوژان');
-assert.equal(m.resolve(rows,'نیشابور: بوژان',{provinces:['خراسان رضوی']}).status,'review');
+assert.equal(m.resolve(rows,'نیشابور: بوژان',{provinces:['خراسان رضوی']}).status,'confirmed');
 assert.equal(m.resolve(rows.slice(0,4),'نیشابور: بوژان',{provinces:['خراسان رضوی']}).match.name_fa,'بوژان');
 assert.equal(m.resolve(rows,'قاسم آباد',{provinces:['خراسان رضوی']}).match.county,'مشهد');
 assert.equal(m.resolve(rows,'قاسم آباد',{provinces:['گلستان']}).status,'unresolved');

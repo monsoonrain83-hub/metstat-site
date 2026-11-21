@@ -27,3 +27,4 @@ jobs:
           node station_matching/metstat_rainfall_text_parser.test.cjs
           node station_matching/metstat_station_corrections.test.cjs
           node ui_patches/metstat_original_model_chips_horizontal.test.cjs
+          node ui_patches/test_fullscreen_layout_responsive.cjs

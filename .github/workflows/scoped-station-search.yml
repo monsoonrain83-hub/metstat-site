@@ -6,6 +6,8 @@ on:
       - '.github/workflows/scoped-station-search.yml'
       - 'station_matching/metstat_province_selector.js'
       - 'station_matching/metstat_province_selector.test.cjs'
+      - 'station_matching/metstat_rainfall_text_parser.js'
+      - 'station_matching/metstat_rainfall_text_parser.test.cjs'
   workflow_dispatch:
 jobs:
   test:
@@ -19,3 +21,4 @@ jobs:
       - run: |
           node station_matching/metstat_scoped_station_search.test.cjs
           node station_matching/metstat_province_selector.test.cjs
+          node station_matching/metstat_rainfall_text_parser.test.cjs

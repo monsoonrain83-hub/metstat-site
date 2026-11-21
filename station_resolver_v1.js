@@ -8,6 +8,16 @@ function parse(text,context={}){
  const raw=norm(text);const p=raw.split(/\s*[:：]\s*/);const station=p.length>1?p.slice(1).join(':').trim():raw;
  return {station,county:p.length>1?p[0]:norm(context.county),province:norm(context.province),city:norm(context.city)};
 }
+function scopeFromText(text,provinces=[],cities=[]){
+ const s=norm(text);let province='',city='';
+ for(const p of [...provinces].sort((a,b)=>norm(b).length-norm(a).length)){
+  if(s.includes('استان '+norm(p))){province=norm(p);break;}
+ }
+ for(const t of [...cities].sort((a,b)=>norm(b).length-norm(a).length)){
+  if(s.includes('شهر '+norm(t))){city=norm(t);break;}
+ }
+ return {province,city};
+}
 function rank(record){const type=norm(record.type||record.network);return /synoptic|سینوپتیک/.test(type)?5:/automatic|خودکار/.test(type)?4:/climatology|اقلیم/.test(type)?3:/raingauge|باران/.test(type)?2:/hydro|هیدرو/.test(type)?2:1;}
 function resolve(text,candidates,context={},learned={}){
  const q=parse(text,context);if(!q.station)return {status:'unresolved',reason:'empty_station'};
@@ -31,5 +41,5 @@ function resolve(text,candidates,context={},learned={}){
  if(out.length>1&&!collocated)return {status:'ambiguous',reason:'multiple_distinct_station_locations',candidates:out,key};
  return {status:'verified',reason:out.length>1?'co_located_priority':'unique_exact',candidate:first,key};
 }
-return {parse,resolve,norm};
+return {parse,resolve,norm,scopeFromText};
 });

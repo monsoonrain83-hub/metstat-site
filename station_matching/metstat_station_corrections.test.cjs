@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const {cache}=require('./metstat_station_corrections.js');
+const db=new Map();const storage={getItem:k=>db.get(k)||null,setItem:(k,v)=>db.set(k,v)};
+const memory=cache({storage});
+const bojan={id:'st100',name_fa:'بوژان',lat:36.15,lon:58.85,province:'خراسان رضوی',county:'نیشابور'};
+assert.equal(memory.remember('نیشابور: بوژان',bojan,['خراسان رضوی']),true);
+assert.equal(memory.recall('نیشابور: بوژان',[bojan],['خراسان رضوی']).id,'st100');
+assert.equal(memory.recall('نیشابور: بوژان',[bojan],['فارس']),null);
+assert.equal(memory.recall('نیشابور: بوژان',[{...bojan,lat:36.45}],['خراسان رضوی']),null);
+assert.equal(memory.recall('نیشابور: بوژان',[{...bojan,id:'other'}],['خراسان رضوی']),null);
+assert.equal(memory.remember('بوژان',{...bojan,lat:null},['خراسان رضوی']),false);
+assert.equal(memory.remember('بوژان',bojan,['فارس']),false);
+assert.equal(Object.keys(memory.exportCorrections()).length,1);
+console.log('8 verified station correction cache cases passed');

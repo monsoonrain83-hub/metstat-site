@@ -20,8 +20,12 @@ function candidates(records,input,opts={}){
  return result.sort((a,b)=>b.score-a.score);
 }
 function resolve(records,input,opts={}){
- const matches=candidates(records,input,opts),valid=matches.filter(x=>x.exact&&x.hasCoordinates);
- if(valid.length===1 && (matches.length===1||valid[0].score>matches[1].score))return {status:"confirmed",match:valid[0].record,candidates:matches};
+ const matches=candidates(records,input,opts);
+ const exactMatches=matches.filter(x=>x.exact);
+ const valid=exactMatches.filter(x=>x.hasCoordinates);
+ // A competing exact-name record without coordinates may be a different site.
+ // Never confirm it merely because a georeferenced candidate scores higher.
+ if(valid.length===1 && exactMatches.length===1)return {status:"confirmed",match:valid[0].record,candidates:matches};
  return {status:matches.length?"review":"unresolved",match:null,candidates:matches};
 }
 return {normalize,parse,scope,candidates,resolve};

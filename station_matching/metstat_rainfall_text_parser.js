@@ -1,5 +1,5 @@
 /* Interpret Persian rainfall text before station search. Never emit coordinates. */
-(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.MetStatRainText=factory();}
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.MetStatRainText=api;}
 )(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
 function clean(s){return String(s||'').normalize('NFKC').replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[\u200c\u200d]/g,' ').replace(/[\u0660-\u0669]/g,c=>String(c.charCodeAt(0)-0x660)).replace(/[\u06f0-\u06f9]/g,c=>String(c.charCodeAt(0)-0x6f0)).replace(/٫/g,'.').replace(/\s+/g,' ').trim();}
@@ -7,7 +7,7 @@ const units={صفر:0,یک:1,دو:2,سه:3,چهار:4,پنج:5,شش:6,هفت:7,�
 function wordNumber(s){const v=clean(s).split(/\s+و\s+|\s+/).filter(Boolean);if(!v.length||v.some(w=>units[w]===undefined))return null;let sum=0;for(const w of v){if(w==='هزار')sum=Math.max(1,sum)*1000;else sum+=units[w];}return sum;}
 function splitRecord(raw){let line=clean(raw).replace(/\s*(?:میلی\s*متر|mm)\s*$/i,'').trim();if(!line)return null;
  let m=line.match(/^(.*?)\s+([+-]?\d+(?:[.,]\d+)?)$/);
- if(m)return {name:m[1].trim(),amount:mm(m[2])};
+ if(m)return {name:m[1].trim().replace(/[،,:：]+$/,'').trim(),amount:mm(m[2])};
  // Small, unambiguous Persian number phrases: prefer longest suffix.
  let tok=line.split(' ');
  for(let n=Math.min(5,tok.length-1);n>=1;n--){let suffix=tok.slice(-n).join(' ');let value=wordNumber(suffix);if(value!==null)return {name:tok.slice(0,-n).join(' ').trim(),amount:value};}

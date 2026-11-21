@@ -8,6 +8,8 @@ on:
       - 'station_matching/metstat_province_selector.test.cjs'
       - 'station_matching/metstat_rainfall_text_parser.js'
       - 'station_matching/metstat_rainfall_text_parser.test.cjs'
+      - 'station_matching/metstat_station_corrections.js'
+      - 'station_matching/metstat_station_corrections.test.cjs'
       - 'ui_patches/**'
   workflow_dispatch:
 jobs:
@@ -23,4 +25,5 @@ jobs:
           node station_matching/metstat_scoped_station_search.test.cjs
           node station_matching/metstat_province_selector.test.cjs
           node station_matching/metstat_rainfall_text_parser.test.cjs
+          node station_matching/metstat_station_corrections.test.cjs
           node ui_patches/metstat_original_model_chips_horizontal.test.cjs

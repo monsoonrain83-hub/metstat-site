@@ -20,6 +20,27 @@ function parse(text){let rows=[],errors=[];let lines=String(text||'').split(/[\r
  else errors.push({line:i+1,original:raw,reason:'not_a_rainfall_measurement'});}
  return {rows,errors};
 }
-function resolveText(text,stationRecords,search,selectedProvinces=[]){if(!search||typeof search.resolve!=='function')throw Error('search.resolve required');const parsed=parse(text);return {...parsed,results:parsed.rows.map(r=>({...r,match:search.resolve(stationRecords,r.name,{provinces:selectedProvinces})}))};}
+function resolveText(text,stationRecords,search,selectedProvinces=[]){
+ if(!search||typeof search.resolve!=='function')throw Error('search.resolve required');
+ const norm=search.normalize||clean;
+ const knownProvinces=[...new Set((stationRecords||[]).map(r=>clean(r.province||r.ostan)).filter(Boolean))].sort((a,b)=>b.length-a.length);
+ const knownCities=[...new Set((stationRecords||[]).map(r=>clean(r.city||r.county)).filter(Boolean))].sort((a,b)=>b.length-a.length);
+ const chosen=selectedProvinces.map(norm);let province='',city='',results=[],errors=[];
+ const lines=String(text||'').split(/[\\r\\n;؛]+/);
+ for(let i=0;i<lines.length;i++){
+  const original=lines[i].trim();if(!original)continue;const line=clean(original);
+  const prov=knownProvinces.find(p=>line.includes('استان '+p));
+  if(prov && !splitRecord(original)){province=prov;city='';continue;}
+  const ct=knownCities.find(x=>line.includes('شهر '+x));
+  if(ct && !splitRecord(original)){city=ct;continue;}
+  const rec=splitRecord(original);
+  if(!rec||!rec.name||rec.amount===null){errors.push({line:i+1,original,reason:'not_a_rainfall_measurement'});continue;}
+  const effective=province?(chosen.length?chosen.filter(p=>p===norm(province)):[province]):selectedProvinces;
+  if(province && chosen.length && !effective.length){results.push({...rec,line:i+1,original,match:{status:'unresolved',reason:'header_outside_selected_provinces'}});continue;}
+  const scoped=city?(stationRecords||[]).filter(r=>norm(r.city||r.county)===norm(city)):stationRecords;
+  results.push({...rec,line:i+1,original,match:search.resolve(scoped,rec.name,{provinces:effective})});
+ }
+ return {rows:results.map(({name,amount,line,original})=>({name,amount,line,original})),errors,results};
+}
 return {clean,parse,splitRecord,wordNumber,resolveText};
 });

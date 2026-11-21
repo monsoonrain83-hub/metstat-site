@@ -6,6 +6,8 @@ on:
       - tests/station_qc_guard.cjs
       - station_resolver_v1.js
       - tests/station_resolver_v1.cjs
+      - station_matching/metstat_scoped_station_search.js
+      - station_matching/metstat_scoped_station_search.test.cjs
       - .github/workflows/station-qc-guard.yml
   workflow_dispatch: {}
 jobs:
@@ -21,3 +23,4 @@ jobs:
         run: |
           node tests/station_qc_guard.cjs
           node tests/station_resolver_v1.cjs
+          node station_matching/metstat_scoped_station_search.test.cjs

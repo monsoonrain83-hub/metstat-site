@@ -1,6 +1,31 @@
-/* r204: ONE existing model-chip group at the top; no duplicate controls. */
-#nvFs .fsRow.fsA{position:absolute!important;top:4px!important;right:110px!important;left:80px!important;width:auto!important;min-width:0!important;height:43px!important;min-height:43px!important;max-height:43px!important;margin:0!important;padding:3px 5px!important;box-sizing:border-box!important;z-index:48!important;display:flex!important;flex-flow:row nowrap!important;align-items:center!important;overflow:hidden!important;border:0!important;background:transparent!important}
-#nvFs .fsRow.fsA #fsMods,#nvFs .fsRow.fsA .fsChips{display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-start!important;flex:1 1 auto!important;min-width:0!important;max-width:100%!important;width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;gap:5px!important;scrollbar-width:thin;overscroll-behavior-x:contain}
-#nvFs .fsRow.fsA #fsMods>*{display:inline-flex!important;flex:0 0 auto!important;max-width:none!important}
-#nvFs .fsColR .fsModDd{display:none!important}
-@media(max-width:540px){#nvFs .fsRow.fsA{right:100px!important;left:55px!important;top:3px!important;min-height:40px!important;max-height:40px!important;height:40px!important}#nvFs .fsRow.fsA #fsMods{gap:4px!important}#nvFs .fsRow.fsA #fsMods>.fsChip{min-height:28px!important;font-size:11px!important}}
+/* MetStat r205 production-safe. CSS only takes effect AFTER the original chip
+   group has successfully moved into the existing fullscreen top row. */
+#nvFs[data-original-chips-horizontal="1"] .fsRow.fsA{
+ position:absolute!important;top:4px!important;right:110px!important;left:80px!important;
+ width:auto!important;min-width:0!important;height:43px!important;min-height:43px!important;
+ max-height:43px!important;margin:0!important;padding:3px 5px!important;
+ box-sizing:border-box!important;z-index:48!important;display:flex!important;
+ flex-flow:row nowrap!important;align-items:center!important;overflow:hidden!important;
+ border:0!important;background:transparent!important;
+}
+#nvFs[data-original-chips-horizontal="1"] .fsRow.fsA #fsMods{
+ display:flex!important;flex-flow:row nowrap!important;align-items:center!important;
+ justify-content:flex-start!important;flex:1 1 auto!important;min-width:0!important;
+ max-width:100%!important;width:100%!important;overflow-x:auto!important;
+ overflow-y:hidden!important;gap:5px!important;scrollbar-width:thin;
+ overscroll-behavior-x:contain;
+}
+#nvFs[data-original-chips-horizontal="1"] .fsRow.fsA #fsMods>*{
+ display:inline-flex!important;flex:0 0 auto!important;max-width:none!important;
+}
+#nvFs[data-original-chips-horizontal="1"] .fsColR .fsModDd{display:none!important}
+@media(max-width:540px){
+ #nvFs[data-original-chips-horizontal="1"] .fsRow.fsA{
+  right:100px!important;left:55px!important;top:3px!important;
+  min-height:40px!important;max-height:40px!important;height:40px!important;
+ }
+ #nvFs[data-original-chips-horizontal="1"] .fsRow.fsA #fsMods{gap:4px!important}
+ #nvFs[data-original-chips-horizontal="1"] .fsRow.fsA #fsMods>.fsChip{
+  min-height:28px!important;font-size:11px!important;
+ }
+}

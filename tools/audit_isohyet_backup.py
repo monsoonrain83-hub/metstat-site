@@ -84,6 +84,10 @@ def inspect_zip(path):
                 raise ValueError("Oversized relevant member")
             if info.file_size and (info.compress_size == 0 or info.file_size / info.compress_size > MAX_COMPRESSION_RATIO):
                 raise ValueError("Suspicious compression ratio for relevant member")
+            # A zero-byte HTML/JS asset is not a recoverable working version.
+            # Fail closed instead of marking a placeholder as present.
+            if basename in ASSETS and info.file_size == 0:
+                raise ValueError("Empty required isohyet asset: " + basename)
             data = archive.read(info)
             if len(data) != info.file_size:
                 raise ValueError("Truncated archive member")

@@ -57,12 +57,13 @@ def inspect_zip(path):
         seen = set()
         for info in members:
             # Validate directory entries too; an unsafe member must not be silently ignored.
-            if not safe_name(info.filename.rstrip("/")):
+            name_to_validate = info.filename[:-1] if info.is_dir() else info.filename
+            if not safe_name(name_to_validate):
                 raise ValueError("Unsafe archive member path")
-            if info.is_dir():
-                continue
             if stat.S_ISLNK(info.external_attr >> 16):
                 raise ValueError("Symbolic links are not permitted in host backups")
+            if info.is_dir():
+                continue
             canonical = PurePosixPath(info.filename.replace(chr(92), "/")).as_posix().casefold()
             if canonical in seen:
                 raise ValueError("Duplicate archive member path")

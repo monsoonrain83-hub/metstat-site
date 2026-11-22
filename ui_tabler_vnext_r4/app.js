@@ -1,0 +1,320 @@
+/* MetStat r4 — 63-route *UI-only* simulator, no meteorological runtime attached.
+ * No remote requests, no third-party runtime, no rewriting production data.
+ * Canonical routes in route-data.js. Verified palette catalog in palette-data.js.
+ */
+(()=>{'use strict';
+const ROOT=document.getElementById('app');if(!ROOT)return;
+const $=id=>document.getElementById(id);
+const routes=window.MetStatRoutes||[];
+const byPath=new Map(routes.map(item=>[item.path,item]));
+const palettes=window.MetStatLegacyPalettes||{groups:{},palettes:{},edges:{}};
+const HISTORY_ALIASES={
+ '/monitoring-forecast/weather-models/online-maps':'/monitoring-forecast/weather-models',
+ '/forecast-verification':'/monitoring-forecast/forecast-verification',
+ '/flash-flood':'/monitoring-forecast/flash-flood',
+ '/rainfall-isohyet':'/meteorological-tools/rainfall-isohyet',
+ '/meteorological-tools/isohyet':'/meteorological-tools/rainfall-isohyet'
+};
+const defaultPeriod='daily';
+const MODELS={
+ daily:[
+  {id:'ecmwf',short:'EC',full:'ECMWF — IFS یکپارچه',flag:'🌍',detail:'European Centre for Medium-Range Weather Forecasts',status:'ready'},
+  {id:'gfs',short:'🇺🇸',full:'GFS — NCEP / NOAA',flag:'🇺🇸',status:'updating'},
+  {id:'icon',short:'🇩🇪',full:'ICON — DWD آلمان',flag:'🇩🇪',status:'partial'},
+  {id:'gem',short:'🇨🇦',full:'GEM / GDPS — کانادا',flag:'🇨🇦',status:'ready'},
+  {id:'ukmo',short:'🇬🇧',full:'UKMO — Met Office بریتانیا',flag:'🇬🇧',status:'stale'},
+  {id:'aifs',short:'ECᴀ',full:'ECMWF AIFS — محدود به خاورمیانه',flag:'🇪🇺',status:'missing'},
+  {id:'arpege',short:'🇫🇷',full:'ARPEGE — Météo-France',flag:'🇫🇷',status:'partial'}
+ ],
+ weekly:[{id:'ec46',short:'EC46',full:'ECMWF EC46 — پیش‌بینی زیر‌فصلی',flag:'🇪🇺',status:'ready'},{id:'cfsv2',short:'CFSv2',full:'NCEP CFSv2 — پیش‌بینی هفتگی',flag:'🇺🇸',status:'partial'}],
+ monthly:[{id:'seas5',short:'SEAS5',full:'ECMWF SEAS5 — پیش‌بینی ماهانه',flag:'🇪🇺',status:'updating'},{id:'cfsv2',short:'CFSv2',full:'NCEP CFSv2',flag:'🇺🇸',status:'ready'},{id:'nmme',short:'NMME',full:'NMME — مجموعه چندمدلی',flag:'🇺🇸',status:'partial'},{id:'cansips',short:'CanSIPS',full:'CanSIPS — پیش‌بینی کانادا',flag:'🇨🇦',status:'stale'},{id:'iri',short:'IRI',full:'IRI — محصول مستقل، خارج از مولتی‌مدل',flag:'🌐',status:'missing'}],
+ seasonal:[{id:'seas5',short:'SEAS5',full:'ECMWF SEAS5',flag:'🇪🇺',status:'ready'},{id:'cansips',short:'CanSIPS',full:'CanSIPS',flag:'🇨🇦',status:'partial'},{id:'cfsv2',short:'CFSv2',full:'NCEP CFSv2',flag:'🇺🇸',status:'stale'},{id:'nmme',short:'NMME',full:'NMME',flag:'🇺🇸',status:'missing'}],
+ ensemble:[{id:'eps',short:'ENS',full:'ECMWF ENS — ۵۱ عضو',flag:'🇪🇺',status:'ready'},{id:'gefs',short:'GEFS',full:'NCEP GEFS',flag:'🇺🇸',status:'partial'},{id:'geps',short:'GEPS',full:'GEPS کانادا',flag:'🇨🇦',status:'updating'}]
+};
+const PARAMS={
+ 'بارش و برف':[{id:'p24',text:'بارش ۲۴ ساعته',group:'precip'},{id:'p6',text:'بارش ۶ ساعته',group:'precip'},{id:'p1',text:'بارش ۱ ساعته',group:'precip'},{id:'pacc',text:'بارش تجمعی',group:'precip'},{id:'snow',text:'برف و آب معادل',group:'snow'}],
+ 'دما و آنومالی':[{id:'t2m',text:'دمای ۲ متر',group:'temp'},{id:'t850',text:'دمای ۸۵۰ hPa',group:'temp'},{id:'tanom',text:'آنومالی دما',group:'tanom'},{id:'panom',text:'آنومالی بارش',group:'panom'}],
+ 'فشار و ارتفاع ژئوپتانسیل':[{id:'mslp',text:'فشار سطح دریا MSLP',group:null},{id:'z500',text:'ارتفاع ژئوپتانسیل ۵۰۰ hPa',group:null},{id:'z700',text:'ارتفاع ژئوپتانسیل ۷۰۰ hPa',group:null},{id:'z850',text:'ارتفاع ژئوپتانسیل ۸۵۰ hPa',group:null},{id:'z300',text:'ارتفاع ژئوپتانسیل ۳۰۰ hPa',group:null},{id:'z200',text:'ارتفاع ژئوپتانسیل ۲۰۰ hPa',group:null}],
+ 'باد، رطوبت و همرفت':[{id:'wind',text:'باد و رودباد',group:'wind'},{id:'rh',text:'رطوبت نسبی',group:'rh'},{id:'cape',text:'CAPE و ناپایداری',group:'cape'},{id:'cin',text:'CIN',group:'cape'},{id:'shear',text:'چینش عمودی باد',group:'wind'}]
+};
+const SECONDARY={
+ 'بدون لایه ثانویه':[{id:'none',text:'بدون پارامتر ثانویه'}],
+ 'باد و رطوبت':[{id:'wind',text:'بردار باد'},{id:'rh',text:'رطوبت نسبی'},{id:'streamlines',text:'خطوط جریان'}],
+ 'فشار و ارتفاع':[{id:'mslp',text:'ایزوبار فشار سطح دریا'},{id:'z500',text:'خطوط تراز ۵۰۰'},{id:'z850',text:'خطوط تراز ۸۵۰'}],
+ 'نمایش':[{id:'boundaries',text:'مرز استان‌ها'},{id:'labels',text:'برچسب شهرها'}]
+};
+const ALLPARAMS=Object.values(PARAMS).flat();
+const BY_PARAM=new Map(ALLPARAMS.map(x=>[x.id,x]));
+const periodNames={daily:'روزانه',weekly:'هفتگی',monthly:'ماهانه',seasonal:'فصلی',ensemble:'انسمبل'};
+const base='\/monitoring-forecast/weather-models';
+const state={route:'/monitoring-forecast/weather-models',lastForecast:'/monitoring-forecast/weather-models',period:'daily',model:'ecmwf',parameter:'p24',secondary:'none',run:'12',lead:24,
+ mode:'forecast',view:'forecast',palette:'wu_precip24',zoom:100,sound:false,playing:false,playTimer:null, layersOpen:false,forecastByPeriod:{},customPeriod:'daily',customModelSet:[],customWeights:{},customParameter:'p24',customRun:'12',customLead:24,customMethod:'mean',customGenerated:false,customMode:'unbuilt', activeDropdown:null,activeParam:null,geo:{continent:'asia',region:'middle-east',country:'iran',province:'',county:''},font:14,uiMapType:'map',panelScroll:0};
+const STATUS_DESCRIPTIONS={ready:'به‌روز (فقط نمونه بصری)',updating:'درحال دریافت (فقط نمونه بصری)',partial:'ناقص (فقط نمونه بصری)',stale:'قدیمی (فقط نمونه بصری)',missing:'ناموجود (فقط نمونه بصری)'};
+let toastTimer=0;
+const esc=str=>String(str??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+const svg=id=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const fnum=n=>new Intl.NumberFormat('fa-IR',{maximumFractionDigits:1}).format(n);
+const noDataText='این یک شبیه‌ساز رابط کاربری است؛ اتصال به دیتای هواشناسی و توابع محاسباتی هنوز انجام نشده.';
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('is-visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('is-visible'),3400);}
+let ctx;
+function clickSound(){if(!state.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ctx=ctx||new AC();if(ctx.state==='suspended')void ctx.resume();const osc=ctx.createOscillator(),g=ctx.createGain();const now=ctx.currentTime;osc.type='sine';osc.frequency.setValueAtTime(610,now);osc.frequency.exponentialRampToValueAtTime(280,now+.075);g.gain.setValueAtTime(.001,now);g.gain.exponentialRampToValueAtTime(.025,now+.011);g.gain.exponentialRampToValueAtTime(.001,now+.095);osc.connect(g);g.connect(ctx.destination);osc.start(now);osc.stop(now+.1);osc.onended=()=>{osc.disconnect();g.disconnect()}}catch(_){}}
+const models=period=>(MODELS[period]||MODELS.daily);
+const isForecastRoute=p=>p.startsWith('/monitoring-forecast/weather-models');
+const regionList={asia:['خاورمیانه','جنوب آسیا','شرق آسیا','جنوب شرق آسیا','غرب آسیا','آسیای مرکزی'],europe:['اروپای غربی','اروپای شرقی','اروپای شمالی','اروپای جنوبی'],africa:['شمال آفریقا','غرب آفریقا','شرق آفریقا','جنوب آفریقا'],north:['آمریکای شمالی','آمریکای مرکزی'],south:['آمریکای جنوبی'],oceania:['اقیانوسیه'],world:['کل جهان']};
+const geoCountries={'middle-east':['ایران','عراق','عربستان سعودی','امارات','عمان','قطر','کویت','بحرین','یمن','ترکیه','سوریه','اردن','لبنان','اسرائیل','فلسطین','مصر','لیبی'],'south-asia':['هند','پاکستان','افغانستان'],'east-asia':['چین','ژاپن','کره جنوبی'],'europe':['فرانسه','آلمان','بریتانیا','ایتالیا'],'north-america':['آمریکا','کانادا','مکزیک']};
+const provinces=['آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز','ایلام','بوشهر','تهران','چهارمحال و بختیاری','خراسان جنوبی','خراسان رضوی','خراسان شمالی','خوزستان','زنجان','سمنان','سیستان و بلوچستان','فارس','قزوین','قم','کردستان','کرمان','کرمانشاه','کهگیلویه و بویراحمد','گلستان','گیلان','لرستان','مازندران','مرکزی','هرمزگان','همدان','یزد'];
+const farsCounties=['آباده','استهبان','اقلید','اوز','بختگان','بوانات','بیضا','پاسارگاد','جهرم','خرامه','خفر','خنج','داراب','زرین‌دشت','زرقان','سپیدان','شیراز','فراشبند','فسا','فیروزآباد','قیر و کارزین','کازرون','کوار','گراش','لارستان','لامرد','مرودشت','ممسنی','مهر','نی‌ریز','رستم','سروستان'];
+function populate(sel,items,value){const el=$(sel);el.replaceChildren();for(const item of items){const opt=document.createElement('option');opt.value=item[0];opt.textContent=item[1];el.appendChild(opt);}if(items.some(i=>i[0]===value))el.value=value;else el.selectedIndex=0;}
+function renderGeo(){const g=state.geo;
+ populate('geoContinent',[['world','کل جهان'],['asia','آسیا'],['europe','اروپا'],['africa','آفریقا'],['north','آمریکای شمالی'],['south','آمریکای جنوبی'],['oceania','اقیانوسیه']],g.continent);
+ const regions=regionList[g.continent]||[];let items=regions.map(x=>[x==='خاورمیانه'?'middle-east':x==='جنوب آسیا'?'south-asia':x==='شرق آسیا'?'east-asia':x==='اروپای غربی'?'europe':x==='آمریکای شمالی'?'north-america':x,x]);populate('geoRegion',items,g.region);
+ const region=$('geoRegion').value;g.region=region;
+ const countries=geoCountries[region]||[];populate('geoCountry',[['','انتخاب کشور'],...countries.map(x=>[x==='ایران'?'iran':x,x])],g.country);g.country=$('geoCountry').value;
+ populate('geoProvince',[["",'تمام کشور'],...(g.country==='iran'?provinces.map(x=>[x,x]):[])],g.province);$('geoProvince').disabled=g.country!=='iran';g.province=$('geoProvince').value;
+ populate('geoCounty',[['','تمام شهرستان‌ها'],...(g.province==='فارس'?farsCounties.map(x=>[x,x]):[])],g.county);$('geoCounty').disabled=g.province!=='فارس';g.county=$('geoCounty').value;
+ $('geoNote').textContent=g.country==='iran'?'۵ سطح انتخاب · بدون اتصال مرز واقعی':'فقط محدوده‌های دارای مرز واقعی در نسخه عملیاتی زوم می‌شوند';
+}
+function bindGeo(){['geoContinent','geoRegion','geoCountry','geoProvince','geoCounty'].forEach(id=>$(id).addEventListener('change',()=>{let g=state.geo;if(id==='geoContinent'){g.continent=$(id).value;g.region='';g.country='';g.province='';g.county=''}if(id==='geoRegion'){g.region=$(id).value;g.country='';g.province='';g.county=''}if(id==='geoCountry'){g.country=$(id).value;g.province='';g.county=''}if(id==='geoProvince'){g.province=$(id).value;g.county=''}if(id==='geoCounty')g.county=$(id).value;renderGeo();toast('محدوده انتخابی ثبت شد؛ زوم واقعی نیازمند لایه مرز معتبر است.')}));}
+function renderNav(){
+ const nav=$('mainNav');nav.replaceChildren();
+ const groups=['خانه','پایش و پیش‌بینی','هواشناسی کاربردی','تحلیل همدیدی','جعبه ابزار هواشناسی','هسته تحلیل اقلیم'];
+ const makeLink=item=>{
+  const a=document.createElement('a');a.href=item.path;a.dataset.route=item.path;a.textContent=item.title;
+  if(item.origin==='requirement'||item.origin==='ui-proposal-not-live-verified')a.title='مسیر نمونه؛ انتشار زنده تأیید نشده';
+  return a;
+ };
+ for(const group of groups){
+  const div=document.createElement('div');div.className='nav-group';
+  const matched=routes.filter(x=>x.group===group);
+  if(group==='خانه'){
+   const a=document.createElement('a');a.className='nav-button';a.href='/';a.dataset.route='/';a.dataset.group=group;a.textContent='صفحه اصلی';div.appendChild(a);
+  }else{
+   const btn=document.createElement('button');btn.className='nav-button';btn.type='button';btn.dataset.navTrigger=group;
+   btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-haspopup','true');btn.innerHTML=`${esc(group)} ${svg('chevron')}`;
+   const drop=document.createElement('div');drop.className='nav-menu';drop.hidden=true;drop.dataset.navPanel=group;
+   const children=new Map();for(const item of matched){const k=item.parent_path||'';if(!children.has(k))children.set(k,[]);children.get(k).push(item)}
+   // Native <details> makes the second/third level truly cascading on click,
+   // without dozens of mis-grouped links at the main menu level.
+   function addLevel(parentEl,parentPath,depth){
+    if(depth>5)return;
+    for(const item of children.get(parentPath)||[]){
+     const subs=children.get(item.path)||[];
+     if(subs.length){
+      const details=document.createElement('details');details.className='nav-branch';
+      const summary=document.createElement('summary');summary.textContent=item.title+'  ＋';summary.setAttribute('aria-label','باز و بسته‌کردن '+item.title);
+      const nest=document.createElement('div');nest.className='nav-children';
+      const base=makeLink(item);base.className='nav-base-link';base.textContent='نمای کلی «'+item.title+'»';nest.appendChild(base);
+      addLevel(nest,item.path,depth+1);
+      details.append(summary,nest);parentEl.appendChild(details);
+     }else parentEl.appendChild(makeLink(item));
+    }
+   }
+   addLevel(drop,'',0);div.append(btn,drop);
+  }
+  nav.appendChild(div);
+ }
+}
+function closeNav(except){document.querySelectorAll('[data-nav-trigger]').forEach(b=>{if(b===except)return;b.setAttribute('aria-expanded','false');b.nextElementSibling.hidden=true;});}
+function navActive(){const item=byPath.get(state.route)||byPath.get('/');document.querySelectorAll('.nav-button').forEach(btn=>btn.dataset.active=String(btn.dataset.navTrigger===item.group ||(item.group==='خانه'&&btn.dataset.group==='خانه')));document.querySelectorAll('[data-route]').forEach(a=>{if(a.dataset.route===state.route)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
+function canonical(path){return HISTORY_ALIASES[path]||path}
+function getRouteFromLocation(){let path=location.protocol==='file:'?(location.hash.startsWith('#/')?location.hash.slice(1):'/monitoring-forecast/weather-models'):location.pathname;return byPath.has(canonical(path))?canonical(path):'/monitoring-forecast/weather-models'}
+function changeUrl(path){if(location.protocol==='file:'){if(location.hash.slice(1)!==path)location.hash=path}else if(location.pathname!==path)history.pushState({metstatPreview:true},'',path);}
+function periodFromRoute(path){const m=path.match(/\/weather-models\/(daily|weekly|monthly|seasonal|ensemble)$/);return m?m[1]:state.period}
+function routeTo(path,{push=true}={}){path=canonical(path);if(!byPath.has(path)){toast('این مسیر در کاتالوگ شبیه‌ساز تعریف نشده است');return}if(push)changeUrl(path);state.route=path;const p=byPath.get(path);if(isForecastRoute(path)&&p.kind!=='custom')state.lastForecast=path;
+ if(p.kind==='custom')state.mode='custom';else if(p.kind==='home')state.mode='home';else if(p.kind==='account')state.mode='account';else state.mode=isForecastRoute(path)?'forecast':'tool';
+ if(p.kind==='forecast'){const newPeriod=periodFromRoute(path);if(newPeriod!==state.period)activatePeriod(newPeriod,{navigate:false});}
+ document.title=`${p.title} | MetStat UI r4 preview`;
+ $('pageTitle').textContent=p.title;$('pageSubtitle').textContent=p.description;$('breadcrumb').textContent='MetStat / '+p.group+(p.parent_path?' / '+(byPath.get(p.parent_path)?.title||''):'');$('mapTitle').textContent=p.title;
+ $('panelTitle').textContent=state.mode==='custom'?'ساخت مولتی‌مدل سفارشی':state.mode==='forecast'?'کنترل مدل‌های هواشناسی':p.title;
+ $('mapInfo').textContent=state.mode==='forecast'?`ران ${state.run}Z · +${fnum(state.lead)} ساعت · نمایشی`:state.mode==='custom'?'مدل‌های انتخابی و تنظیمات اختصاصی': 'محصول UI · بدون اتصال موتور';
+ $('placeholderTitle').textContent=p.kind==='home'?'داشبورد اصلی':p.title;
+ $('placeholderSub').textContent=p.kind==='home'?'نمایش ابزارها و مسیرها':p.description+' · پیش‌نمایش بدون داده واقعی';
+ $('mapFooterText').textContent=p.kind==='custom'?'برای ساخت نمایشی ترکیب، تنظیمات را انجام بده':`نمایش صفحه «${p.title}» آماده است`;
+ ROOT.dataset.mode=state.mode;$('sidebar').dataset.mode=state.mode;document.dispatchEvent(new CustomEvent('metstat:preview-route',{detail:{path,mode:state.mode}}));
+ const isForecast=state.mode==='forecast';$('sidebarSwitch').hidden=!isForecast&&state.mode!=='custom';$('forecastTab').setAttribute('aria-pressed',String(isForecast));$('customTab').setAttribute('aria-pressed',String(state.mode==='custom'));
+ $('forecastTab').classList.toggle('is-active',isForecast);$('customTab').classList.toggle('is-active',state.mode==='custom');
+ $('timeline').hidden=state.mode==='home'||state.mode==='account';$('mapModelRail').hidden=state.mode!=='forecast';$('mapPalette').hidden=state.mode==='home'||state.mode==='custom'||state.mode==='account';
+ $('homeView').setAttribute('aria-hidden',String(state.mode!=='home'));$('customView').setAttribute('aria-hidden',String(state.mode!=='custom'));$('accountView').setAttribute('aria-hidden',String(state.mode!=='account'));
+ renderSidebar();renderModelRail();renderTimeline();renderPalette();navActive();closeNav();
+}
+function modeSwitchCustom(){if(state.mode==='custom')return;state.panelScroll=$('sidebarContent').scrollTop;routeTo('/monitoring-forecast/weather-models/custom-multi-model');}
+function modeSwitchForecast(){if(state.mode==='forecast')return;routeTo(state.lastForecast||'/monitoring-forecast/weather-models');$('sidebarContent').scrollTop=state.panelScroll;}
+function activatePeriod(period,{navigate=true}={}){if(!MODELS[period])period=defaultPeriod;state.forecastByPeriod[state.period]={model:state.model,parameter:state.parameter,secondary:state.secondary,run:state.run,lead:state.lead};state.period=period;const prev=state.forecastByPeriod[period];state.model=prev?.model||MODELS[period][0].id;state.parameter=prev?.parameter||(period==='daily'?'p24':'panom');state.secondary=prev?.secondary||'none';state.run=prev?.run||'12';state.lead=prev?.lead||0;state.palette='';if(navigate)routeTo('/monitoring-forecast/weather-models/'+period);}
+function iconForModel(m,period){const txt=period==='daily'?m.short:m.short;return esc(txt)}
+function renderModelRail(){const rail=$('mapModelRail');rail.replaceChildren();if(state.mode!=='forecast')return;for(const m of models(state.period)){const b=document.createElement('button');b.type='button';b.className='model-status';b.dataset.modelId=m.id;b.dataset.status=m.status;b.title=`${m.full} — ${STATUS_DESCRIPTIONS[m.status]||'نمونه UI'}`;b.setAttribute('aria-label',b.title);b.classList.toggle('emoji',/^\p{Regional_Indicator}/u.test(m.short));b.classList.toggle('is-current',m.id===state.model);const span=document.createElement('span');span.className='model-face';span.textContent=periodIcon(m,state.period);b.appendChild(span);rail.appendChild(b)}}
+function periodIcon(m,period){return period==='daily'?m.short:m.short}
+function renderTimeline(){let hrs;if(state.period==='daily')hrs=[0,6,12,18,24,36,48,60,72,96,120,144,168,192,216,240,264,288,312,336,360];else if(state.period==='weekly')hrs=[0,168,336,504,672,840,1008];else if(state.period==='monthly')hrs=[0,720,1440,2160,2880,3600];else if(state.period==='seasonal')hrs=[0,720,1440,2160];else hrs=[0,12,24,36,48,60,72,96,120,144,168,192,216,240,288,312,336,360];state.lead=hrs.reduce((a,b)=>Math.abs(b-state.lead)<Math.abs(a-state.lead)?b:a,hrs[0]);state.availableLeads=hrs;const r=$('leadRange');r.min=0;r.max=hrs.length-1;r.step=1;r.value=hrs.indexOf(state.lead);$('leadLabel').textContent=state.period==='weekly'?`هفته ${fnum(1+Math.floor(state.lead/168))}`:state.period==='monthly'||state.period==='seasonal'?`ماه ${fnum(1+Math.floor(state.lead/720))}`:`+${fnum(state.lead)} ساعت`;
+ const ticks=$('leadTicks');ticks.replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=state.period==='daily'?`${fnum(Math.round(hrs[hrs.length-1]*i/3))}h`:state.period==='weekly'?`هفته ${fnum(i*2+1)}`:`ماه ${fnum(i+1)}`;ticks.appendChild(span)}
+ for(const sel of ['gifFrom','gifTo'])populate(sel,hrs.map(h=>[String(h),`${fnum(h)} ساعت`]),sel==='gifFrom'?String(hrs[0]):String(hrs[hrs.length-1]));}
+function leadAdvance(dir){if(!state.availableLeads)return;let i=state.availableLeads.indexOf(state.lead);const unit=Number($('leadStep').value)||24;const wanted=state.lead+dir*unit;const hrs=state.availableLeads;const next=dir>0?hrs.find(x=>x>wanted-1)||hrs[hrs.length-1]:[...hrs].reverse().find(x=>x<wanted+1)||hrs[0];if(next===state.lead){stopPlay();return}state.lead=next;renderTimeline();updateMapInfo();}
+function stopPlay(){state.playing=false;clearTimeout(state.playTimer);state.playTimer=null;$('leadPlay').innerHTML=svg('play');$('leadPlay').setAttribute('aria-label','پخش گام‌های نمایشی')}
+function togglePlay(){if(state.playing){stopPlay();return}state.playing=true;$('leadPlay').innerHTML=svg('pause');$('leadPlay').setAttribute('aria-label','توقف پخش');const tick=()=>{if(!state.playing)return;const before=state.lead;leadAdvance(1);if(before!==state.lead)state.playTimer=setTimeout(tick,850)};state.playTimer=setTimeout(tick,850)}
+function updateMapInfo(){if(state.mode==='forecast'){$('mapInfo').textContent=`ران ${state.run}Z · ${$('leadLabel').textContent} · نمایشی`;const label=BY_PARAM.get(state.parameter)?.text||'پارامتر';const m=models(state.period).find(x=>x.id===state.model);$('mapTitle').textContent=`${label} · ${m?.full.split(' — ')[0]||state.model}`;}}
+function renderParameterPicker(type,groups,chosen){const isMain=type==='main'||type==='custom';const param= isMain?BY_PARAM.get(chosen):Object.values(SECONDARY).flat().find(x=>x.id===chosen);let html=`<div class="parameter-selector" data-pick="${type}"><label class="label">${isMain?'پارامتر اصلی':'پارامتر ثانویه'}</label><button type="button" class="parameter-trigger" data-open-params="${type}" aria-controls="params-${type}" aria-expanded="false"><span>${esc(param?.text||chosen)}</span><span>⌄</span></button><div class="parameter-menu" id="params-${type}" hidden>`;
+ for(const [name,values] of Object.entries(groups)){html+=`<details${name===Object.keys(groups)[0]?' open':''}><summary>${esc(name)}</summary>`;for(const x of values)html+=`<button type="button" data-pick-option="${type}" data-value="${esc(x.id)}" aria-pressed="${x.id===chosen}">${esc(x.text)}</button>`;html+='</details>';}return html+'</div></div>'}
+function modelRows(period,chosen){return `<div class="field"><span class="label">مدل هواشناسی / لوگو و نام کامل</span><div class="models-list">${models(period).map(m=>`<label class="model-row"><input type="radio" name="singleModel" value="${esc(m.id)}" ${m.id===chosen?'checked':''}><span class="model-symbol" aria-hidden="true">${iconForModel(m,period)}</span><span class="model-full">${esc(m.full)}</span></label>`).join('')}</div></div>`}
+function forecastPanel(){return `<section class="sidebar-section"><div class="section-head"><strong>نوع محصول پیش‌بینی</strong><small>FORECAST MODE</small></div><div class="pill-grid">${Object.entries(periodNames).map(([k,v])=>`<button class="chip-option" type="button" data-period="${k}" aria-pressed="${k===state.period}">${v}</button>`).join('')}</div></section>
+<section class="sidebar-section"><div class="section-head"><strong>مدل و پارامترها</strong><small>متغیرهای اصلی و ثانویه</small></div>${modelRows(state.period,state.model)}${renderParameterPicker('main',PARAMS,state.parameter)}${renderParameterPicker('secondary',SECONDARY,state.secondary)}</section>
+<section class="sidebar-section"><div class="section-head"><strong>زمان و ران</strong><small>تابع انتشار معتبر در نسخه زنده</small></div><div class="field-row"><div class="field"><label for="forecastRun">ران پیش‌بینی</label><select id="forecastRun">${['00','06','12','18'].map(x=>`<option value="${x}" ${x===state.run?'selected':''}>${x}Z</option>`).join('')}</select></div><div class="field"><label for="forecastLeadHint">گام انتخابی</label><input readonly id="forecastLeadHint" value="+${fnum(state.lead)} ساعت"></div></div><div class="notice">ECMWF و GFS هرکدام یک گزینه هستند؛ رزولوشن واقعی هر فریم پس از اتصال مانيفست مشخص می‌شود.</div></section>
+<section class="sidebar-section"><div class="side-actions"><button type="button" class="sidebar-button is-primary" data-preview-action="apply">${svg('map')} نمایش نقشه</button><button type="button" class="sidebar-button" data-preview-action="reset">${svg('reset')} بازنشانی</button></div></section><div class="notice warning">رنگ وضعیت مدل‌ها در ستون نقشه فعلاً فقط نمایش ساختاری است؛ داده LIVE وجود ندارد.</div>`}
+const customDefaults={daily:{ecmwf:60,gfs:15,icon:10,gem:8,ukmo:7},weekly:{ec46:60,cfsv2:40},monthly:{seas5:60,cfsv2:15,nmme:15,cansips:10}};
+function customEligible(period){return models(period).filter(m=>!['iri','aifs','arpege'].includes(m.id))}
+function ensureCustomPeriod(){const items=customEligible(state.customPeriod);if(!state.customModelSet.length||state.customModelSet.some(id=>!items.find(m=>m.id===id))){state.customModelSet=items.map(m=>m.id);state.customWeights={...customDefaults[state.customPeriod]};state.customGenerated=false}}
+function sumWeights(){return Object.entries(state.customWeights).reduce((n,[id,w])=>n+(state.customModelSet.includes(id)?Number(w)||0:0),0)}
+function customPanel(){ensureCustomPeriod();const period=state.customPeriod,ms=customEligible(period);const total=sumWeights();return `<section class="sidebar-section"><div class="section-head"><strong>تنظیمات ترکیب سفارشی</strong><small>MULTI-MODEL</small></div><div class="pill-grid">${[['daily','روزانه'],['weekly','هفتگی'],['monthly','ماهانه']].map(([id,name])=>`<button class="chip-option" data-custom-period="${id}" aria-pressed="${period===id}">${name}</button>`).join('')}</div><div class="notice" style="margin-top:9px">${period==='daily'?'مولتی‌مدل روزانه فقط ران‌های ۰۰ و ۱۲ و تا ۱۸۰ ساعت':period==='weekly'?'ترکیب هفتگی EC46 و CFSv2 با وزن مرجع ۶۰/۴۰':'در ترکیب ماهانه IRI حذف است؛ انتخاب مدل تابع داده موجود است.'}</div></section>
+<section class="sidebar-section"><div class="section-head"><strong>مدل‌های عضو ترکیب</strong><small>${fnum(ms.length)} مدل مرجع</small></div><div class="models-list">${ms.map(m=>`<label class="model-row"><input type="checkbox" data-custom-member="${esc(m.id)}" ${state.customModelSet.includes(m.id)?'checked':''}><span class="model-symbol">${iconForModel(m,period)}</span><span class="model-full">${esc(m.full)}</span></label>`).join('')}</div></section>
+<section class="sidebar-section"><div class="section-head"><strong>ضرایب وزن‌دهی</strong><small>جمع = ۱۰۰٪</small></div>${ms.map(m=>`<div class="weight-line"><label for="weight-${m.id}">${esc(m.id.toUpperCase())}</label><input type="range" id="weight-${m.id}" min="0" max="100" step="1" value="${state.customWeights[m.id]||0}" data-custom-weight="${m.id}" ${!state.customModelSet.includes(m.id)?'disabled':''}><output id="weight-value-${m.id}">${fnum(state.customWeights[m.id]||0)}٪</output></div>`).join('')}<div class="weight-total ${total===100?'ok':'bad'}" id="weightTotal"><span>مجموع وزن انتخاب‌شده</span><b id="weightSum">${fnum(total)}٪</b></div><div class="side-actions" style="margin-top:9px"><button class="sidebar-button" data-preview-action="normalize">نرمال‌سازی ۱۰۰٪</button><button class="sidebar-button" data-preview-action="standard-weights">وزن‌های استاندارد</button></div></section>
+<section class="sidebar-section"><div class="section-head"><strong>پارامتر، زمان و روش</strong></div>${renderParameterPicker('custom',PARAMS,state.customParameter)}<div class="field-row"><div class="field"><label>ران مشترک</label><select id="customRun"><option value="00" ${state.customRun==='00'?'selected':''}>00Z</option><option value="12" ${state.customRun==='12'?'selected':''}>12Z</option></select></div><div class="field"><label>زمان اعتبار نمونه</label><select id="customLead"><option value="24">+۲۴ ساعت</option><option value="72">+۷۲ ساعت</option><option value="120">+۱۲۰ ساعت</option><option value="180">+۱۸۰ ساعت</option></select></div></div><div class="field"><label>محصول ترکیبی</label><select id="customMethod"><option value="mean">میانگین وزنی</option><option value="max">بیشینه مدل‌ها</option><option value="min">کمینه مدل‌ها</option><option value="agreement">توافق مدل‌ها</option><option value="probability">احتمال فراتر رفتن از آستانه</option></select></div><div class="field"><label>آستانه بارش (فقط محصول احتمال)</label><input type="number" id="customThreshold" min="0" value="10" placeholder="میلی‌متر"></div></section><section class="sidebar-section"><button type="button" class="sidebar-button is-primary" id="generateCustom" style="width:100%;min-height:44px">${svg('multi')} ساخت نقشه ترکیبی (نمایشی)</button></section><div class="notice warning">ترکیب علمی واقعی به هم‌مکان‌سازی، زمان اعتبار مشترک، واحد معتبر، کنترل کیفیت و وجود داده نیاز دارد. این فایل فقط جریان UX را بازسازی می‌کند.</div>`}
+function accountPanel(p){
+ const base='<div class="notice warning">حساب کاربری در این فایل فقط ماکت قابل آزمایش است. هیچ رمز عبوری دریافت یا ارسال نمی‌شود؛ ورود واقعی وجود ندارد.</div>';
+ const items=routes.filter(x=>x.group==='حساب کاربری'&&x.path!='/account');
+ let s=`<section class="sidebar-section"><div class="section-head"><strong>پنل کاربری MetStat</strong><small>r97 / DEMO</small></div>${base}<div class="models-list">${items.map(x=>`<button class="sidebar-button" type="button" data-route-go="${esc(x.path)}">${esc(x.title)} ⟵</button>`).join('')}</div></section>`;
+ const fields={
+ '/account/login':['نام کاربری','رمز عبور','ورود با گوگل (نمونه رابط)'],
+ '/account/register':['نام (انگلیسی)','نام خانوادگی (انگلیسی)','نام کاربری (انگلیسی)','ایمیل','رمز عبور','تکرار رمز عبور'],
+ '/account/profile':['نام','نام خانوادگی','نام کاربری','ایمیل','رمز فعلی','رمز جدید','تکرار رمز جدید'],
+ '/account/admin':['مدیریت حساب‌ها و دسترسی کاربران','بررسی وضعیت سرویس و طرح‌ها','تأیید آمار ماهانه ایستگاه‌ها'],
+ '/account/station-approval':['انتخاب ایستگاه','انتخاب ماه و سال','وضعیت تأیید آمار ماهانه'],
+ '/account/favorites':['افزودن صفحه فعلی به علاقه‌مندی‌ها','فهرست علاقه‌مندی‌ها']
+ };
+ if(fields[p.path]){
+  s+=`<section class="sidebar-section"><div class="section-head"><strong>${esc(p.title)}</strong><small>نمایش ساختار اصلی</small></div>`;
+  for(const f of fields[p.path])s+=`<div class="field"><label>${esc(f)}</label><input disabled placeholder="فقط پیش‌نمایش؛ ذخیره و ورود غیرفعال"></div>`;
+  s+='</section>';
+ }
+ s+=`<section class="sidebar-section"><div class="section-head"><strong>آزمایش حالت‌های پنل</strong></div><div class="side-actions"><button class="sidebar-button" data-account-action="user-demo">نمای کاربر</button><button class="sidebar-button" data-account-action="admin-demo">نمای مدیر</button><button class="sidebar-button" data-account-action="guest-demo">خروج از حالت نمایشی</button></div></section>`;
+ return s;
+}
+const FIELD_LIBRARY={
+ applied:[['نوع محصول',['گردشگری و سفر','کشاورزی','هواشناسی کوهستان','هایکینگ و طبیعت‌گردی','گزارش چندمدلی']],['زمان',['امروز','فردا','۷ روز آینده']],['متغیر شاخص',['بارش','دمای احساس‌شده','وزش باد','احتمال همرفت']]],
+ meteo:[['ایستگاه یا نقطه',['مختصات جغرافیایی','جستجوی ایستگاه','نقطه روی نقشه']],['نمودار',['متئوگرام','Skew-T / Log-P','هودوگراف','پروفایل قائم']],['مدل',['ECMWF','GFS','GEM']]],
+ station:[['ایستگاه / شهر', ['شیراز','استهبان','تهران','مشهد','بندرعباس']],['نوع داده',['مشاهدات لحظه‌ای','آرشیو ساعتی','بارش روزانه']],['پنجره زمانی',['۶ ساعت اخیر','۲۴ ساعت اخیر','۷۲ ساعت اخیر']]],
+ satellite:[['محصول مشاهده‌ای',['Meteosat 8 / IODC','Meteosat 12','رادار بارش','MTG-LI']],['کانال',['مرئی VIS','فروسرخ IR','بخار آب WV','ترکیبی RGB']],['بازه انیمیشن',['۱ ساعت','۳ ساعت','۶ ساعت','۱۲ ساعت']]],
+ verification:[['منبع پیش‌بینی',['ECMWF','GFS','ICON','GEM','UKMO']],['مشاهده مرجع',['ایستگاه‌ها','بولتن بارش سازمان','رادار بارش']],['معیار خطا',['MAE','RMSE','BIAS','POD','FAR','CSI']],['دوره ارزیابی',['۲۴ ساعت','۷ روز','۳۰ روز']]],
+ flood:[['منبع پیش‌بینی',['ECMWF','GFS']],['پنجره تجمع بارش',['۱ ساعت','۳ ساعت','۶ ساعت','۲۴ ساعت']],['محدوده حوضه',['کل ایران','حوضه اصلی','حوضه درجه دو','حوضه درجه سه']],['لایه شیب و ارتفاع',['DEM ۹۰ متر','DEM ۳۰ متر (در صورت وجود)']],['سطح خطر',['کم','متوسط','زیاد','بسیار زیاد']]],
+ status:[['خانواده محصول',['روزانه','هفتگی','ماهانه','فصلی','انسمبل']],['شرط کنترل',['تازگی ران','وجود فریم‌ها','مانيفست و SHA256','پوشش مکانی']],['نمایش',['جدول مانيفست','نوار وضعیت مدل‌ها','گزارش خطا']]],
+ upload:[['قالب ورودی',['بارش و دما','نقشه دلخواه','تروپیکال تیدبیتس','WeatherBELL','weather.us']],['محصول خروجی',['میانگین وزنی','بیشینه','کمینه','توافق مدل‌ها','تراز نقشه']],['روش هم‌مکان‌سازی',['زمین‌مرجع از قالب','تطبیق مرزها','تعیین دستی کادر']]],
+ isohyet:[['محدوده استان',['فارس','کل ایران','بوشهر','هرمزگان','کرمان','خوزستان']],['دوره بارش',['۲۴ ساعته','۴۸ ساعته','ماهانه','سالانه']],['درون‌یابی',['IDW','Ordinary Kriging','Spline','Regression Kriging','Thiessen']],['پارامتر QC',['حذف داده تکراری','اعتبار مختصات','نام مشابه ایستگاه','آستانه غیرعادی']]],
+ matching:[['محدوده جست‌وجو',['فارس','کل ایران','چند استان انتخابی']],['روش تطبیق',['نام دقیق + نرمال‌سازی','متن فارسی و فینگلیش','نام مستعار/شناسه','فاصله مکانی با قید اعتبار']],['گزارش',['تأییدشده','نیازمند بررسی','بدون تطابق']]],
+ terrain:[['مدل ورودی',['ECMWF','GFS','ICON','GEM','UKMO']],['متغیر',['بارش','دما','رطوبت']],['DEM',['ایران ۹۰ متر','ایران ۳۰ متر','DEM سفارشی GeoTIFF']],['محدوده اصلاح',['ایران','استان فارس','حوضه انتخابی']],['شدت اصلاح',['پیش‌فرض علمی','با محدودسازی','خام بدون اصلاح']]],
+ convection:[['شاخص',['CAPE','CIN','Lifted Index','K Index','Total Totals','PWAT','Shear 0–6km']],['محصول',['پتانسیل همرفت','شدت بالقوه','توافق شاخص‌ها']],['وزن‌دهی',['برابر','وزن کارشناس','وزن سفارشی']],['بازه اعتبار',['۶ ساعت','۲۴ ساعت','۴۸ ساعت']]],
+ lightning:[['منبع',['GIF weather.us','فریم‌های PNG','نقشه‌های رعدوبرق']],['روش تراکم',['Kernel Density','نزدیک‌ترین همسایه','شبکه‌بندی منظم']],['شعاع جست‌وجو',['۵ کیلومتر','۱۰ کیلومتر','۲۵ کیلومتر','خودکار']],['خروجی',['نقشه تجمع رعد','تراکم رعد','مسیر سلول تندری']]],
+ hazard:[['نوع پدیده',['بارش سنگین','تندباد','رعدوبرق','برف','گرما و سرما','اشعه UV']],['شدت',['زرد','نارنجی','قرمز']],['بازه زمانی',['۶ ساعت','۲۴ ساعت','۴۸ ساعت']],['لایه نقشه',['مرز استان‌ها','شهرستان‌ها','ایستگاه‌ها']]],
+ synoptic:[['پارامتر همدیدی',['MSLP','ارتفاع ژئوپتانسیل','دمای تراز','رطوبت','سرعت باد / رودباد']],['تراز',['سطح دریا','۸۵۰ hPa','۷۰۰ hPa','۵۰۰ hPa','۳۰۰ hPa','۲۰۰ hPa']],['مدل',['ECMWF','GFS','GEM','ICON','UKMO']],['نمایش',['خطوط ایزوبار','کانتور + سایه‌رنگ','باد و کانتور']]],
+ indices:[['شاخص اقلیمی',['ENSO Niño3.4','IOD','QBO 30 hPa','QBO 50 hPa','PDO','AMO','MJO','NAO','PNA','SCAND','EA/WR']],['مقیاس زمانی',['ماهانه','فصلی','روزانه / زیر‌فصلی']],['نمایش',['سری زمانی','آنومالی','نقشه فاز','همبستگی']],['بازه تاریخی',['۱۲ ماه','۲۴ ماه','۳۰ سال']]],
+ atlas:[['ایستگاه / استان',['فارس','هرمزگان','بوشهر','کل ایران']],['متغیر',['بارش','دما','رطوبت','روز بارانی','حداکثر دما']],['آمار',['میانگین','بیشینه','کمینه','نرمال','صدک']],['محصول',['نمودار سالانه','نقشه استان','نمودار ماهانه','جدول']]],
+ charts:[['نمودار',['دما و بارش','آب و هوا نما','روند و رگرسیون','سری زمانی','هیستوگرام']],['تناوب',['روزانه','ماهانه','سالانه']],['دوره',['۱۲ ماه','۲۰ سال','دوره اقلیمی']],['محور',['جلالی','میلادی']]],
+ drought:[['شاخص خشکسالی',['SPI','SPEI','RDI','PDSI (در صورت داده معتبر)']],['تجمع',['۱ ماه','۳ ماه','۶ ماه','۱۲ ماه','۲۴ ماه']],['پهنه‌بندی',['IDW','Kriging','محدوده ایستگاه']],['دوره پایه',['۱۹۹۱–۲۰۲۰','دوره معتبر ایستگاه']]],
+ climate:[['مدل اقلیمی',['ECMWF SEAS5','CFSv2','NMME','CanSIPS','CMIP6']],['سناریو',['SSP1-2.6','SSP2-4.5','SSP5-8.5','پیش‌بینی فصلی']],['پارامتر',['بارش','آنومالی دما','Z500','ناهنجاری فشار']],['ماه / فصل',['ماه آینده','سه ماه آینده','شش ماه آینده']]],
+ convert:[['نوع خروجی',['PNG','GIF','CSV','GeoTIFF','NetCDF']],['رزولوشن',['استاندارد','بالا','خیلی بالا']],['قالب بازپخش',['روان','کم‌حجم','بدون انیمیشن']]],
+ overview:[['گروه محصول',['نقشه‌های مدل‌ها','پایش ایستگاه‌ها','ابزار نقشه','تحلیل اقلیم']],['نمایش خلاصه',['همه','منتخب','نیازمند توسعه']]]
+};
+function fieldFromData(label,arr,slug){return `<div class="field"><label for="field-${slug}">${esc(label)}</label><select id="field-${slug}" data-generic="${esc(slug)}">${arr.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div>`}
+function renderToolPanel(p){const lib=FIELD_LIBRARY[p.kind]||FIELD_LIBRARY.overview;let s=`<section class="sidebar-section"><div class="section-head"><strong>${esc(p.title)}</strong><small>${esc(p.kind.toUpperCase())}</small></div><div class="notice">${esc(p.description)}</div></section>`;
+ if(['upload','isohyet','matching','terrain','convection','lightning','hazard','verification','flood','status','atlas','charts','drought','climate','convert','synoptic','satellite','station','indices','meteo','applied'].includes(p.kind))s+=`<section class="sidebar-section"><div class="section-head"><strong>پارامترها و تنظیمات</strong><small>موارد شناخته‌شده از پروژه</small></div>${lib.map(([name,arr],i)=>fieldFromData(name,arr,p.kind+i)).join('')}</section>`;
+ if(['upload','lightning','hazard','terrain','matching','verification','isohyet','convert'].includes(p.kind)){
+ const text=p.kind==='matching'?'بارگذاری گزارش بارش یا چسباندن متن':p.kind==='verification'?'آپلود نقشه پیش‌بینی/مشاهده':p.kind==='isohyet'?'فایل ایستگاه‌ها یا گزارش بارش':'افزودن نقشه‌ها و فایل‌های موردنیاز';
+ s+=`<section class="sidebar-section"><div class="section-head"><strong>ورودی داده</strong></div><div class="field"><label for="toolInput">${esc(text)}</label><input type="file" id="toolInput" multiple accept=".png,.jpg,.jpeg,.webp,.gif,.csv,.xlsx,.tif,.tiff,.nc,.json,.txt" aria-label="انتخاب فایل؛ فقط نمایشی"></div><div class="notice">ورودی محلی فقط نام فایل را نمایش می‌دهد؛ هیچ فایل یا داده‌ای ارسال نمی‌شود.</div><div id="uploadedFiles" class="micro"></div></section>`;
+ }
+ if(p.kind==='account'){
+  const links=routes.filter(x=>x.group==='حساب کاربری'&&x.path!==p.path);
+  s+=`<section class="sidebar-section"><div class="section-head"><strong>پنل کاربری</strong><small>فقط طرح رابط</small></div><div class="notice warning">این فایل به حساب واقعی، ورود، اشتراک یا اطلاعات خصوصی وصل نیست.</div><div class="models-list">${links.map(x=>`<button type="button" class="sidebar-button" data-route-go="${esc(x.path)}">${esc(x.title)} ⟵</button>`).join('')}</div></section>`;
+  if(p.path==='/account/profile')s+=`<section class="sidebar-section"><div class="field"><label>زبان رابط</label><select><option>فارسی</option><option>English</option></select></div><div class="field"><label>واحد دما</label><select><option>سانتی‌گراد</option><option>فارنهایت</option></select></div><div class="notice">ذخیره تنظیمات در این نسخه فعال نیست.</div></section>`;
+  if(p.path==='/account/security')s+=`<section class="sidebar-section"><div class="notice">ورود دومرحله‌ای، نشست‌های فعال و خروج امن پس از اتصال به سامانه احراز هویت قابل استفاده خواهند بود.</div></section>`;
+ }
+ if(p.kind==='matching')s+=`<section class="sidebar-section"><div class="field"><label for="stationText">متن گزارش فارسی، لاتین یا فینگلیش</label><textarea id="stationText" rows="3" placeholder="استهبان ۱۲، شیراز ۸ ..."></textarea></div><label class="checkrow"><input type="checkbox" checked> اولویت با ایستگاه معتبر و استان انتخابی</label></section>`;
+ if(p.kind==='flood')s+=`<section class="sidebar-section"><div class="notice warning">خطرپذیری سیلاب در ایران بر اساس بارش، شیب، حوضه، نوع خاک و کاربری اراضی برآورد می‌شود. این صفحه احتمال معتبر محاسبه نمی‌کند.</div></section>`;
+ if(p.kind==='isohyet')s+=`<section class="sidebar-section"><label class="checkrow"><input type="checkbox" checked> کنترل کیفیت نام/مختصات ایستگاه‌ها</label><label class="checkrow"><input type="checkbox" checked> انتخاب چند استان و فیلتر سخت</label></section>`;
+ if(p.kind==='terrain')s+=`<section class="sidebar-section"><label class="checkrow"><input type="checkbox" checked> حفظ میانگین سلول اصلی مدل</label><label class="checkrow"><input type="checkbox"> نمایش نقشه خام در کنار اصلاح‌شده</label></section>`;
+ if(p.kind==='atlas'||p.kind==='charts')s+=`<section class="sidebar-section"><div class="mini-card-grid"><div class="mini-card"><small>کنترل داده</small><strong>نیازمند اتصال</strong></div><div class="mini-card"><small>نوع نمودار</small><strong>آمار ایستگاهی</strong></div></div></section>`;
+ if(p.kind==='overview'||p.kind==='home'){
+ const children=routes.filter(x=>x.group===p.group&&x.path!==p.path).slice(0,10);
+ s+=`<section class="sidebar-section"><div class="section-head"><strong>بخش‌های مرتبط</strong><small>${fnum(children.length)} مسیر نمونه</small></div><div class="models-list">${children.map(x=>`<button type="button" class="sidebar-button" data-route-go="${esc(x.path)}">${esc(x.title)} ⟵</button>`).join('')}</div></section>`;
+ }
+ s+=`<section class="sidebar-section"><div class="side-actions"><button class="sidebar-button is-primary" data-preview-action="mock-run">${svg('chart')} نمایش ساختار</button><button class="sidebar-button" data-preview-action="mock-clear">${svg('reset')} بازنشانی</button></div></section><div class="notice warning">امکانات بالا از فهرست مستند/سایت قدیمی الگوبرداری شده‌اند؛ عملکرد علمی و اتصال زنده در این نسخه وجود ندارد.</div>`;
+ return s;
+}
+function renderSidebar(){const p=byPath.get(state.route)||byPath.get('/');const el=$('sidebarContent');el.innerHTML=state.mode==='custom'?customPanel():state.mode==='forecast'?forecastPanel():state.mode==='account'?accountPanel(p):renderToolPanel(p);if(state.mode==='custom'){$('customRun').value=state.customRun;$('customLead').value=String(state.customLead);$('customMethod').value=state.customMethod;const threshold=$('customThreshold');threshold.disabled=state.customMethod!=='probability';}}
+function layersPopulate(){const data=[['مرز کشورها','countries',true],['مرز استان‌ها','provinces',true],['مرز شهرستان‌ها','counties',false],['شهرهای بزرگ','cities',true],['شهرهای کوچک','small-towns',false],['نقاط روستایی','villages',false],['راه‌ها و بزرگراه‌ها','roads',false],['رودخانه‌ها','rivers',true],['دریاچه‌ها','lakes',true],['پایتخت‌های جهان','capitals',true],['نام‌ها و برچسب‌ها','labels',true],['شبکه طول و عرض','graticule',true],['انیمیشن بردار باد','wind',false]];let html='<h4>لایه‌های جغرافیایی</h4>';for(const [title,id,checked] of data)html+=`<label><span>${esc(title)}</span><input type="checkbox" data-layer="${id}" ${checked?'checked':''} aria-label="${esc(title)}"></label>`;html+='<h4>کیفیت خطوط و لیبل‌ها</h4>';for(const [title,id,min,max,val] of [['ضخامت خطوط','line-width',.5,4,1.3],['اندازه برچسب','label-size',9,22,12],['سرعت انیمیشن باد','wind-speed',.25,3,1]])html+=`<label><span>${title} <output id="out-${id}">${val}</output></span><input type="range" id="lay-${id}" min="${min}" max="${max}" step=".25" value="${val}" data-layer-range="${id}"></label>`;html+='<p class="notice">لایه‌های واقعی جغرافیایی تا اتصال موتور نقشه فعال نمی‌شوند. تنظیمات این بخش فقط نمایشی است.</p>';$('layersControls').innerHTML=html;}
+function setLayers(open){state.layersOpen=open;$('layersPanel').hidden=!open;$('layersBtn').setAttribute('aria-expanded',String(open));if(open)$('layersPanel').querySelector('input')?.focus()}
+function getColors(id,group){if(id==='windy')return palettes.windy?.[group==='precip'?'precip':'temp']||null;return palettes.palettes?.[id]||null}
+function gradient(cols){if(!cols||cols.length<2)return 'repeating-linear-gradient(90deg,#bdd7e3 0 12px,#e5f1f7 12px 24px)';const n=100/cols.length;const all=[];for(let i=0;i<cols.length;i++){const color=cols[i];if(!/^#[0-9a-fA-F]{6}$/.test(color))return 'linear-gradient(90deg,#a2b6c4,#d5e5ef)';all.push(`${color} ${(i*n).toFixed(2)}%`,`${color} ${((i+1)*n).toFixed(2)}%`)}return `linear-gradient(to right,${all.join(',')})`}
+function paramGroup(){return (BY_PARAM.get(state.mode==='custom'?state.customParameter:state.parameter)||{}).group||''}
+function renderPalette(){const group=paramGroup();const picker=$('mapPalette');if(state.mode==='home'||state.mode==='custom'||state.mode==='account'){picker.hidden=true;return}picker.hidden=false;
+ const groups=palettes.groups?.[group]||[];const options=groups.filter(x=>Array.isArray(x)&&x.length>=2);$('paletteGroupName').textContent=group||'فاقد پالت مستند';const list=$('paletteList');list.replaceChildren();
+ let selected=options.find(x=>x[1]===state.palette && getColors(x[1],group));if(!selected)selected=options.find(x=>getColors(x[1],group));
+ if(!selected){state.palette=null;$('paletteName').textContent='کالر بار مستند برای این پارامتر موجود نیست';$('paletteStrip').style.background=gradient(null);$('paletteTicks').textContent='اعداد مقیاس معتبر در دسترس نیست';const msg=document.createElement('p');msg.textContent='هیچ پالت مستند با رنگ‌های واقعی برای این پارامتر در فایل مرجع یافت نشد.';msg.className='notice';list.appendChild(msg);return}
+ const id=selected[1];state.palette=id;const colors=getColors(id,group);$('paletteName').textContent=selected[0];$('paletteStrip').style.background=gradient(colors);renderPaletteTicks(id,colors);
+ for(const [name,pid] of options){const colors0=getColors(pid,group),b=document.createElement('button');b.type='button';b.className='palette-item';b.dataset.paletteChoice=pid;b.disabled=!colors0||colors0.length<2;b.setAttribute('aria-pressed',String(pid===id));b.setAttribute('aria-label',name);const n=document.createElement('span');n.className='palette-label';n.textContent=name;const sw=document.createElement('span');sw.className='palette-preview';sw.style.background=gradient(colors0);sw.setAttribute('aria-hidden','true');const lab=document.createElement('small');lab.textContent=palettes.edges?.[pid]?.length===colors0?.length?'مقیاس':'بی‌مقیاس';b.append(n,sw,lab);list.appendChild(b)}
+}
+function renderPaletteTicks(id,colors){const el=$('paletteTicks');el.replaceChildren();const edges=palettes.edges?.[id];if(!Array.isArray(edges)||!colors||edges.length!==colors.length){const d=document.createElement('span');d.style.cssText='left:50%;transform:translateX(-50%)';d.textContent='اعداد طبقات برای این پالت مستند نشده است';el.appendChild(d);return}
+ for(let i=0;i<6;i++){const p=i/5,idx=Math.round((edges.length-1)*p),node=document.createElement('span');node.style.left=(p*100)+'%';const val=edges[idx];node.textContent=typeof val==='number'?fnum(val):String(val);el.appendChild(node)}
+}
+function setPaletteOpen(open){const p=$('paletteChoices');p.hidden=!open;$('paletteBtn').setAttribute('aria-expanded',String(open));if(open)p.querySelector('button:not(:disabled)')?.focus()}
+function updateCustomView(){const canvas=$('customCanvasGrid');canvas.replaceChildren();for(let i=0;i<35;i++){const s=document.createElement('span');s.style.background=`radial-gradient(circle at ${20+(i*11)%65}% ${25+(i*13)%70}%,${i%4===0?'#dc193766':'#399fd47a'},#0c355d80)`;canvas.appendChild(s)}
+ const ids=state.customModelSet.join(' / ');$('customCanvasTitle').textContent=state.customGenerated?`پیش‌نمایش: ${ids||'مدل انتخابی ندارد'}`:'مدل‌ها و وزن‌ها را تعیین و «ساخت نقشه» را انتخاب کن';$('customCanvasDesc').textContent=state.customGenerated?`${state.customMethod} · مجموع وزن ${fnum(sumWeights())}٪ · پارامتر ${BY_PARAM.get(state.customParameter)?.text||state.customParameter} | نقشه محاسباتی واقعی تولید نشده است`:noDataText;}
+function customGenerate(){const total=sumWeights();if(state.customModelSet.length<2){toast('برای ترکیب، دست‌کم دو مدل مستقل انتخاب کن');return}if(total!==100){toast('جمع وزن‌ها باید دقیقاً ۱۰۰٪ باشد. از نرمال‌سازی استفاده کن.');return}if(state.customPeriod==='daily'&&(!state.customModelSet.includes('ecmwf')||Number(state.customWeights.ecmwf)!==60)){toast('مطابق دستور مرجع، سهم ECMWF در مولتی‌مدل روزانه ۶۰٪ است. تغییر نیازمند تأیید علمی است.');return}
+ state.customGenerated=true;updateCustomView();$('customCanvasTitle').textContent='ترکیب مدل‌ها • پیش‌نمایش رابط';toast('شمای نقشه مولتی‌مدل ایجاد شد؛ این خروجی داده هواشناسی نیست.');}
+function customNormalize(){const selected=state.customModelSet.filter(id=>customEligible(state.customPeriod).some(x=>x.id===id));if(!selected.length)return;let total=sumWeights();if(total===0){let each=Math.floor(100/selected.length);selected.forEach((id,i)=>state.customWeights[id]=i===selected.length-1?100-each*(selected.length-1):each)}else{let alloc=0;selected.forEach((id,i)=>{const v=i===selected.length-1?100-alloc:Math.round(100*(Number(state.customWeights[id]||0)/total));state.customWeights[id]=v;alloc+=v})}renderSidebar();}
+function changeCustomPeriod(period){state.customPeriod=period;state.customModelSet=[];state.customWeights={};state.customGenerated=false;renderSidebar();updateCustomView();}
+function updateWeights(){const total=sumWeights(),sum=$('weightSum');if(sum)sum.textContent=fnum(total)+'٪';const x=$('weightTotal');if(x){x.classList.toggle('ok',total===100);x.classList.toggle('bad',total!==100)}}
+function screenshotPng(){const mul=Number($('pngScale').value)||2;const canvas=document.createElement('canvas');canvas.width=960*mul;canvas.height=560*mul;const g=canvas.getContext('2d');if(!g){toast('امکان ساخت نمونه PNG در این مرورگر وجود ندارد');return}g.scale(mul,mul);const bg=g.createLinearGradient(0,0,960,560);bg.addColorStop(0,'#399FD4');bg.addColorStop(.63,'#d9f2fb');bg.addColorStop(1,'#f8f9fd');g.fillStyle=bg;g.fillRect(0,0,960,560);g.fillStyle='#fff';g.fillRect(22,22,916,60);g.fillStyle='#dc1937';g.font='bold 26px Arial';g.fillText('METSTAT • UI PREVIEW',40,62);g.fillStyle='#134968';g.fillRect(30,105,900,370);g.strokeStyle='#62a6c6';g.lineWidth=1;for(let x=35;x<930;x+=40){g.beginPath();g.moveTo(x,110);g.lineTo(x,469);g.stroke()}for(let y=110;y<470;y+=37){g.beginPath();g.moveTo(35,y);g.lineTo(924,y);g.stroke()}g.textAlign='center';g.fillStyle='#e4f6ff';g.font='bold 30px Arial';g.fillText('INTERFACE SIMULATION',480,274);g.font='bold 17px Arial';g.fillText('NO LIVE FORECAST OR OBSERVATIONS',480,309);g.fillStyle='#bb1936';g.fillRect(38,487,884,9);g.fillStyle='#46677b';g.font='bold 16px Arial';g.fillText('MetStat UI r3 - Visualization and navigation prototype only',480,535);canvas.toBlob(blob=>{if(!blob){toast('ایجاد PNG ناموفق بود');return}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MetStat_UI_r3_DEMO_NOT_FORECAST.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);$('exportDialog').close();toast('PNG نمونه UI ذخیره شد (نه نقشه هواشناسی واقعی).')},'image/png')}
+function dialogOpen(el){if(typeof el.showModal==='function'){if(!el.open)el.showModal()}else el.setAttribute('open','')}
+function dialogClose(el){if(typeof el.close==='function'&&el.open)el.close();else el.removeAttribute('open')}
+function routeAction(el){const path=el.dataset.route||el.dataset.routeGo;if(!path)return false;routeTo(path);return true}
+function paramsClose(except){document.querySelectorAll('[data-open-params]').forEach(b=>{if(b===except)return;b.setAttribute('aria-expanded','false');const p=$('params-'+b.dataset.openParams);if(p)p.hidden=true})}
+function selectParam(type,value){if(type==='main'){state.parameter=value;state.palette='';}else if(type==='custom'){state.customParameter=value}else state.secondary=value;renderSidebar();renderPalette();updateMapInfo();if(state.mode==='custom')updateCustomView();}
+function navClick(b){const open=b.getAttribute('aria-expanded')!=='true';closeNav(b);b.setAttribute('aria-expanded',String(open));b.nextElementSibling.hidden=!open;}
+function handleClick(e){const account=e.target.closest('[data-account-action]');if(account){window.MetStatR4Account?.setRole(account.dataset.accountAction);return}const nav=e.target.closest('[data-nav-trigger]');if(nav){clickSound();navClick(nav);return}const link=e.target.closest('[data-route],[data-route-go]');if(link){e.preventDefault();clickSound();routeAction(link);return}const period=e.target.closest('[data-period]');if(period){clickSound();activatePeriod(period.dataset.period);return}
+ const cperiod=e.target.closest('[data-custom-period]');if(cperiod){clickSound();changeCustomPeriod(cperiod.dataset.customPeriod);return}
+ const modelbtn=e.target.closest('[data-model-id]');if(modelbtn){clickSound();state.model=modelbtn.dataset.modelId;renderSidebar();renderModelRail();updateMapInfo();return}
+ const opener=e.target.closest('[data-open-params]');if(opener){clickSound();const name=opener.dataset.openParams;const menu=$('params-'+name),open=opener.getAttribute('aria-expanded')!=='true';paramsClose(opener);opener.setAttribute('aria-expanded',String(open));menu.hidden=!open;return}
+ const opt=e.target.closest('[data-pick-option]');if(opt){clickSound();selectParam(opt.dataset.pickOption,opt.dataset.value);return}
+ const paletteOption=e.target.closest('[data-palette-choice]');if(paletteOption){clickSound();state.palette=paletteOption.dataset.paletteChoice;renderPalette();setPaletteOpen(false);return}
+ const action=e.target.closest('[data-preview-action]');if(action){clickSound();if(action.dataset.previewAction==='reset'){state.model='ecmwf';state.parameter='p24';state.secondary='none';state.run='12';state.lead=24;renderSidebar();renderModelRail();renderTimeline();renderPalette();updateMapInfo();toast('تنظیمات پیش‌بینی به حالت اولیه بازگشت')}else if(action.dataset.previewAction==='apply'){updateMapInfo();toast('نمایش تنظیمات مدل در این شبیه‌ساز ثبت شد؛ داده واقعی بارگذاری نمی‌شود')}else if(action.dataset.previewAction==='standard-weights'){state.customWeights={...customDefaults[state.customPeriod]};renderSidebar();toast('وزن‌های مرجع بازگردانده شد')}else if(action.dataset.previewAction==='normalize'){customNormalize();toast('وزن‌ها به ۱۰۰٪ نرمال شدند؛ الزامات علمی همچنان برقرارند')}else if(action.dataset.previewAction==='mock-run'){toast(noDataText)}else if(action.dataset.previewAction==='mock-clear'){renderSidebar();toast('تنظیمات نمایشی بازنشانی شدند')}return}
+ // Click outside any open dropdown is handled after explicit controls.
+ if(!e.target.closest('.nav-group'))closeNav();if(!e.target.closest('.parameter-selector'))paramsClose();
+ if(!e.target.closest('#paletteChoices,#paletteBtn')&& !$('paletteChoices').hidden)setPaletteOpen(false);
+ if(state.layersOpen&&!e.target.closest('#layersPanel,#layersBtn,#windBtn'))setLayers(false);
+}
+function listener(id,handler){const x=$(id);if(!x)throw new Error('Missing r3 control #'+id);x.addEventListener('click',e=>{e.stopPropagation();clickSound();handler(e)})}
+function bindListeners(){document.addEventListener('click',handleClick);
+ listener('forecastTab',modeSwitchForecast);listener('customTab',modeSwitchCustom);listener('customShortcut',modeSwitchCustom);
+ listener('zoomIn',()=>{state.zoom=Math.min(240,state.zoom+20);zoomSync()});listener('zoomOut',()=>{state.zoom=Math.max(60,state.zoom-20);zoomSync()});listener('fullExtent',()=>{state.zoom=100;zoomSync()});listener('refreshMap',()=>toast('رفرش شبیه‌سازی‌شده: اتصال به سرویس نقشه برقرار نیست'));
+ listener('layersBtn',()=>setLayers(!state.layersOpen));listener('windBtn',()=>{setLayers(true);$('layersControls').querySelector('[data-layer="wind"]')?.focus()});listener('layersClose',()=>setLayers(false));
+ listener('saveBtn',()=>dialogOpen($('exportDialog')));listener('paletteBtn',()=>setPaletteOpen($('paletteChoices').hidden));
+ listener('fullscreenBtn',async()=>{const on=!ROOT.classList.contains('map-fullscreen');ROOT.classList.toggle('map-fullscreen',on);$('fullscreenBtn').setAttribute('aria-label',on?'خروج از تمام صفحه':'ورود به تمام صفحه');if(on){const el=$('mapCard');if(el.requestFullscreen){try{await el.requestFullscreen()}catch(_){/* CSS-only fullscreen fallback */}}}else if(document.fullscreenElement){try{await document.exitFullscreen()}catch(_){}}});
+ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)ROOT.classList.remove('map-fullscreen')});
+ listener('leadPrev',()=>leadAdvance(-1));listener('leadNext',()=>leadAdvance(1));listener('leadPlay',togglePlay);
+ $('leadRange').addEventListener('input',e=>{if(!state.availableLeads)return;state.lead=state.availableLeads[Number(e.target.value)]||0;renderTimeline();updateMapInfo()});
+ listener('helpBtn',()=>toast('تمام ۶۳ مسیر و ابزارها در این فایل به شکل نمایشی هستند. زوم موبایل با دو انگشت فعال است.'));listener('soundBtn',()=>{state.sound=!state.sound;$('soundBtn').setAttribute('aria-pressed',String(state.sound));$('soundBtn').title=state.sound?'قطع صدای کلیک':'فعال‌کردن صدای کلیک';toast(state.sound?'صدای ظریف کلیک روشن شد':'صدای کلیک خاموش شد')});
+ listener('uiSmaller',()=>{state.font=Math.max(12,state.font-1);document.documentElement.style.setProperty('--panel-font',state.font+'px');toast('اندازه نوشته منوها: '+fnum(state.font)+'px')});
+ listener('uiBigger',()=>{state.font=Math.min(18,state.font+1);document.documentElement.style.setProperty('--panel-font',state.font+'px');toast('اندازه نوشته منوها: '+fnum(state.font)+'px')});
+ listener('exportPng',screenshotPng);listener('openGif',()=>{dialogClose($('exportDialog'));dialogOpen($('gifDialog'))});listener('gifBack',()=>{dialogClose($('gifDialog'));dialogOpen($('exportDialog'))});listener('gifApply',()=>{const from=Number($('gifFrom').value),to=Number($('gifTo').value);if(from>to){toast('گام پایان باید بزرگ‌تر از گام آغاز باشد');return}dialogClose($('gifDialog'));toast(`تنظیمات GIF ثبت شد: ${fnum(from)} تا ${fnum(to)} ساعت. خروجی واقعی تا اتصال فریم‌های معتبر فعال نیست.`)});
+ $('exportDialog').addEventListener('click',e=>{if(e.target===$('exportDialog'))dialogClose($('exportDialog'))});$('gifDialog').addEventListener('click',e=>{if(e.target===$('gifDialog'))dialogClose($('gifDialog'))});
+ listener('pngOption',()=>{dialogOpen($('exportDialog'));$('pngOption').classList.add('active');$('gifOption').classList.remove('active')});listener('gifOption',()=>{dialogClose($('exportDialog'));dialogOpen($('gifDialog'))});
+ $('sidebarContent').addEventListener('change',e=>{const t=e.target;
+  if(t.name==='singleModel'){state.model=t.value;renderModelRail();updateMapInfo();renderSidebar();return}
+  if(t.id==='forecastRun'){state.run=t.value;updateMapInfo();return}
+  if(t.dataset.customMember){const id=t.dataset.customMember;if(t.checked){if(!state.customModelSet.includes(id))state.customModelSet.push(id)}else{state.customModelSet=state.customModelSet.filter(x=>x!==id)};state.customGenerated=false;renderSidebar();updateCustomView();return}
+  if(t.id==='customRun')state.customRun=t.value;
+  if(t.id==='customLead')state.customLead=Number(t.value);
+  if(t.id==='customMethod'){state.customMethod=t.value;$('customThreshold').disabled=t.value!=='probability'}
+  if(t.id==='toolInput'){$('uploadedFiles').textContent=Array.from(t.files||[]).map(f=>f.name).join('، ')||'فایلی انتخاب نشده'};
+ });
+ $('sidebarContent').addEventListener('input',e=>{const t=e.target;if(t.dataset.customWeight){state.customWeights[t.dataset.customWeight]=Number(t.value);const out=$('weight-value-'+t.dataset.customWeight);if(out)out.textContent=fnum(t.value)+'٪';state.customGenerated=false;updateWeights()}});
+ $('sidebarContent').addEventListener('click',e=>{const b=e.target.closest('#generateCustom');if(b){clickSound();customGenerate()}});
+ $('layersControls').addEventListener('input',e=>{const t=e.target;if(t.dataset.layerRange){$('out-'+t.dataset.layerRange).textContent=t.value;toast('تنظیم نمایشی '+t.dataset.layerRange+' = '+t.value)}if(t.dataset.layer==='graticule')$('schematic').style.opacity=t.checked?'1':'.82';if(t.dataset.layer==='wind')toast(t.checked?'انیمیشن باد (نمایش کنترل) روشن شد':'انیمیشن باد (نمایش کنترل) خاموش شد')});
+ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(state.layersOpen){setLayers(false);return}if(!$('paletteChoices').hidden){setPaletteOpen(false);return}closeNav();paramsClose();if(ROOT.classList.contains('map-fullscreen'))ROOT.classList.remove('map-fullscreen')});
+ window.addEventListener('popstate',()=>{const p=getRouteFromLocation();if(p!==state.route)routeTo(p,{push:false})});window.addEventListener('hashchange',()=>{if(location.protocol==='file:'){const p=getRouteFromLocation();if(p!==state.route)routeTo(p,{push:false})}});
+ // Browser-managed pinch-to-zoom MUST remain enabled (user-scalable=yes, touch-action:pinch-zoom).
+ // Do not attach preventDefault touch listeners to menus or body.
+}
+function zoomSync(){$('schematic').style.setProperty('--map-zoom',state.zoom/100);$('mapPlaceholder').style.setProperty('--map-zoom',state.zoom/100);$('stageBadge').textContent='نمایش آزمایشی · '+fnum(state.zoom)+'٪'}
+function renderHomeCards(){const box=$('homeCards');box.replaceChildren();for(const g of ['پایش و پیش‌بینی','هواشناسی کاربردی','جعبه ابزار هواشناسی','تحلیل همدیدی','هسته تحلیل اقلیم']){const r=routes.find(x=>x.group===g),b=document.createElement('button');b.className='home-card';b.type='button';b.dataset.routeGo=r.path;const name=document.createElement('span');name.textContent=g;b.append(name);const x=document.createElement('span');x.textContent='‹';b.append(x);box.appendChild(b)}}
+function boot(){renderNav();renderHomeCards();renderGeo();bindGeo();layersPopulate();bindListeners();$('coverageCount').textContent=fnum(routes.length);routeTo(getRouteFromLocation(),{push:false});zoomSync();updateCustomView();$('soundBtn').setAttribute('aria-pressed','false');
+ // Keep original independent state when switching away from the normal forecast view.
+ window.MetStatR3Preview=Object.freeze({getRoute:()=>state.route,getMode:()=>state.mode,getForecast:()=>({period:state.period,model:state.model,param:state.parameter}),getCustom:()=>({period:state.customPeriod,members:[...state.customModelSet],weights:{...state.customWeights},generated:state.customGenerated}),routeCount:routes.length,liveDataConnected:false});
+}
+boot();
+})();

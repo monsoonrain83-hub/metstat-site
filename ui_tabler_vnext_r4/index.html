@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'self'">
+<title>MetStat Atlas — نسخه نمایشی جامع r4</title>
+<link rel="stylesheet" href="styles.css">
+<script defer src="route-data.js"></script>
+<script defer src="palette-data.js"></script>
+<script defer src="app.js"></script>
+<script defer src="account-r4.js"></script>
+<script defer src="drawing-r4.js"></script>
+</head>
+<body>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5zm-9 10 9 5 9-5M3 17l9 5 9-5"/></symbol>
+<symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6m-3-3v6"/></symbol>
+<symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6"/></symbol>
+<symbol id="i-extent" viewBox="0 0 24 24"><path d="M4 9V4h5m6 0h5v5M4 15v5h5m6 0h5v-5"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5m-3.7-3a8 8 0 0 1 13.3-2l1.4 1.4M4 17l1.4 1.4a8 8 0 0 0 13.3-2"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
+<symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h13a3 3 0 1 0-3-3M2 12h17a2 2 0 1 1-2 2M4 16h8a3 3 0 1 1-3 3"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M10 3h4l.6 2.3 2 1.1 2.3-.7 2 3.5-1.7 1.7v2.2l1.7 1.7-2 3.5-2.3-.7-2 1.1L14 21h-4l-.6-2.3-2-1.1-2.3.7-2-3.5 1.7-1.7v-2.2L3.1 9.2l2-3.5 2.3.7 2-1.1z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M6 15l4-5 4 2 5-8"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 17V3m-5 5 5-5 5 5M4 17v4h16v-4"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.4"/></symbol>
+<symbol id="i-multi" viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="8" rx="1"/><rect x="13" y="4" width="8" height="8" rx="1"/><rect x="3" y="14" width="8" height="7" rx="1"/><path d="M17 15v6m-3-3h6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14m8-14v14"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M4 12h16m-5-5 5 5-5 5"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 7v5h5M21 17v-5h-5M5 16a8 8 0 0 0 14 2M19 8a8 8 0 0 0-14-2"/></symbol>
+</svg>
+<div id="app" class="app" data-mode="forecast">
+  <header class="header" id="header">
+    <a class="brand" href="/" data-route title="صفحه اصلی MetStat"><span class="brand-mark">M</span><span><b>MetStat</b><small>METEOROLOGICAL ATLAS</small></span></a>
+    <nav class="main-nav" id="mainNav" aria-label="منوی اصلی سایت"></nav>
+    <div class="header-tools"><span class="preview-state">◉ پیش‌نمایش r4</span><button class="control head-action" id="soundBtn" type="button" title="خاموش/روشن کردن صدای کلیک" aria-pressed="false">♪</button><button class="control head-action" id="uiSmaller" title="کوچک‌کردن نوشته‌های منو" aria-label="کوچک‌کردن نوشته‌های منو">A−</button><button class="control head-action" id="uiBigger" title="بزرگ‌کردن نوشته‌های منو" aria-label="بزرگ‌کردن نوشته‌های منو">A+</button></div><div class="account-control" id="accountControl"><button class="control head-action account-button" id="accountToggle" aria-haspopup="true" aria-expanded="false" aria-controls="accountDropdown" aria-label="منوی حساب کاربری">👤 <span id="accountStatus">حساب کاربری</span> ▾</button><div class="account-dropdown" id="accountDropdown" hidden></div></div>
+  </header>
+  <div class="title-strip" id="titleStrip"><div class="title-stack"><span class="breadcrumb" id="breadcrumb"></span><strong id="pageTitle">مدل‌های هواشناسی</strong><span class="micro" id="pageSubtitle"></span></div><div class="title-actions"><button class="control mini" id="helpBtn" type="button">راهنما <svg><use href="#i-info"/></svg></button><span class="non-live">DATA: DEMO / WITHOUT LIVE CONNECTION</span></div></div>
+  <section class="geo-bar" aria-label="مناطق جغرافیایی پنج‌گانه">
+    <span class="geo-title"><svg><use href="#i-map"/></svg> محدوده نقشه</span>
+    <label>قاره<select id="geoContinent" aria-label="انتخاب قاره"></select></label>
+    <label>منطقه<select id="geoRegion" aria-label="انتخاب منطقه"></select></label>
+    <label>کشور<select id="geoCountry" aria-label="انتخاب کشور"></select></label>
+    <label>استان / ایالت<select id="geoProvince" aria-label="انتخاب استان"></select></label>
+    <label>شهرستان<select id="geoCounty" aria-label="انتخاب شهرستان"></select></label>
+    <div class="geo-extra" id="geoNote">زوم نمایشی · مرزها متصل نیستند</div>
+  </section>
+  <main class="workspace" id="workspace">
+    <aside class="sidebar" id="sidebar" aria-label="تنظیمات صفحه"><div class="sidebar-head"><div><span class="smallcap">CONTROL CENTER</span><strong id="panelTitle">تنظیمات مدل‌های هواشناسی</strong></div><span class="side-mark">01</span></div>
+      <div class="sidebar-switch" id="sidebarSwitch"><button class="tab-switch is-active" id="forecastTab" type="button" aria-pressed="true">مدل‌های هواشناسی</button><button class="tab-switch" id="customTab" type="button" aria-pressed="false">مولتی‌مدل سفارشی</button></div>
+      <div class="sidebar-content" id="sidebarContent"></div>
+      <div class="sidebar-bottom"><button id="customShortcut" class="control custom-shortcut" type="button"><svg><use href="#i-multi"/></svg><span>ساخت مولتی‌مدل سفارشی</span><b>＋</b></button><span class="sidebar-footnote">هر دو محیط وضعیت انتخاب‌های خود را حفظ می‌کنند.</span></div>
+    </aside>
+    <section class="content" id="content" aria-label="کادر اصلی نقشه یا نمودار">
+      <div class="map-card" id="mapCard">
+        <div class="map-topbar"><div class="map-title"><span class="smallcap">MAP / CHART WORKSPACE</span><b id="mapTitle">ECMWF · بارش ۲۴ ساعته</b></div><div class="map-meta"><span id="mapInfo">ران نمایشی 12Z · +۲۴ ساعت</span><button class="icon-btn top-icon" id="fullscreenBtn" aria-label="ورود یا خروج از تمام صفحه" title="تمام صفحه"><svg><use href="#i-expand"/></svg></button></div></div>
+        <div class="map-stage" id="mapStage" tabindex="0" aria-label="کادر نمایشی نقشه؛ فاقد داده هواشناسی واقعی">
+          <div class="view-layer regular-view" id="regularView"><div class="schematic" id="schematic"><svg viewBox="0 0 900 510" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b314a"/><stop offset="1" stop-color="#17485c"/></linearGradient><radialGradient id="land" cx=".4" cy=".3" r="1"><stop stop-color="#567e7d"/><stop offset="1" stop-color="#24525f"/></radialGradient><pattern id="grid" width="66" height="64" patternUnits="userSpaceOnUse"><path d="M66 0H0V64" fill="none" stroke="#b4d2dc" stroke-opacity=".20" stroke-width=".7"/></pattern></defs><rect width="900" height="510" fill="url(#sea)"/><path d="M-18 90 90 56l120 47 87 96-9 60-75 44-43 73-118-13-64-54z" fill="url(#land)" stroke="#b2d0cf" opacity=".87"/><path d="m397-38 104 42 89 16 88 58 73-22 157 85v205l-148 11-86-92-101-16-96-70-48-113z" fill="url(#land)" stroke="#b2d0cf" opacity=".86"/><path d="m415 297 86 10 43 35 13 97-48 95-67-12-33-90z" fill="url(#land)" stroke="#b2d0cf" opacity=".86"/><path d="m828 409 52-19 35 27v79l-65-13z" fill="url(#land)"/><rect width="900" height="510" fill="url(#grid)"/></svg></div>
+            <div class="map-placeholder" id="mapPlaceholder"><span class="placeholder-icon"><svg><use href="#i-map"/></svg></span><strong id="placeholderTitle">بوم پیش‌نمایش نقشه</strong><small id="placeholderSub">این نقشه نمونه رابط کاربری است؛ داده پیش‌بینی واقعی ندارد</small><span class="map-watermark">PREVIEW • NO FORECAST DATA</span></div>
+          </div>
+          <div class="view-layer custom-view" id="customView" aria-hidden="true"><div class="custom-canvas-grid" id="customCanvasGrid"></div><div class="custom-legend" id="customLegend"><span class="custom-lead">مولتی‌مدل سفارشی</span><b id="customCanvasTitle">برای ساخت پیش‌نمایش، مدل‌ها و وزن‌ها را تعیین کن</b><small id="customCanvasDesc">این محیط گرافیکی است؛ هیچ رستری محاسبه نشده است.</small></div></div>
+          <div class="view-layer home-view" id="homeView" aria-hidden="true"><div class="home-overlay"><small>MetStat • WORKSPACE OVERVIEW</small><h2>هواشناسی، نقشه و تحلیل در یک محیط</h2><p>از منوهای اصلی برای مشاهده ۶۳ بخش شبیه‌سازی‌شده استفاده کن. هیچ داده زنده‌ای در این فایل بارگذاری نمی‌شود.</p><div id="homeCards" class="home-cards"></div></div></div>
+          <div class="view-layer account-view" id="accountView" aria-hidden="true"><div class="account-workspace"><span class="account-demobadge">حساب آزمایشی · بدون ورود واقعی</span><h2 id="accountStageTitle">حساب کاربری</h2><p id="accountStageDescription">ورود، ثبت‌نام، علاقه‌مندی‌ها، ویرایش مشخصات و پنل مدیر</p><div class="account-stage-links" id="accountStageLinks"></div><div class="account-stage-details" id="accountStageDetails" aria-live="polite"></div></div></div>
+          <div class="map-left-rail" id="mapLeftRail" aria-label="ابزارهای نقشه"><button class="icon-btn" id="zoomIn" title="بزرگ‌نمایی" aria-label="بزرگ‌نمایی"><svg><use href="#i-zoom-in"/></svg></button><button class="icon-btn" id="zoomOut" title="کوچک‌نمایی" aria-label="کوچک‌نمایی"><svg><use href="#i-zoom-out"/></svg></button><button class="icon-btn" id="fullExtent" title="گستره کامل" aria-label="گستره کامل"><svg><use href="#i-extent"/></svg></button><button class="icon-btn" id="refreshMap" title="رفرش نقشه" aria-label="رفرش نقشه"><svg><use href="#i-refresh"/></svg></button></div>
+          <div class="drawing-ui" id="drawingUi" aria-label="ابزار ترسیم نقشه">
+            <button type="button" class="icon-btn draw-launch" id="drawingToggle" title="ابزار ترسیم دستی" aria-label="بازکردن ابزارهای نقاشی و جبهه‌ها" aria-expanded="false" aria-controls="drawingTools">✎</button>
+            <section class="draw-tools" id="drawingTools" hidden aria-label="ابزارهای ترسیم دستی و تحلیل جبهه">
+              <div class="draw-heading"><strong>ترسیم روی نقشه · FULLSCREEN</strong><span class="demo-draw-badge">بدون مختصات واقعی</span><button type="button" id="drawingClose" aria-label="بستن ابزار ترسیم">×</button></div>
+              <div class="draw-grid" role="toolbar" aria-label="حالت‌های ترسیم">
+                <button type="button" data-draw="pan" class="is-active">✥ جابه‌جایی</button>
+                <button type="button" data-draw="ruler">📏 خط‌کش</button>
+                <button type="button" data-draw="solid">╱ خط ساده</button>
+                <button type="button" data-draw="dash">┄ خط‌چین</button>
+                <button type="button" data-draw="arrow">➜ پیکان</button>
+                <button type="button" data-draw="cold">🔵 جبهه سرد</button>
+                <button type="button" data-draw="warm">🔴 جبهه گرم</button>
+                <button type="button" data-draw="occl">🟣 جبهه مخلوط</button>
+                <button type="button" data-draw="stat">🔴🔵 جبهه بندآمده</button>
+                <button type="button" data-draw="rect">▱ مستطیل</button>
+                <button type="button" data-draw="circ">◯ دایره</button>
+                <button type="button" data-draw="free">〰 چندضلعی آزاد</button>
+                <button type="button" data-draw="dot">● نقطه</button>
+                <button type="button" data-draw="text">T متن</button>
+                <button type="button" data-draw="L">L کم‌فشار</button>
+                <button type="button" data-draw="H">H پرفشار</button>
+                <button type="button" data-draw="eraser">⌫ پاک‌کن</button>
+              </div>
+              <div class="draw-options">
+                <label>رنگ <input type="color" id="drawColor" value="#dc1937"></label>
+                <label>ضخامت <input type="range" id="drawWidth" min="1" max="14" step="1" value="3"></label><output id="drawWidthValue">۳ px</output>
+                <label>شفافیت <input type="range" id="drawOpacity" min="0.1" max="1" step="0.1" value="0.8"></label>
+                <label>اندازه متن <select id="drawFont"><option value="16">۱۶</option><option value="24" selected>۲۴</option><option value="32">۳۲</option><option value="42">۴۲</option></select></label>
+                <label><input type="checkbox" id="drawStraight"> خط صاف</label>
+                <label><input type="checkbox" id="drawFlip"> سمت نماد جبهه ↶</label>
+              </div>
+              <div class="draw-actions"><button type="button" id="drawUndo">↶ بازگردانی</button><button type="button" id="drawRedo">↷ تکرار</button><button type="button" id="drawClear">🗑 پاک‌کردن همه</button><span id="drawCount" aria-live="polite">۰ ترسیم</span></div>
+              <small>کشیدن با موس یا لمس تک‌انگشتی روی نقشه؛ خط‌کش برحسب پیکسل نمایشی است، نه کیلومتر. برای زوم صفحه از دو انگشت در بیرون بوم ترسیم استفاده کن. ترسیم علمیِ جغرافیایی پس از اتصال نقشه واقعی فعال می‌شود.</small>
+            </section>
+          </div>
+          <svg class="drawing-overlay" id="drawingOverlay" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-label="لایه ترسیم دستی نمایشی" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="map-right-rail" id="mapModelRail" aria-label="مدل‌ها و وضعیت آپدیت"></div>
+          <div class="layer-trigger"><button class="icon-btn" id="layersBtn" title="لایه‌ها و تنظیمات نمایش" aria-expanded="false" aria-controls="layersPanel" aria-label="لایه‌ها"><svg><use href="#i-layers"/></svg></button><button class="icon-btn" id="windBtn" title="انیمیشن باد" aria-label="انیمیشن باد"><svg><use href="#i-wind"/></svg></button></div>
+          <div class="layers-panel" id="layersPanel" hidden><div class="layers-header"><b>لایه‌ها و نمایش</b><button class="close-small" id="layersClose" aria-label="بستن تنظیمات لایه">×</button></div><div class="layers-scroll" id="layersControls"></div></div>
+          <div class="map-save"><button class="save-control" id="saveBtn" type="button" title="خروجی نقشه" aria-label="ذخیره و خروجی"><svg><use href="#i-save"/></svg><span>ذخیره</span></button></div>
+          <div class="map-palette" id="mapPalette"><button class="palette-trigger" id="paletteBtn" type="button" aria-controls="paletteChoices" aria-expanded="false" aria-label="انتخاب کالربار"><span id="paletteName">weather.us — بارش ۲۴ساعته</span><span class="color-strip" id="paletteStrip"></span><svg><use href="#i-chevron"/></svg></button><div class="palette-ticks" id="paletteTicks" aria-label="مقیاس عددی پالت"></div><div class="palette-choices" id="paletteChoices" hidden><div class="palette-choice-head">پالت‌های مرتبط با پارامتر <span id="paletteGroupName"></span></div><div id="paletteList" class="palette-list"></div></div></div>
+          <div class="stage-badge" id="stageBadge">نمایش آزمایشی · ۱۰۰٪</div>
+        </div>
+        <div class="timeline" id="timeline"><div class="timeline-actions"><button class="icon-btn light" id="leadPrev" title="گام قبل" aria-label="گام قبلی">‹</button><button class="icon-btn light" id="leadPlay" title="پخش گام‌ها" aria-label="پخش گام‌های نمایشی"><svg><use href="#i-play"/></svg></button><button class="icon-btn light" id="leadNext" title="گام بعد" aria-label="گام بعدی">›</button></div><div class="timeline-slider"><div class="timeline-caption"><span>نوار گام پیش‌بینی <small>نمونه؛ بر اساس manifest زنده نیست</small></span><b id="leadLabel">+۲۴ ساعت</b></div><input type="range" id="leadRange" aria-label="گام پیش‌بینی" min="0" max="360" value="24" step="1"><div class="tickmarks" id="leadTicks"></div></div><label class="step-select">گام<select id="leadStep"><option value="6">۶ ساعت</option><option value="12">۱۲ ساعت</option><option value="24" selected>۲۴ ساعت</option><option value="48">۴۸ ساعت</option></select></label></div>
+        <div class="map-footer"><span><span class="foot-dot"></span><span id="mapFooterText">آماده بررسی تجربه کاربری</span></span><span id="mapFooterRight">UI simulation · بدون داده واقعی · EPSG:4326 نمایشی</span></div>
+      </div>
+    </section>
+  </main>
+  <footer class="global-footer"><span>MetStat UI r4 • Tabler-inspired / shadcn patterns • پیش‌نمایش مستقل</span><span>پوشش صفحات مستند: <b id="coverageCount">۰</b> · فقط UI؛ نصب روی هاست مجاز نیست</span></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="exportDialog" class="dialog"><form method="dialog" class="dialog-wrap"><div class="dialog-title"><b>ذخیره و دریافت خروجی</b><button class="close-small" value="cancel" aria-label="بستن">×</button></div><p class="dialog-sub">خروجی این پیش‌نمایش فقط نمونه گرافیکی است و داده جوی ندارد.</p><div class="export-types"><button type="button" class="export-type active" id="pngOption">PNG با کیفیت انتخابی</button><button type="button" class="export-type" id="gifOption">GIF متحرک</button></div><div class="dialog-field"><label for="pngScale">کیفیت تصویر PNG</label><select id="pngScale"><option value="1">استاندارد · ۱×</option><option value="2" selected>بالا · ۲×</option><option value="3">خیلی بالا · ۳×</option></select></div><div class="dialog-actions"><button type="button" id="exportPng" class="solid-action">دریافت PNG نمایشی</button><button type="button" id="openGif" class="solid-action secondary">تنظیمات GIF</button></div></form></dialog>
+<dialog id="gifDialog" class="dialog"><form method="dialog" class="dialog-wrap"><div class="dialog-title"><b>تنظیمات خروجی GIF</b><button class="close-small" value="cancel" aria-label="بستن">×</button></div><div class="dialog-field"><label for="gifFrom">آغاز گام پیش‌بینی</label><select id="gifFrom"></select></div><div class="dialog-field"><label for="gifTo">پایان گام پیش‌بینی</label><select id="gifTo"></select></div><div class="dialog-field"><label for="gifFps">سرعت فریم‌ها</label><select id="gifFps"><option value="1">۱ فریم در ثانیه</option><option value="2" selected>۲ فریم در ثانیه</option><option value="4">۴ فریم در ثانیه</option><option value="6">۶ فریم در ثانیه</option></select></div><div class="dialog-field"><label for="gifWidth">عرض خروجی</label><select id="gifWidth"><option value="960">۹۶۰ پیکسل</option><option value="1280" selected>۱۲۸۰ پیکسل</option><option value="1920">۱۹۲۰ پیکسل</option></select></div><label class="checkrow"><input type="checkbox" id="gifLoop" checked> تکرار بی‌نهایت (Loop)</label><p class="dialog-sub">GIF واقعی پس از اتصال فریم‌های معتبر مدل و موتور رمزگذاری فعال می‌شود. این صفحه فعلاً فقط طراحی و اعتبارسنجی تنظیمات را نمایش می‌دهد.</p><div class="dialog-actions"><button type="button" id="gifApply" class="solid-action">ثبت تنظیمات GIF در پیش‌نمایش</button><button type="button" id="gifBack" class="solid-action secondary">بازگشت</button></div></form></dialog>
+<dialog id="drawTextDialog" class="dialog" aria-label="نوشتن متن روی نقشه"><div class="dialog-wrap"><div class="dialog-title"><b>متن روی نقشه</b><button type="button" class="close-small" id="drawTextCancel" aria-label="انصراف">×</button></div><label class="dialog-field">برچسب <input id="drawTextInput" type="text" maxlength="80" placeholder="متن یادداشت، نام سامانه یا توضیح ..."></label><div class="dialog-actions"><button type="button" id="drawTextConfirm" class="solid-action">ثبت متن روی بوم</button></div></div></dialog>
+</body>
+</html>

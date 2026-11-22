@@ -28,10 +28,25 @@ class BackupAuditTests(unittest.TestCase):
             self.assertFalse(report["deploy_allowed"])
             self.assertFalse(report["live_verified"])
             self.assertEqual(sha256(backup.read_bytes()), before)
+            self.assertEqual(report["backup_sha256"], before)
             self.assertEqual(len(report["entries"]), 3)
             self.assertEqual(report["entries"][0]["isohyet_reference_count"], 0)
             self.assertNotIn("SECRET_DO_NOT_REPORT", json.dumps(report))
             self.assertFalse((Path(tmp) / "online").exists())
+
+    def test_backup_hash_changes_with_archive_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Path(tmp) / "first.zip"
+            second = Path(tmp) / "second.zip"
+            self.make_zip(first, {"online/station_match_v39.js": "v39-A"})
+            self.make_zip(second, {"online/station_match_v39.js": "v39-B"})
+            a = audit(first)
+            b = audit(second)
+            self.assertEqual(a["backup_sha256"], sha256(first.read_bytes()))
+            self.assertEqual(b["backup_sha256"], sha256(second.read_bytes()))
+            self.assertNotEqual(a["backup_sha256"], b["backup_sha256"])
+            self.assertFalse(a["deploy_allowed"])
+            self.assertFalse(b["deploy_allowed"])
 
     def test_missing_matcher_flagged(self):
         with tempfile.TemporaryDirectory() as tmp:

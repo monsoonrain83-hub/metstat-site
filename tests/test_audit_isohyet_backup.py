@@ -152,7 +152,7 @@ class BackupAuditTests(unittest.TestCase):
         for bad in ("", ".", "./index.html", "online//station_match_v39.js",
                     "online/./station_match_v39.js", "online/../index.html",
                     "online\\\\.\\\\station_match_v39.js",
-                    "online/sta\\x00tion_match_v39.js", "online/\\x01index.html"):
+                    "online/sta" + chr(0) + "tion_match_v39.js", "online/" + chr(1) + "index.html"):
             with self.subTest(path=repr(bad)):
                 self.assertFalse(safe_name(bad))
 

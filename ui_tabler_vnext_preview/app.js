@@ -76,7 +76,7 @@ function renderRoute(path,updateHistory=true){
   if(updateHistory){
     if(location.protocol==='file:'){
       // Hash routing keeps the exact standalone file in place on Android/desktop.
-      history.replaceState({msRoute:dest},'',location.pathname+'#'+dest);
+      location.hash=dest;
     } else if(location.pathname!==dest){
       history.pushState({msRoute:dest},'',dest);
     }
@@ -204,6 +204,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 window.addEventListener('popstate',()=>renderRoute(currentPath(),false));
+window.addEventListener('hashchange',()=>{if(location.protocol==='file:')renderRoute(currentPath(),false)});
 renderRoute(currentPath(),false);syncModel('ecmwf');syncLead(24);updateLayerCounter();
 setLayerPanel(false);
 // Testable, read-only interface to the isolated preview state; no production globals overwritten.

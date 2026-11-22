@@ -66,3 +66,49 @@ The prior master requirements section 8.2 and r205 wanted the original model chi
 - Replace illustrative colored states with real manifest availability, preserve all scientific data and DEM correction.
 - Deploy a canary to a non-production path with exact live asset hashes, visual browser QA and route-level tests.
 - Only then replace the main site shell and migrate old URLs, retaining rollback.
+
+## vNext2 update — user reference palette (1405/09/01)
+
+Theme tokens **Sky Blue `#399FD4` / White `#F8F9FD` / Scarlet Red `#DC1937`**.
+Only the site chrome, navigations, form controls and export annotation framing
+should use these tokens. **Never use them to replace the colored model-readiness
+semantics** (green, red, blue, blinking) on the map rail.
+
+* The single top header has only top-level sections. Click, Enter or Space opens
+  the respective cascading submenu; Escape and outside click dismiss it.
+* Main and secondary parameter selectors are categorized disclosure groups,
+  opening individual categories with +/−. Both retain model-selector event hooks.
+* An advanced forecast-lead range slider and small transport controls replace
+  the forecast-hour dropdown; the preview's lead values are illustrative until
+  wired to the manifest (per-run/per-parameter valid leads). **Never skip to a
+  non-existent forecast frame in production.**
+* Each colorbar *option* shows its actual color strip, instead of only a label.
+  Once selected, the closed control is a wide, thin colorbar with numeric
+  breakpoints beneath it. The original MetStat palette dictionary and numerical
+  boundaries were read from the user's own historical site snapshot: 41 named
+  palettes (incl. WeatherBELL precipitation and snow), 26 with numeric edges.
+  Palette names with missing color arrays stay explicitly unavailable; palettes
+  without numeric breaks do **not** receive fabricated numbers. Actual raster
+  recoloring/class selection is a separate, existing scientific operation.
+* Clicking an ordinary control provides a 90-ms low-volume Web Audio tick
+  beginning only with a user gesture. The sound can be muted via the header.
+* The exact uploaded meteorological reference image is used only as a muted,
+  blurred background for the **visual preview**. The homepage-only restriction
+  needs integration with the production site's true home route.
+* `home-atmosphere.css` embeds that blurred derivative as `data:image/webp` to
+  make code-review copies self-contained; `assets/homepage_atmosphere.webp` is
+  the optional unembedded copy for later optimized production deployment.
+* The status badge on sample models is **DEMO only**; it must be populated from
+  actual run/field availability when integrating with the production frontend.
+
+### Testing / limitations
+
+`python -m unittest discover -s tests -p 'test_*.py' -v`: **23 passing tests**
+covering document structure, CSS/JS syntax, route allowlist, palette origins,
+legend numerics, selector grouping, and status-color non-interference. Local
+Chromium screenshots/browser-interaction E2E could not be executed because the
+managed browser blocks navigation even to local `file://` and `localhost` URLs
+(`ERR_BLOCKED_BY_ADMINISTRATOR`). No claim of visual regression completion.
+The live site is **not changed**. Never upload the preview's `index.html` over
+production. Maintain cPanel backup, staging tests, direct URL 200/404 and safe
+rollbacks before promotion.

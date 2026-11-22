@@ -1,0 +1,389 @@
+[
+  {
+    "group": "خانه",
+    "path": "/",
+    "title": "داشبورد اصلی MetStat",
+    "description": "درگاه ورود به محصولات و ابزارهای هواشناسی و اقلیمی",
+    "kind": "home",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast",
+    "title": "پایش و پیش‌بینی",
+    "description": "مرکز داده‌ها، نقشه‌ها و وضعیت مدل‌ها",
+    "kind": "overview",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models",
+    "title": "مدل‌های هواشناسی",
+    "description": "مدل‌های عددی، دوره‌ها و لایه‌ها",
+    "kind": "forecast",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models/daily",
+    "title": "پیش‌بینی روزانه",
+    "description": "انتخاب مدل و پارامترهای مربوط به این دوره",
+    "kind": "forecast",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models/weekly",
+    "title": "پیش‌بینی هفتگی",
+    "description": "انتخاب مدل و پارامترهای مربوط به این دوره",
+    "kind": "forecast",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models/monthly",
+    "title": "پیش‌بینی ماهانه",
+    "description": "انتخاب مدل و پارامترهای مربوط به این دوره",
+    "kind": "forecast",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models/seasonal",
+    "title": "پیش‌بینی فصلی",
+    "description": "انتخاب مدل و پارامترهای مربوط به این دوره",
+    "kind": "forecast",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models/ensemble",
+    "title": "پیش‌بینی انسمبل",
+    "description": "انتخاب مدل و پارامترهای مربوط به این دوره",
+    "kind": "forecast",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-models/custom-multi-model",
+    "title": "مولتی‌مدل سفارشی",
+    "description": "ساخت نقشه ترکیبی با انتخاب مدل، وزن و پارامتر",
+    "kind": "custom",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/live-stations",
+    "title": "رصد لحظه‌ای ایستگاه‌ها",
+    "description": "نقشه ایستگاه‌ها، مشاهده و فیلتر زمانی",
+    "kind": "station",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/satellite-radar",
+    "title": "ماهواره و رادار زنده",
+    "description": "Meteosat، رادار بارش، محصول‌های مشاهده‌ای",
+    "kind": "satellite",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/lightning-live",
+    "title": "پایش رعدوبرق",
+    "description": "تراکم، رخداد و حرکت سلول‌های تندری",
+    "kind": "satellite",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/forecast-verification",
+    "title": "پایش دقت مدل‌ها",
+    "description": "صحت‌سنجی پیش‌بینی با داده مشاهده‌ای",
+    "kind": "verification",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/forecast-verification/iranmet-bulletin",
+    "title": "ارزیابی بولتن ۲۴ساعته سازمان",
+    "description": "مقایسه نقشه بولتن با پیش‌بینی و مشاهدات",
+    "kind": "verification",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/flash-flood",
+    "title": "احتمال وقوع سیل ناگهانی",
+    "description": "تحلیل پتانسیل بارش‌محور در حوضه‌ها",
+    "kind": "flood",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/weather-alerts",
+    "title": "هشدارهای جوی",
+    "description": "هشدار زرد، نارنجی و قرمز با لایه‌های پدیده‌ای",
+    "kind": "hazard",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "پایش و پیش‌بینی",
+    "path": "/monitoring-forecast/model-update-status",
+    "title": "وضعیت آپدیت مدل‌ها",
+    "description": "مانيفست، سلامت، زمان اعتبار و تاخیر انتشار",
+    "kind": "status",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools",
+    "title": "جعبه ابزار هواشناسی",
+    "description": "نقشه‌سازی، اصلاح، ترکیب و تبدیل داده",
+    "kind": "overview",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/rainfall-isohyet",
+    "title": "تهیه نقشه هم‌بارش",
+    "description": "ایستگاه، تفکیک استان، کنترل کیفیت و درون‌یابی",
+    "kind": "isohyet",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/station-matching",
+    "title": "تشخیص و تطبیق گزارش بارندگی",
+    "description": "عبارت‌های فارسی، فینگلیش و نام مستعار ایستگاه‌ها",
+    "kind": "matching",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/weighted-multimodel",
+    "title": "میانگین وزنی نقشه‌ها",
+    "description": "میانگین، بیشینه، کمینه و توافق مدل‌ها از تصاویر",
+    "kind": "upload",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/weatherbell",
+    "title": "پردازش نقشه‌های WeatherBELL",
+    "description": "ورودی نقشه‌های بارش و وزن مدل‌ها",
+    "kind": "upload",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/weather-us",
+    "title": "پردازش نقشه‌های weather.us",
+    "description": "استخراج کادر، نوار رنگ و مرزها",
+    "kind": "upload",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/tropicaltidbits",
+    "title": "پردازش نقشه‌های tropicaltidbits",
+    "description": "CFSv2، CanSIPS، NMME و نقشه‌های اقلیمی",
+    "kind": "upload",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/weathermodels",
+    "title": "پردازش نقشه‌های weathermodels",
+    "description": "بارش و دمای ۲ متر و کادر زمین‌مرجع",
+    "kind": "upload",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/universal-map",
+    "title": "پردازش نقشه از هر سایت",
+    "description": "شناسایی قالب و کادر نقشه نامشخص",
+    "kind": "upload",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/orographic-correction",
+    "title": "اصلاح ارتفاعی DEM",
+    "description": "بازتوزیع بارش و دما با مدل رقومی ارتفاع",
+    "kind": "terrain",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/convection",
+    "title": "تحلیل همرفت و ناپایداری",
+    "description": "CAPE، CIN، LI، شاخص K و ترکیب شاخص‌ها",
+    "kind": "convection",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/lightning-density",
+    "title": "نقشه تراکم رعدوبرق",
+    "description": "از GIF یا PNG رعدوبرق به نقشه تجمع و تراکم",
+    "kind": "lightning",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/severe-weather",
+    "title": "نقشه پدیده‌های مخرب",
+    "description": "آستانه باد، بارش، همرفت و انواع هشدار",
+    "kind": "hazard",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "جعبه ابزار هواشناسی",
+    "path": "/meteorological-tools/format-converter",
+    "title": "تبدیل و خروجی نقشه",
+    "description": "خروجی PNG، GIF، GeoTIFF، CSV و NetCDF",
+    "kind": "convert",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "تحلیل همدیدی",
+    "path": "/synoptic-analysis",
+    "title": "تحلیل همدیدی",
+    "description": "فشار، ارتفاع ژئوپتانسیل و باد",
+    "kind": "synoptic",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "تحلیل همدیدی",
+    "path": "/synoptic-analysis/pressure-levels",
+    "title": "نقشه ترازهای فشاری",
+    "description": "۸۵۰، ۷۰۰، ۵۰۰، ۳۰۰، ۲۰۰ هکتوپاسکال",
+    "kind": "synoptic",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "تحلیل همدیدی",
+    "path": "/synoptic-analysis/jet-streams",
+    "title": "رودباد و میدان باد",
+    "description": "بردار باد و رودباد ترازهای بالا",
+    "kind": "synoptic",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "تحلیل همدیدی",
+    "path": "/synoptic-analysis/teleconnections",
+    "title": "الگوهای دورپیوندی",
+    "description": "NAO، PNA، SCAND، EA/WR و MJO",
+    "kind": "indices",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics",
+    "title": "تحلیل اقلیم",
+    "description": "نمودار شاخص‌ها و محصولات فصلی",
+    "kind": "overview",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/climate-indices",
+    "title": "شاخص‌های اقلیمی",
+    "description": "ENSO، IOD، QBO، PDO، AMO، MJO و شاخص‌های همدیدی",
+    "kind": "indices",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/station-atlas",
+    "title": "اطلس اقلیمی ایستگاه‌ها",
+    "description": "نمودار و نقشه آمار بلندمدت",
+    "kind": "atlas",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/station-charts",
+    "title": "نمودار آمار ایستگاهی",
+    "description": "دما، بارش، روند و همبستگی",
+    "kind": "charts",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/drought",
+    "title": "کارگاه خشکسالی",
+    "description": "SPI، SPEI و منحنی شدت–مدت–بسامد",
+    "kind": "drought",
+    "origin": "public-homepage",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/climate-change",
+    "title": "تغییر اقلیم CMIP6",
+    "description": "سناریو و محصولات اقلیمی",
+    "kind": "climate",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/seasonal-outlook",
+    "title": "چشم‌انداز فصلی",
+    "description": "شاخص‌ها، آنومالی و سه ماه پیاپی",
+    "kind": "climate",
+    "origin": "requirement",
+    "controls": []
+  },
+  {
+    "group": "اقلیم و ایستگاه‌ها",
+    "path": "/climate-analytics/statistical-maps",
+    "title": "نقشه‌های آماری",
+    "description": "درون‌یابی، پهنه‌بندی، خروجی و همبستگی",
+    "kind": "atlas",
+    "origin": "public-homepage",
+    "controls": []
+  }
+]

@@ -56,6 +56,9 @@ def inspect_zip(path):
             raise ValueError("Too many archive members")
         seen = set()
         for info in members:
+            # Validate directory entries too; an unsafe member must not be silently ignored.
+            if not safe_name(info.filename.rstrip("/")):
+                raise ValueError("Unsafe archive member path")
             if info.is_dir():
                 continue
             if stat.S_ISLNK(info.external_attr >> 16):

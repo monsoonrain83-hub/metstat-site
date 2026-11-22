@@ -182,6 +182,28 @@ class BackupAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Duplicate"):
                 inspect_zip(backup)
 
+    def test_reject_file_as_parent_of_nested_asset_in_any_order(self):
+        for reverse in (False, True):
+            with self.subTest(reverse=reverse), tempfile.TemporaryDirectory() as tmp:
+                backup = Path(tmp) / "nested-collision.zip"
+                entries = [
+                    ("online", "ordinary file, not directory"),
+                    ("online/station_match_v39.js", "resolver"),
+                ]
+                with zipfile.ZipFile(backup, "w") as z:
+                    for name, body in (reversed(entries) if reverse else entries):
+                        z.writestr(name, body)
+                with self.assertRaisesRegex(ValueError, "ancestor"):
+                    inspect_zip(backup)
+
+    def test_accept_explicit_directory_as_parent_of_nested_asset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "valid-nested.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                z.writestr("online/", "")
+                z.writestr("online/station_match_v39.js", "resolver")
+            self.assertEqual(len(inspect_zip(backup)), 1)
+
     def test_reject_del_control_character(self):
         self.assertFalse(safe_name("online/" + chr(127) + "station_match_v39.js"))
 

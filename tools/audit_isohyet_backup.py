@@ -21,6 +21,15 @@ NAV_TERMS = (r"isohyet", r"همبارش")
 SENSITIVE = re.compile(r"(^|/)(admin/private|\.env|config\.json|auth\.php)(/|$)", re.I)
 
 
+def sha256_file(path):
+    """Stream the entire supplied backup for immutable provenance tracking."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -71,7 +80,8 @@ def audit(backup, active_index=None):
     if not zipfile.is_zipfile(backup):
         raise ValueError("Backup must be ZIP; no unpacking supported")
     rows = inspect_zip(backup)
-    result = {"backup": str(backup), "entries": rows, "live_verified": False,
+    result = {"backup": str(backup), "backup_sha256": sha256_file(backup),
+              "entries": rows, "live_verified": False,
               "deploy_allowed": False, "warnings": []}
     if active_index is not None:
         data = Path(active_index).read_bytes()

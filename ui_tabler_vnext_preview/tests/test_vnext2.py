@@ -81,6 +81,12 @@ class NewShell(unittest.TestCase):
   self.assertIn('min-width:1180px',self.css)
   self.assertNotIn('.ms-workspace{grid-template-columns:1fr',self.css)
   self.assertIn('prefers-reduced-motion:reduce',self.css)
+ def test_offline_link_navigation_is_file_safe(self):
+  js=(BASE/'app.js').read_text(encoding='utf8')
+  self.assertIn("location.protocol==='file:'",js)
+  self.assertIn("location.pathname+'#'+dest",js)
+  self.assertIn("location.hash.startsWith('#/')",js)
+  self.assertNotIn("location.href=dest",js)
  def test_export_theme_only_decorative(self):
   imagecss=(BASE/'home-atmosphere.css').read_text()
   self.assertIn('data:image/webp;base64,',imagecss)

@@ -31,7 +31,7 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             self.send_header('Cache-Control', 'no-store')
             self.end_headers()
             return
-        elif path not in ('/index.html', '/theme.css', '/app.js'):
+        elif path not in ('/index.html', '/theme.css', '/app.js', '/vnext2.css', '/vnext2.js', '/palette-data.js', '/palettes.json', '/home-atmosphere.css', '/assets/homepage_atmosphere.webp'):
             self.send_error(404, 'Unknown preview path')
             return
         super().do_GET()

@@ -9,3 +9,19 @@ All three codebases supplied by the administrator were inspected as GitHub ZIP s
 | Magic UI source | https://github.com/magicuidesign/magicui | MIT, Copyright (c) Magic UI | Motion references and decorative status patterns; no React/Framer library copied |
 
 The repository source ZIPs themselves must **not** be copied wholesale into the public cPanel tree; they include build tools, examples, dependencies, and files unsuitable for runtime exposure. Before shipping a compiled Tabler asset or any other third-party substantial code, retain the corresponding MIT copyright and permission notice and pin/check dependencies. No font files are bundled here.
+
+## vNext2 sources
+
+- Web Audio UI-click sound is authored directly using the browser Web Audio API,
+  inspired by the approach in `usesounds` (https://github.com/SebastianUrdaneguiBisalaya/usesounds)
+  and `howler.js` (https://github.com/goldfire/howler.js). No source code, sound
+  files, or dependencies were copied from those repositories.
+- CSS pressed transitions are original; design references include Tabler and
+  https://github.com/GoogleChrome/modern-web-guidance. Their runtime was not copied.
+- Palette arrays, value breaks, and source-group memberships are extracted from
+  user-owned MetStat snapshot `MetStat_P18_COMPLETE_LAYOUT_TEST.html` (local
+  historical reference, not necessarily current production); the preview does
+  not assert that every source's naming, license, or breakpoints are official.
+- `home-atmosphere.css` embeds a *blurred derivative* of the image supplied by
+  the site administrator in this conversation. The decorative image is for the
+  preview background only; no underlying meteorological data are derived from it.

@@ -8,6 +8,7 @@ on:
       - "ui_tabler_vnext_preview/**"
       - "ui_tabler_vnext_r3/**"
       - "ui_tabler_vnext_r4/**"
+      - "ui_tabler_vnext_r5/**"
       - "docs/METSTAT_TABLER_DESKTOP_UI_VNEXT_20261122.md"
       - ".github/workflows/tabler-vnext-contract.yml"
   workflow_dispatch: {}
@@ -59,3 +60,15 @@ jobs:
         run: |
           python build_offline.py
           python -c "from pathlib import Path; p=Path('MetStat_vNext_r4_ALL_PAGES_USER_DRAWING_INTERACTIVE_OFFLINE.html'); assert p.is_file() and p.stat().st_size>200000"
+      - name: "r5 authoritative sitemap and 68 direct routes"
+        run: |
+          node --check ui_tabler_vnext_r5/app.js
+          node --check ui_tabler_vnext_r5/model-icons.js
+          node --check ui_tabler_vnext_r5/ava-studio-r5.js
+          node --check ui_tabler_vnext_r5/feature-r5.js
+          python -m unittest discover -s ui_tabler_vnext_r5/tests -p test_r5.py -v
+      - name: "r5 offline single-file build"
+        working-directory: ui_tabler_vnext_r5
+        run: |
+          python build_offline.py
+          python -c "from pathlib import Path; p=Path('MetStat_vNext_r5_ALL_PAGES_AVA_STUDIO_INTERACTIVE_OFFLINE.html'); assert p.is_file() and p.stat().st_size>250000"

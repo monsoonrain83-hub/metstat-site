@@ -69,6 +69,18 @@ class BackupAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Duplicate"):
                 inspect_zip(backup)
 
+    def test_windows_separated_assets_are_inventoried_without_false_missing_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "windows.zip"
+            self.make_zip(backup, {
+                "online\\\\station_isohyet_v26.html": "map UI",
+                "online\\\\station_match_v39.js": "matcher",
+            })
+            report = audit(backup)
+            self.assertEqual(len(report["entries"]), 2)
+            self.assertFalse(any("Missing from supplied archive" in w for w in report["warnings"]))
+            self.assertFalse(report["deploy_allowed"])
+
     def test_reject_single_windows_separator_traversal(self):
         self.assertFalse(safe_name("online\\..\\..\\index.html"))
         with tempfile.TemporaryDirectory() as tmp:

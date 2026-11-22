@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "deployment": "PREVIEW_ONLY_NOT_PRODUCTION",
+  "base": "/monitoring-forecast/weather-models",
+  "canonical_routes": [
+    "/monitoring-forecast/weather-models",
+    "/monitoring-forecast/weather-models/daily",
+    "/monitoring-forecast/weather-models/weekly",
+    "/monitoring-forecast/weather-models/monthly",
+    "/monitoring-forecast/weather-models/seasonal",
+    "/monitoring-forecast/weather-models/ensemble",
+    "/meteorological-tools",
+    "/synoptic-analysis",
+    "/climate-analytics",
+    "/rainfall-isohyet",
+    "/forecast-verification",
+    "/flash-flood"
+  ],
+  "provisional_legacy_aliases": {
+    "/monitoring-forecast/weather-models/online-maps": "/monitoring-forecast/weather-models"
+  },
+  "host_route_policy": "First resolve all canonical routes with same auth and HTTP 200 on direct load/reload; preserve legacy aliases until verified, then switch old URLs to explicit HTTP 301. Never deploy catch-all rewrites or replace existing .htaccess without comparing live DocumentRoot, auth and nested routes."
+}

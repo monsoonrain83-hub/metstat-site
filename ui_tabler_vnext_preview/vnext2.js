@@ -53,6 +53,8 @@ function toggleMenu(btn){
  if(!panel)return;
  const shouldOpen=btn.getAttribute('aria-expanded')!=='true';
  closeMenus(btn);btn.setAttribute('aria-expanded',String(shouldOpen));panel.hidden=!shouldOpen;
+ if(shouldOpen)root.querySelectorAll('.ms-top-item').forEach(x=>x.dataset.selected=String(x===btn));
+ else syncNav();
 }
 const routeToGroup=path=>{
  if(path.includes('weather-models')||path.includes('forecast-verification')||path.includes('flash-flood'))return 'weather-models';
@@ -222,7 +224,7 @@ root.addEventListener('change',e=>{
  if(e.target.id==='msMainParameter')renderPaletteList();
 });
 document.addEventListener('click',e=>{
- if(!e.target.closest('.ms-nav'))closeMenus();
+ if(!e.target.closest('.ms-nav')){closeMenus();syncNav();}
  if(!e.target.closest('.ms-parameter-field'))closePickers();
  if(!e.target.closest('.ms-colorbar-picker')){$('msPaletteOptions').hidden=true;$('msPaletteTrigger').setAttribute('aria-expanded','false');}
 });

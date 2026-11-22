@@ -48,6 +48,25 @@ class BackupAuditTests(unittest.TestCase):
             self.assertFalse(a["deploy_allowed"])
             self.assertFalse(b["deploy_allowed"])
 
+    def test_reject_zero_byte_required_assets(self):
+        for asset in ("station_isohyet_v26.html", "station_match_v39.js"):
+            with self.subTest(asset=asset), tempfile.TemporaryDirectory() as tmp:
+                backup = Path(tmp) / "empty-asset.zip"
+                self.make_zip(backup, {"online/" + asset: b""})
+                with self.assertRaisesRegex(ValueError, "Empty required isohyet asset"):
+                    audit(backup)
+
+    def test_allow_nonempty_required_assets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "valid-assets.zip"
+            self.make_zip(backup, {
+                "online/station_isohyet_v26.html": "<html>map</html>",
+                "online/station_match_v39.js": "window.stationMatcher = {};",
+            })
+            report = audit(backup)
+            self.assertEqual(len(report["entries"]), 2)
+            self.assertFalse(report["deploy_allowed"])
+
     def test_missing_matcher_flagged(self):
         with tempfile.TemporaryDirectory() as tmp:
             backup = Path(tmp) / "b.zip"

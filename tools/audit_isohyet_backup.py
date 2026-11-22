@@ -49,7 +49,7 @@ def inspect_zip(path):
             if not safe_name(info.filename):
                 raise ValueError("Unsafe archive member path")
             # No archive member is extracted; no sensitive bytes are returned.
-            basename = PurePosixPath(info.filename).name
+            basename = PurePosixPath(info.filename.replace(chr(92), "/")).name
             if basename not in ASSETS and basename not in ("index.html", "index_new.html"):
                 continue
             if info.file_size > MAX_RELEVANT_BYTES:
@@ -81,7 +81,7 @@ def audit(backup, active_index=None):
         result["warnings"].append("An ACTIVE file alone cannot prove Document Root, auth API or rollback")
     else:
         result["warnings"].append("No verified ACTIVE index supplied; do not patch live index")
-    present = {PurePosixPath(r["path"]).name for r in rows}
+    present = {PurePosixPath(r["path"].replace(chr(92), "/")).name for r in rows}
     for required in ASSETS:
         if required not in present:
             result["warnings"].append("Missing from supplied archive: " + required)

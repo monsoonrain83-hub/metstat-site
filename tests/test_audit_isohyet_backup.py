@@ -148,6 +148,24 @@ class BackupAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "compression ratio"):
                 inspect_zip(backup)
 
+    def test_reject_ambiguous_dot_empty_and_control_segments(self):
+        for bad in ("", ".", "./index.html", "online//station_match_v39.js",
+                    "online/./station_match_v39.js", "online/../index.html",
+                    "online\\\\.\\\\station_match_v39.js",
+                    "online/sta\\x00tion_match_v39.js", "online/\\x01index.html"):
+            with self.subTest(path=repr(bad)):
+                self.assertFalse(safe_name(bad))
+
+    def test_reject_alias_path_before_inventory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "ambiguous.zip"
+            self.make_zip(backup, {
+                "online/station_match_v39.js": "canonical",
+                "online/./station_match_v39.js": "ambiguous",
+            })
+            with self.assertRaises(ValueError):
+                inspect_zip(backup)
+
     def test_reject_zip_slip_and_absolute_members(self):
         for bad in ("../index.html", "/index.html", "C:/index.html"):
             self.assertFalse(safe_name(bad))

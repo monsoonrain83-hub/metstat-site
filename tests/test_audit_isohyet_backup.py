@@ -88,8 +88,8 @@ class BackupAuditTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             backup = Path(tmp) / "windows.zip"
             self.make_zip(backup, {
-                "online\\\\station_isohyet_v26.html": "map UI",
-                "online\\\\station_match_v39.js": "matcher",
+                "online\\station_isohyet_v26.html": "map UI",
+                "online\\station_match_v39.js": "matcher",
             })
             report = audit(backup)
             self.assertEqual(len(report["entries"]), 2)

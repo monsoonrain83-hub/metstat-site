@@ -63,10 +63,11 @@ const routeToGroup=path=>{
  return 'climate-analytics';
 };
 function syncNav(){
- const group=routeToGroup(window.MetStatShellPreview?.getRoute?.()||location.pathname);
+ const activeRoute=window.MetStatShellPreview?.getRoute?.()||location.pathname;
+ const group=routeToGroup(activeRoute);
  root.querySelectorAll('.ms-top-item').forEach(btn=>btn.dataset.selected=String(btn.closest('.ms-nav-group')?.dataset.navGroup===group));
  root.querySelectorAll('.ms-nav-menu a[data-route]').forEach(a=>{
-  if(a.pathname===location.pathname)a.setAttribute('aria-current','page');
+  if(a.pathname===activeRoute)a.setAttribute('aria-current','page');
   else a.removeAttribute('aria-current');
  });
 }

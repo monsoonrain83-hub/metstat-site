@@ -1,0 +1,19 @@
+name: MetStat R5 live single-desktop release preflight
+on:
+  pull_request:
+    paths: [scripts/verify-r5-live-shell.mjs, tests/verify-r5-live-shell.test.mjs, .github/workflows/r5-live-shell-gate.yml]
+  push:
+    branches: [quality/r5-live-desktop-release-gate-20261123]
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check scripts/verify-r5-live-shell.mjs
+      - run: node --test tests/verify-r5-live-shell.test.mjs

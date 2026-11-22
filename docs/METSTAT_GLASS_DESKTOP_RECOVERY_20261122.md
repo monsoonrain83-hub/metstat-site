@@ -21,6 +21,13 @@
 - `admin.zip`: 68 entries, including `admin/private/config.json`; **sensitive material**; never extract blindly into public web root.
 - An archived `htaccess` has explicit nested paths such as `monitoring-forecast/weather-models` / `isohyet-map`, but no base route `monitoring-forecast/`; user reports route issue now corrected on host. Do not reapply archived rewrite rules.
 
+
+## 2026-11-22 authoritative UI supersession (avoid implementing obsolete toolbar)
+
+**IMPORTANT:** The later, committed master-requirements addendum on `main` (`005e9bd8` in site; `b5808202` in NWP) supersedes the horizontal-model-chips guidance in this recovery note and older r205 / section 8.2. The **existing original model-chip DOM group must now remain VERTICAL at the RIGHT INSIDE the real map frame**, including fullscreen. Reparent the original nodes, preserving listeners; never create duplicate controls. The five cascading geography menus remain HORIZONTAL ABOVE the map. This is a requirement reconciliation only, NOT implementation or permission to deploy.
+
+Use Tabler-first visual tokens, accessible shadcn-style interaction patterns and restrained Magic UI effects without unapproved React migration; desktop logical layout on every viewport. The left map rail includes zoom in/out, full extent and refresh below them. The authoritative implementation lane is site draft PR #17 and `docs/METSTAT_TABLER_DESKTOP_UI_VNEXT_20261122.md`. Any earlier instructions here implying horizontal model buttons are **historical, not acceptance criteria**. Before coding, re-read the latest master MD and the actual ACTIVE DOM; P0 release gates remain unchanged.
+
 ## UI policy: ONE desktop experience on every display
 
 **No single-column mobile version.** Keep desktop logical viewport/design canvas width ~1366–1440px (configurable design tokens), with an outer horizontal scroll container on narrow phones and full pointer/touch handling. HTML viewport meta must remain accessible: do not disable pinch zoom, shrink buttons to 8px, or use `user-scalable=no`.

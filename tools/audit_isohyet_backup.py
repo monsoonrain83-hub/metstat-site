@@ -37,7 +37,7 @@ def sha256(data):
 def safe_name(name):
     """Reject ambiguous ZIP paths before any archive member is inspected."""
     normalized = name.replace("\\", "/")
-    if not normalized or any(ord(ch) < 32 for ch in normalized):
+    if not normalized or any(ord(ch) < 32 or ord(ch) == 127 for ch in normalized):
         return False
     # PurePosixPath silently collapses empty and dot components. Reject them
     # instead: these aliases can hide duplicate members in different ZIP tools.
@@ -62,12 +62,12 @@ def inspect_zip(path):
                 raise ValueError("Unsafe archive member path")
             if stat.S_ISLNK(info.external_attr >> 16):
                 raise ValueError("Symbolic links are not permitted in host backups")
-            if info.is_dir():
-                continue
-            canonical = PurePosixPath(info.filename.replace(chr(92), "/")).as_posix().casefold()
+            canonical = PurePosixPath(name_to_validate.replace(chr(92), "/")).as_posix().casefold()
             if canonical in seen:
                 raise ValueError("Duplicate archive member path")
             seen.add(canonical)
+            if info.is_dir():
+                continue
             if not safe_name(info.filename):
                 raise ValueError("Unsafe archive member path")
             # No archive member is extracted; no sensitive bytes are returned.

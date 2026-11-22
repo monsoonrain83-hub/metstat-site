@@ -37,7 +37,7 @@ def sha256(data):
 def safe_name(name):
     """Reject ambiguous ZIP paths before any archive member is inspected."""
     normalized = name.replace("\\", "/")
-    if not normalized or "\\x00" in normalized or any(ord(ch) < 32 for ch in normalized):
+    if not normalized or any(ord(ch) < 32 for ch in normalized):
         return False
     # PurePosixPath silently collapses empty and dot components. Reject them
     # instead: these aliases can hide duplicate members in different ZIP tools.

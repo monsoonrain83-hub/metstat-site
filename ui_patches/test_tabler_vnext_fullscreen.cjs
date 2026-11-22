@@ -1,0 +1,28 @@
+/* Contract tests for guarded Tabler vNext bridge; no browser DOM spoofing. */
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = __dirname;
+const js = fs.readFileSync(path.join(root,'metstat_tabler_vnext_fullscreen_adapter.js'),'utf8');
+const css = fs.readFileSync(path.join(root,'metstat_tabler_vnext_fullscreen.css'),'utf8');
+assert.match(js,/fs\.dataset\.msVnextApproved !== '1'/, 'activation must require explicit opt-in');
+assert.match(js,/fs\.querySelectorAll\('#fsMods'\)\.length !== 1/, 'must reject duplicate model controls');
+assert.match(js,/\[data-metstat-map-canvas="1"\]/, 'must mount in VERIFIED map only');
+assert.match(js,/getComputedStyle\(canvas\)\.position === 'static'/, 'canvas positioning must be verified');
+assert.match(js,/dock\.appendChild\(chips\)/, 'must move the original event-bound node');
+assert.doesNotMatch(js,/cloneNode|innerHTML|eval\s*\(|setInterval\s*\(/, 'no new duplicate controls or untrusted HTML');
+assert.match(js,/delete fs\.dataset\.msVnextMounted/, 'rollback removes marker');
+assert.match(js,/oldParent\.insertBefore\(chips, oldNext\)/, 'rollback restores exact original slot');
+assert.match(js,/fs\.removeAttribute\('data-original-chips-horizontal'\)/, 'r205 horizontal style disabled only after successful move');
+assert.match(js,/if \(!validStatus\.has\(status\)\) return false/, 'reject unknown status');
+assert.match(js,/\[data-logical-model\]/, 'statuses bind known model node');
+assert.match(css,/#nvFs\[data-ms-vnext-mounted="1"\] \.ms-vnext-model-dock/, 'all visual changes opt-in only');
+assert.match(css,/flex-flow:column nowrap !important/, 'model rail must be VERTICAL');
+assert.match(css,/top:58px;[\s\S]*?right:12px/, 'inside map placement');
+assert.match(css,/\[data-ms-status="ready"\]/);
+assert.match(css,/\[data-ms-status="missing"\]/);
+assert.match(css,/\[data-ms-status="partial"\]/);
+assert.match(css,/\[data-ms-status="updating"\]/);
+assert.match(css,/@media \(prefers-reduced-motion:reduce\)/);
+assert.doesNotMatch(css,/\.fsRow\.fsA\s*\{/, 'do not mutate old fullscreen row');
+console.log('Tabler vNext opt-in bridge static contract: PASS');

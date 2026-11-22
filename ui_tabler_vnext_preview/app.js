@@ -42,9 +42,22 @@ function emit(type,payload={}){
   document.dispatchEvent(new CustomEvent('metstat:ui-action',{detail:{type,...payload},bubbles:false}));
 }
 function safePath(url){
-  try {const u=new URL(url,location.origin); return u.origin===location.origin && Object.prototype.hasOwnProperty.call(routes,u.pathname.replace(/\/+$/,'')||'/')?u.pathname.replace(/\/+$/,''):null} catch {return null}
+  try {
+    // Offline single-file previews resolve absolute menu hrefs to file:///...
+    // but must never navigate away from this document or claim deployed routes.
+    const base=location.protocol==='file:' ? location.href : location.origin;
+    const u=new URL(url,base);
+    if(location.protocol==='file:' ? u.protocol!=='file:' : u.origin!==location.origin)return null;
+    const path=u.pathname.replace(/\/+$/,'')||'/';
+    return Object.prototype.hasOwnProperty.call(routes,path)?path:null;
+  } catch {return null}
 }
-function currentPath(){return safePath(location.href) || '/monitoring-forecast/weather-models'}
+function currentPath(){
+  if(location.protocol==='file:' && location.hash.startsWith('#/')){
+    return safePath(location.hash.slice(1)) || '/monitoring-forecast/weather-models';
+  }
+  return safePath(location.href) || '/monitoring-forecast/weather-models';
+}
 function renderRoute(path,updateHistory=true){
   const dest=safePath(path);if(!dest){speak('مسیر در فهرست مجاز این پیش‌نمایش نیست');return false}
   routePath=dest;
@@ -60,7 +73,14 @@ function renderRoute(path,updateHistory=true){
   const tab=dest.split('/').pop();
   const period=root.querySelector('[data-period="'+tab+'"]');
   if(period)syncPeriod(tab,false);
-  if(updateHistory && location.pathname!==dest)history.pushState({msRoute:dest},'',dest);
+  if(updateHistory){
+    if(location.protocol==='file:'){
+      // Hash routing keeps the exact standalone file in place on Android/desktop.
+      history.replaceState({msRoute:dest},'',location.pathname+'#'+dest);
+    } else if(location.pathname!==dest){
+      history.pushState({msRoute:dest},'',dest);
+    }
+  }
   return true;
 }
 function syncPeriod(period,pushRoute=true){

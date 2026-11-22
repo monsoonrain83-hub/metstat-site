@@ -81,6 +81,31 @@ class BackupAuditTests(unittest.TestCase):
             self.assertFalse(any("Missing from supplied archive" in w for w in report["warnings"]))
             self.assertFalse(report["deploy_allowed"])
 
+    def test_conflicting_asset_copies_require_manual_resolution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "multi-root.zip"
+            self.make_zip(backup, {
+                "public_html/online/station_match_v39.js": "new resolver",
+                "old_backup/online/station_match_v39.js": "old resolver",
+                "public_html/online/station_isohyet_v26.html": "tool",
+            })
+            report = audit(backup)
+            self.assertEqual(len(report["entries"]), 3)
+            self.assertTrue(any("Ambiguous backup candidates for station_match_v39.js: 2 copies" in w
+                                for w in report["warnings"]))
+            self.assertFalse(any("Missing from supplied archive" in w for w in report["warnings"]))
+            self.assertFalse(report["deploy_allowed"])
+
+    def test_single_asset_copy_does_not_trigger_ambiguity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "single-root.zip"
+            self.make_zip(backup, {
+                "public_html/online/station_match_v39.js": "resolver",
+                "public_html/online/station_isohyet_v26.html": "tool",
+            })
+            report = audit(backup)
+            self.assertFalse(any("Ambiguous backup candidates" in w for w in report["warnings"]))
+
     def test_reject_single_windows_separator_traversal(self):
         self.assertFalse(safe_name("online\\..\\..\\index.html"))
         with tempfile.TemporaryDirectory() as tmp:

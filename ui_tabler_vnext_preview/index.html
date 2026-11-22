@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>MetStat — اطلس هواشناسی | پیش‌نمایش رابط کاربری</title>
+<link rel="stylesheet" href="theme.css">
+<script defer src="app.js"></script>
+</head>
+<body>
+<svg class="ms-icons" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5zm-9 10 9 5 9-5M3 17l9 5 9-5"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6m8 4v6"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h13a3 3 0 1 0-3-3M2 12h17a2 2 0 1 1-2 2M4 16h8a3 3 0 1 1-3 3"/></symbol>
+  <symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6m-3-3v6"/></symbol>
+  <symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6"/></symbol>
+  <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M3 9V3h6m12 6V3h-6M3 15v6h6m12-6v6h-6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5m-3.7-3a8 8 0 0 1 13.3-2l1.4 1.4M4 17l1.4 1.4a8 8 0 0 0 13.3-2"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/></symbol>
+  <symbol id="i-setting" viewBox="0 0 24 24"><path d="M10 3h4l.6 2.3 2 1.1 2.3-.7 2 3.5-1.7 1.7v2.2l1.7 1.7-2 3.5-2.3-.7-2 1.1L14 21h-4l-.6-2.3-2-1.1-2.3.7-2-3.5 1.7-1.7v-2.2L3.1 9.2l2-3.5 2.3.7 2-1.1z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14m8-14v14"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+</svg>
+<div class="ms-app" id="msApp">
+  <header class="ms-header" aria-label="ناوبری اصلی">
+    <div class="ms-header-right">
+      <a class="ms-brand" href="/monitoring-forecast/weather-models" data-route aria-label="MetStat - صفحه مدل‌های هواشناسی"><span class="ms-brandmark" aria-hidden="true"><span>M</span></span><span class="ms-brandcopy"><strong>MetStat</strong><small>اطلس پیش‌بینی و اقلیم</small></span></a>
+      <nav class="ms-nav" aria-label="صفحات اصلی">
+        <a href="/monitoring-forecast/weather-models" data-route data-nav="weather-models" aria-current="page">پایش و پیش‌بینی</a>
+        <a href="/meteorological-tools" data-route data-nav="meteorological-tools">جعبه ابزار</a>
+        <a href="/synoptic-analysis" data-route data-nav="synoptic-analysis">تحلیل همدیدی</a>
+        <a href="/climate-analytics" data-route data-nav="climate-analytics">اقلیم‌شناسی</a>
+        <a href="/rainfall-isohyet" data-route data-nav="rainfall-isohyet">نقشه همبارش</a>
+        <a href="/forecast-verification" data-route data-nav="forecast-verification">پایش دقت مدل‌ها</a>
+        <a href="/flash-flood" data-route data-nav="flash-flood">سیل ناگهانی</a>
+      </nav>
+    </div>
+    <div class="ms-header-left">
+      <span class="ms-context-pill"><span class="ms-live-dot"></span> محیط نمایشی</span>
+      <button class="ms-header-action" type="button" data-action="language" aria-label="تغییر زبان">FA</button>
+      <span class="ms-avatar" title="حساب کاربری نمایشی" aria-label="حساب کاربری">M</span>
+    </div>
+  </header>
+  <main class="ms-main">
+    <section class="ms-intro" aria-label="عنوان صفحه">
+      <div class="ms-title-stack"><span class="ms-eyebrow">MONITORING / FORECASTING</span><h1 id="msPageTitle">مدل‌های هواشناسی</h1><p id="msPageSubtitle">انتخاب مدل، بازه پیش‌بینی و پارامتر — در یک محیط ثابت و یکپارچه</p></div>
+      <div class="ms-intro-actions"><span class="ms-status-muted" id="msRouteLabel">/monitoring-forecast/weather-models</span><button class="ms-btn ms-btn-quiet" type="button" data-action="info"><svg><use href="#i-info"/></svg><span>راهنما</span></button></div>
+    </section>
+    <section class="ms-geo-bar card" aria-label="انتخاب محدوده‌های جغرافیایی">
+      <div class="ms-geo-intro"><svg><use href="#i-map"/></svg><span>محدوده نقشه</span></div>
+      <label class="ms-geo-select"><span>قاره</span><select id="msContinent" aria-label="انتخاب قاره"><option value="asia" selected>آسیا</option><option value="world">کل جهان</option><option value="europe">اروپا</option><option value="africa">آفریقا</option><option value="north-america">آمریکای شمالی</option><option value="south-america">آمریکای جنوبی</option><option value="oceania">اقیانوسیه</option></select></label>
+      <label class="ms-geo-select"><span>منطقه</span><select id="msRegion" aria-label="انتخاب منطقه"><option value="middle-east" selected>خاورمیانه</option><option value="none">انتخاب کنید</option></select></label>
+      <label class="ms-geo-select"><span>کشور</span><select id="msCountry" aria-label="انتخاب کشور"><option value="iran" selected>ایران</option><option value="none">انتخاب کنید</option></select></label>
+      <label class="ms-geo-select"><span>استان / ایالت</span><select id="msProvince" aria-label="انتخاب استان یا ایالت"><option value="">همه استان‌ها</option><option value="fars">فارس (نمایشی)</option></select></label>
+      <label class="ms-geo-select"><span>شهرستان</span><select id="msCounty" aria-label="انتخاب شهرستان" disabled><option value="">پس از اتصال مرز معتبر</option></select></label>
+    </section>
+    <div class="ms-workspace">
+      <aside class="ms-forecast card" aria-label="تنظیمات پیش‌بینی">
+        <div class="ms-panel-heading"><div><small>01 / FORECAST</small><h2>پیش‌بینی</h2></div><span class="ms-mini-icon"><svg><use href="#i-sliders"/></svg></span></div>
+        <fieldset class="ms-periods"><legend>نوع محصول</legend><div class="ms-period-grid" role="group" aria-label="نوع پیش‌بینی"><button type="button" class="ms-period active" data-period="daily" aria-pressed="true">روزانه</button><button type="button" class="ms-period" data-period="weekly" aria-pressed="false">هفتگی</button><button type="button" class="ms-period" data-period="monthly" aria-pressed="false">ماهانه</button><button type="button" class="ms-period" data-period="seasonal" aria-pressed="false">فصلی</button><button type="button" class="ms-period" data-period="ensemble" aria-pressed="false">انسمبل</button></div></fieldset>
+        <div class="ms-field"><label for="msModel">مدل هواشناسی</label><select class="form-select" id="msModel"><option value="ecmwf">ECMWF — یکپارچه</option><option value="gfs">GFS — یکپارچه</option><option value="icon">ICON</option><option value="gem">GEM / GDPS</option><option value="ukmo">UKMO</option></select></div>
+        <div class="ms-field"><label for="msMainParameter">پارامتر اصلی</label><select class="form-select" id="msMainParameter"><option value="p24">بارش ۲۴ساعته</option><option value="t2m">دمای ۲ متری</option><option value="z500">ارتفاع ژئوپتانسیل ۵۰۰</option><option value="mslp">فشار سطح دریا</option></select></div>
+        <div class="ms-field"><label for="msSecondaryParameter">پارامتر ثانویه</label><select class="form-select" id="msSecondaryParameter"><option value="none">بدون پارامتر ثانویه</option><option value="wind">بردار باد</option><option value="rh">رطوبت نسبی</option><option value="anomaly">آنومالی</option></select></div>
+        <div class="ms-duo"><div class="ms-field"><label for="msRun">ران</label><select class="form-select" id="msRun"><option value="00">00Z</option><option value="06">06Z</option><option value="12" selected>12Z</option><option value="18">18Z</option></select></div><div class="ms-field"><label for="msLead">ساعت پیش‌بینی</label><select class="form-select" id="msLead"><option value="24">+۲۴</option><option value="48">+۴۸</option><option value="72">+۷۲</option><option value="120">+۱۲۰</option><option value="180">+۱۸۰</option><option value="240">+۲۴۰</option><option value="360">+۳۶۰</option></select></div></div>
+        <div class="ms-timeline"><div><span>گام پیش‌بینی</span><strong id="msLeadText">+۲۴ ساعت</strong></div><input type="range" min="0" max="360" step="24" value="24" id="msLeadRange" aria-label="گام پیش‌بینی به ساعت"><div class="ms-timeline-mark"><span>۰۰</span><span>۱۸۰</span><span>۳۶۰</span></div></div>
+        <div class="ms-forecast-actions"><button class="ms-btn ms-btn-primary" type="button" data-action="apply"><svg><use href="#i-check"/></svg>اعمال انتخاب</button><button class="ms-btn ms-btn-secondary" type="button" data-action="reset"><svg><use href="#i-refresh"/></svg>بازنشانی</button></div>
+        <div class="ms-note"><svg><use href="#i-info"/></svg><p>رابط نمایشی است. منبع واقعی و ساعت‌های معتبر فقط پس از اتصال manifest فعال می‌شوند.</p></div>
+      </aside>
+      <section class="ms-map-column" aria-label="نمایش نقشه و نمودار">
+        <div class="ms-map-card card">
+          <div class="ms-map-heading"><div><span class="ms-map-kicker">FORECAST CANVAS</span><h2 id="msMapTitle">بارش ۲۴ ساعته · ECMWF</h2></div><div class="ms-map-heading-actions"><span class="ms-map-meta"><svg><use href="#i-clock"/></svg><span id="msMapValid">ران 12Z | +۲۴ ساعت</span></span><button class="ms-btn-icon ms-compact-toggle" type="button" data-action="fullscreen" aria-label="نمای تمام صفحه" aria-pressed="false"><svg><use href="#i-maximize"/></svg></button></div></div>
+          <div class="ms-map-surface" id="msMapSurface" tabindex="0" aria-label="بوم نقشه؛ فعلاً نمایشی و فاقد داده واقعی">
+            <svg class="ms-faux-map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="پس‌زمینه شماتیک برای بررسی رابط، نه نقشه پیش‌بینی واقعی">
+              <defs><linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10263c"/><stop offset="1" stop-color="#173955"/></linearGradient><radialGradient id="land" cx=".36" cy=".38" r=".8"><stop offset="0" stop-color="#567e77"/><stop offset=".52" stop-color="#365e66"/><stop offset="1" stop-color="#254758"/></radialGradient><pattern id="grid" width="56" height="50" patternUnits="userSpaceOnUse"><path d="M56 0H0V50" fill="none" stroke="#dce9ee" stroke-width=".7" opacity=".10"/></pattern></defs>
+              <rect width="900" height="500" fill="url(#sea)"/><path d="M-30 68 77 54l45 30 53-17 44 32 42 7 31 48-21 28 35 20 6 40-61 24-33 35-69-18-39 37-98 6Z" fill="url(#land)" stroke="#7da39b" stroke-width="1.5" opacity=".90"/><path d="m410-35 83 25 88 17 57 52 84-8 51 36 67-5 90 62v205l-103 22-68-55-75 12-58-49-36-58-73-41-21-50-49-53-29-36z" fill="url(#land)" stroke="#7da39b" stroke-width="1.4" opacity=".91"/><path d="m423 283 85 9 41 33 25 75-35 91-67 54-54-42 8-60-33-66z" fill="url(#land)" stroke="#7da39b" stroke-width="1.3" opacity=".88"/><path d="m830 390 60-26 42 30 10 64-82 9z" fill="url(#land)" stroke="#7da39b" opacity=".9"/><path d="m44 111 102 13 72 74-35 39m273-212 89 49 114 13 59 50m-262-82 95 125 110 25m-91 26 61 62 75 13" fill="none" stroke="#9db8ad" stroke-width="1.1" opacity=".21"/><rect width="900" height="500" fill="url(#grid)"/>
+            </svg>
+            <span class="ms-map-watermark">PREVIEW · NO MODEL DATA</span>
+            <div class="ms-map-empty"><span class="ms-map-empty-icon"><svg><use href="#i-map"/></svg></span><strong>پیش‌نمایش پوسته نقشه</strong><span>نمایش داده واقعی پس از اتصال موتور نقشه و کاتالوگ معتبر</span></div>
+            <div class="ms-model-rail" id="msModelRail" role="group" aria-label="دسترسی سریع مدل‌ها"><div class="ms-rail-label">مدل‌ها</div><button class="ms-rail-chip is-selected" type="button" data-quick-model="ecmwf" data-status="ready" aria-label="ECMWF - وضعیت نمایشی" aria-pressed="true"><span class="ms-chip-marker"></span><span class="ms-chip-name">ECMWF</span><span class="ms-chip-caption">نمونه</span></button><button class="ms-rail-chip" type="button" data-quick-model="gfs" data-status="ready" aria-label="GFS - وضعیت نمایشی" aria-pressed="false"><span class="ms-chip-marker"></span><span class="ms-chip-name">GFS</span><span class="ms-chip-caption">نمونه</span></button><button class="ms-rail-chip" type="button" data-quick-model="icon" data-status="updating" aria-label="ICON - درحال به‌روزرسانی نمایشی" aria-pressed="false"><span class="ms-chip-marker"></span><span class="ms-chip-name">ICON</span><span class="ms-chip-caption">نمونه</span></button><button class="ms-rail-chip" type="button" data-quick-model="gem" data-status="partial" aria-label="GEM - وضعیت آزمایشی" aria-pressed="false"><span class="ms-chip-marker"></span><span class="ms-chip-name">GEM</span><span class="ms-chip-caption">نمونه</span></button><button class="ms-rail-chip" type="button" data-quick-model="ukmo" data-status="missing" aria-label="UKMO - وضعیت آزمایشی" aria-pressed="false"><span class="ms-chip-marker"></span><span class="ms-chip-name">UKMO</span><span class="ms-chip-caption">نمونه</span></button></div>
+            <div class="ms-map-left-rail" role="group" aria-label="ابزارهای اصلی نقشه"><button type="button" class="ms-rail-tool" data-action="zoom-in" data-label="بزرگ‌نمایی" aria-label="بزرگ‌نمایی"><svg><use href="#i-zoom-in"/></svg><span>بزرگ‌نمایی</span></button><button type="button" class="ms-rail-tool" data-action="zoom-out" data-label="کوچک‌نمایی" aria-label="کوچک‌نمایی"><svg><use href="#i-zoom-out"/></svg><span>کوچک‌نمایی</span></button><button type="button" class="ms-rail-tool" data-action="extent" data-label="گستره کامل" aria-label="گستره کامل"><svg><use href="#i-maximize"/></svg><span>گستره کامل</span></button><button type="button" class="ms-rail-tool ms-refresh-tool" data-action="refresh" data-label="تازه‌سازی" aria-label="تازه‌سازی"><svg><use href="#i-refresh"/></svg><span>تازه‌سازی</span></button></div>
+            <div class="ms-overlay-group" role="group" aria-label="تنظیمات لایه‌ها و نمایش نقشه"><button type="button" class="ms-overlay-button" data-action="layers" aria-label="بازکردن تنظیمات لایه‌ها" aria-controls="msLayerPanel" aria-expanded="false"><svg><use href="#i-layers"/></svg><span>لایه‌ها و نمایش</span></button><button type="button" class="ms-overlay-button" data-action="wind" aria-label="نمایش تنظیمات باد" aria-controls="msLayerPanel"><svg><use href="#i-wind"/></svg><span>باد</span></button><button type="button" class="ms-overlay-button" data-action="settings" aria-label="تنظیمات نقشه" aria-controls="msLayerPanel"><svg><use href="#i-setting"/></svg><span>تنظیمات</span></button></div>
+            <div class="ms-layer-panel" id="msLayerPanel" role="region" aria-label="لایه‌ها و کیفیت نمایش" aria-hidden="true" inert>
+              <div class="ms-layer-head"><div><small>02 / MAP DISPLAY</small><h3>لایه‌ها و نمایش</h3></div><button type="button" class="ms-close" data-action="close-layers" aria-label="بستن پنل لایه‌ها">×</button></div>
+              <div class="ms-layer-scroll"><fieldset class="ms-layer-set"><legend>لایه‌های جغرافیایی</legend><label class="ms-switch-row"><span>مرز شهرستان‌ها</span><input type="checkbox" data-layer="counties" checked><span class="ms-switch"></span></label><label class="ms-switch-row"><span>نقاط شهرهای کوچک</span><input type="checkbox" data-layer="towns" checked><span class="ms-switch"></span></label><label class="ms-switch-row"><span>روستاها</span><input type="checkbox" data-layer="villages"><span class="ms-switch"></span></label><label class="ms-switch-row"><span>راه‌ها</span><input type="checkbox" data-layer="roads" checked><span class="ms-switch"></span></label><label class="ms-switch-row"><span>رودخانه‌ها</span><input type="checkbox" data-layer="rivers" checked><span class="ms-switch"></span></label><label class="ms-switch-row"><span>دریاچه‌ها</span><input type="checkbox" data-layer="lakes" checked><span class="ms-switch"></span></label></fieldset><fieldset class="ms-layer-set"><legend>لیبل‌ها و خطوط</legend><label class="ms-switch-row"><span>نمایش نام مکان‌ها</span><input type="checkbox" data-layer="labels" checked><span class="ms-switch"></span></label><label class="ms-slider-row">ضخامت خطوط <output id="msLineWidthOutput">۲ px</output><input id="msLineWidth" type="range" min="1" max="6" step="1" value="2"></label><label class="ms-slider-row">اندازه برچسب‌ها <output id="msLabelSizeOutput">۱۴ px</output><input id="msLabelSize" type="range" min="11" max="20" step="1" value="14"></label></fieldset><fieldset class="ms-layer-set"><legend>حرکت باد</legend><label class="ms-switch-row"><span>انیمیشن ذرات باد</span><input type="checkbox" data-layer="wind"><span class="ms-switch"></span></label><label class="ms-slider-row">سرعت انیمیشن <output id="msWindSpeedOutput">۱ ×</output><input id="msWindSpeed" type="range" min="1" max="5" step="1" value="1"></label></fieldset></div>
+              <div class="ms-layer-footer"><span>تغییرات از رویداد به موتور نقشه ارسال می‌شود.</span></div>
+            </div>
+            <div class="ms-colorbar"><span class="ms-colorbar-title">نمونه جایگاه راهنمای رنگ</span><div class="ms-gradient-scale" aria-hidden="true"></div><div class="ms-colorbar-labels"><span>کمینه</span><span>میانه</span><span>بیشینه</span></div></div>
+            <span class="ms-zoom-label" id="msZoomInfo">بزرگ‌نمایی نمایشی: ۱۰۰٪</span>
+          </div>
+          <div class="ms-map-footer"><div class="ms-footer-status"><span class="ms-status-circle"></span><span id="msActionStatus" role="status" aria-live="polite">آماده بررسی رابط کاربری</span></div><div class="ms-footer-meta">EPSG:4326 <span aria-hidden="true">·</span> رابط آزمایشی <span aria-hidden="true">·</span> داده زنده متصل نیست</div></div>
+        </div>
+        <div class="ms-insight-strip"><article class="ms-stat card"><span>منبع انتخابی</span><strong id="msStatSource">ECMWF</strong><small>رزولوشن باید از manifest خوانده شود</small></article><article class="ms-stat card"><span>زمان اعتبار</span><strong id="msStatValid">+۲۴ ساعت</strong><small>نمایش پس از تأیید ران</small></article><article class="ms-stat card"><span>نمایش لایه‌ها</span><strong id="msStatLayers">۵ لایه</strong><small>تنظیمات در مجموعه مشترک</small></article><article class="ms-stat card"><span>وضعیت انتشار</span><strong>پیش‌نمایش</strong><small>بدون تغییر هاست فعال</small></article></div>
+      </section>
+    </div>
+    <footer class="ms-page-foot"><span>MetStat UI Shell — Tabler-inspired system / shadcn interaction patterns / Magic UI micro-motion</span><span>فقط پیش‌نمایش؛ جایگزین سایت عملیاتی نیست</span></footer>
+  </main>
+</div>
+<div class="ms-toast" id="msToast" role="status" aria-live="polite"></div>
+</body>
+</html>

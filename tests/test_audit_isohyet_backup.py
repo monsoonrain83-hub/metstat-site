@@ -59,6 +59,24 @@ class BackupAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Duplicate"):
                 inspect_zip(backup)
 
+    def test_reject_duplicate_mixed_windows_and_posix_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "duplicate-separator.zip"
+            self.make_zip(backup, {
+                "online/station_match_v39.js": "version A",
+                "online\\station_match_v39.js": "version B",
+            })
+            with self.assertRaisesRegex(ValueError, "Duplicate"):
+                inspect_zip(backup)
+
+    def test_reject_single_windows_separator_traversal(self):
+        self.assertFalse(safe_name("online\\..\\..\\index.html"))
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "windows-traversal.zip"
+            self.make_zip(backup, {"online\\..\\..\\index.html": "unsafe"})
+            with self.assertRaises(ValueError):
+                inspect_zip(backup)
+
     def test_reject_symlink_even_when_name_is_irrelevant(self):
         with tempfile.TemporaryDirectory() as tmp:
             backup = Path(tmp) / "symlink.zip"

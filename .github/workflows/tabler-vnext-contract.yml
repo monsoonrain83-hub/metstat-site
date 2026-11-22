@@ -1,0 +1,25 @@
+name: "MetStat Tabler vNext isolated UI contract"
+on:
+  pull_request:
+    paths:
+      - "ui_patches/metstat_tabler_vnext_fullscreen_adapter.js"
+      - "ui_patches/metstat_tabler_vnext_fullscreen.css"
+      - "ui_patches/test_tabler_vnext_fullscreen.cjs"
+      - "docs/METSTAT_TABLER_DESKTOP_UI_VNEXT_20261122.md"
+      - ".github/workflows/tabler-vnext-contract.yml"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  ui-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: "Syntax: no runtime imports or untrusted injection"
+        run: node --check ui_patches/metstat_tabler_vnext_fullscreen_adapter.js
+      - name: "Safe original-node relocation and vertical map rail"
+        run: node ui_patches/test_tabler_vnext_fullscreen.cjs

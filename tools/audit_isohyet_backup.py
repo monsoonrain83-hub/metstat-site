@@ -42,7 +42,7 @@ def inspect_zip(path):
                 continue
             if stat.S_ISLNK(info.external_attr >> 16):
                 raise ValueError("Symbolic links are not permitted in host backups")
-            canonical = info.filename.replace("\\\\", "/").casefold()
+            canonical = PurePosixPath(info.filename.replace(chr(92), "/")).as_posix().casefold()
             if canonical in seen:
                 raise ValueError("Duplicate archive member path")
             seen.add(canonical)

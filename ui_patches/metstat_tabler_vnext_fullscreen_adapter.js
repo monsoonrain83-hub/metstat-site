@@ -18,6 +18,9 @@
     if (!canvas || !chips || !canvas.contains(chips) && !fs.contains(chips)) return false;
     if (states.has(fs)) return states.get(fs).chips === chips;
     if (!canvas.isConnected || canvas === chips || chips.contains(canvas)) return false;
+    // The absolute dock must be relative to the VERIFIED map, never the page.
+    // Refuse to alter the engine's canvas positioning implicitly.
+    if (getComputedStyle(canvas).position === 'static') return false;
     const oldParent = chips.parentElement;
     const oldNext = chips.nextSibling;
     if (!oldParent || oldParent === canvas) return false;

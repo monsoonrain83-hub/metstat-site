@@ -1,0 +1,177 @@
+/* MetStat vNext 2 / SKY · WHITE · SCARLET — user's exact supplied 2026-11-22 palette.
+ * Tokens: Sky Blue #399FD4; Off White #F8F9FD; Scarlet Red #DC1937.
+ * Zero runtime dependencies. Deliberately EXCLUDES .ms-rail-chip: MODEL STATUS
+ * retains its existing green/blue/red/blinking semantics and data source.
+ */
+:root {
+  --ms-sky:#399FD4;--ms-paper:#F8F9FD;--ms-scarlet:#DC1937;
+  --ms-bg:#edf7fd;--ms-card:#fff;--ms-ink:#1d3852;--ms-muted:#54768c;
+  --ms-line:#cce7f3;--ms-primary:var(--ms-sky);--ms-primary-soft:#e4f5fc;
+  --ms-shadow:0 4px 20px #166fa01a;--ms-radius:12px;--ms-tap:42px;
+}
+html {scrollbar-color:#8cc8e6 #e8f4fa}
+body {background:linear-gradient(138deg,#e6f5fc 0%,#f9fdff 35%,#edf8fd 100%);color:#1d3852}
+.ms-app{max-width:1880px;isolation:isolate}
+.ms-header {height:65px;min-height:65px;background:linear-gradient(115deg,#238dc7,#399fd4 42%,#6bb9df);border:0;border-bottom:3px solid #ffffffaa;box-shadow:0 4px 22px #1679a65c;color:#fff;gap:18px}
+.ms-brandmark {background:linear-gradient(145deg,#f8f9fd,#d7effa);color:#DC1937;box-shadow:0 3px 0 #197dac,0 5px 10px #045c9570;border:1px solid #fff}
+.ms-brandcopy strong{color:white;text-shadow:0 2px 1px #125e91,0 -1px 0 #ffffff70;letter-spacing:.1px;font-weight:900}
+.ms-brandcopy small{color:#f8f9fd;font-size:11px;font-weight:700;text-shadow:0 1px 1px #135e8d}
+.ms-header-right{gap:19px}
+.ms-header-left{gap:7px}
+.ms-nav{gap:8px;align-items:center;overflow:visible}
+.ms-nav-group{position:relative;flex:0 0 auto}
+.ms-top-item,.ms-nav-menu>a {
+  border:1px solid #fff;color:#DC1937;background:var(--ms-paper);
+  font-size:13px;font-weight:900;white-space:nowrap;
+  box-shadow:0 3px 0 #d4eef9,0 4px 7px #06578936;
+  text-shadow:0 1px 0 #fff;transition:transform .15s ease,background .16s ease,color .16s ease,box-shadow .16s ease;
+}
+.ms-top-item{display:inline-flex;align-items:center;gap:7px;justify-content:center;height:39px;min-height:39px;border-radius:9px;padding:0 12px}
+.ms-top-item svg{width:14px;height:14px;transition:transform .18s ease}
+.ms-top-item[data-selected="true"],.ms-top-item[aria-expanded="true"],.ms-nav-menu>a[aria-current="page"],.ms-nav-menu>a:active {
+  background:#DC1937!important;color:#fff!important;border-color:#c91530!important;
+  box-shadow:0 2px 0 #90112a,0 4px 8px #6c12332b!important;
+  text-shadow:0 1px 1px #910e27!important;
+}
+.ms-top-item:active,.ms-nav-menu>a:active{transform:translateY(2px) scale(.985);box-shadow:0 1px 0 #99132d!important}
+.ms-top-item[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ms-nav-menu{position:absolute;z-index:130;right:0;top:calc(100% + 10px);width:max-content;min-width:222px;max-width:280px;max-height:calc(100dvh - 85px);overflow:auto;display:flex;flex-direction:column;gap:5px;background:#ecf8ffed;padding:8px;border:1px solid #7cc4e4;border-radius:12px;box-shadow:0 18px 36px #1b638c4b;backdrop-filter:blur(11px);animation:ms-menu-appear .16s ease-out}
+.ms-nav-menu[hidden]{display:none!important}
+.ms-nav-menu>a{height:43px;display:flex;align-items:center;border-radius:8px;padding:0 14px;box-shadow:none;white-space:normal;line-height:1.4;text-shadow:none}
+.ms-nav-menu>a:hover{background:#fff0f3;color:#DC1937;border-color:#f5a9b6}
+@keyframes ms-menu-appear{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+.ms-context-pill{background:#ffffff22;border:1px solid #fff8;color:white;font-size:11px;font-weight:800}
+.ms-header-action,.ms-sound-toggle {height:38px;border:1px solid #ffffff;background:#F8F9FD;border-radius:8px;padding:0 10px;color:#DC1937;font-weight:900;box-shadow:0 3px 0 #d4edf8;white-space:nowrap}
+.ms-sound-toggle{display:flex;align-items:center;gap:4px;font-size:15px}
+.ms-sound-toggle span{font-size:11px}
+.ms-sound-toggle[aria-pressed="false"]{background:#edf1f3;color:#687f91;text-decoration:line-through}
+.ms-avatar {background:#dc1937;border:2px solid #fff;box-shadow:0 3px 0 #ae1832}
+.ms-main{position:relative;isolation:isolate}
+/* Decorative: user-supplied meteorological image is NOT real gridded output. Only homepage atmospheric whitespace. */
+.ms-main::before{content:"";position:absolute;z-index:-1;inset:-12px 0 0;background:linear-gradient(115deg,#399fd4df,#f8f9fdc9 65%,#399fd4c7),url("assets/homepage_atmosphere.webp") center top/cover no-repeat;opacity:.21;filter:blur(1px);pointer-events:none;border-radius:0 0 20px 20px}
+.ms-intro h1{color:#1576b2;font-size:22px;font-weight:900;text-shadow:0 1px 0 #fff,0 2px 1px #94c2dc}
+.ms-eyebrow{color:#268bbd}
+.ms-intro p{color:#366687;font-size:12px}
+.ms-status-muted{color:#457799}
+.ms-app .card{border-color:#c7e3f3;box-shadow:0 4px 14px #0c689621,0 0 0 1px #fff7}
+.ms-btn,.ms-btn-primary,.ms-btn-secondary,.ms-btn-quiet,.ms-period,.ms-param-trigger,.ms-palette-trigger,.ms-track-btn,.ms-geo-select select,.ms-app .form-select {
+  border:1px solid #e89aaa;background:#F8F9FD;color:#DC1937;font-weight:800;text-shadow:0 1px 0 #fff;
+  box-shadow:0 3px 0 #d9e7ee,0 4px 9px #123c5b20;
+  transition:background .16s,color .16s,border-color .16s,transform .12s,box-shadow .16s;
+}
+.ms-btn:hover,.ms-param-trigger:hover,.ms-track-btn:hover{background:#fff2f5;color:#bb0c2d;transform:translateY(-1px)}
+.ms-btn:active,.ms-param-trigger:active,.ms-period:active,.ms-track-btn:active,.ms-rail-tool:active,.ms-overlay-button:active{
+  transform:translateY(2px) scale(.98);box-shadow:0 0 0 #0000!important;
+}
+.ms-btn-primary,.ms-period.active,.ms-param-trigger[aria-expanded="true"],.ms-track-btn[aria-pressed="true"]{
+  background:#DC1937!important;color:#fff!important;border-color:#b61530!important;box-shadow:0 3px 0 #92132a,0 4px 10px #dc19372a!important;text-shadow:0 1px 1px #8f0a23!important;
+}
+.ms-btn-primary:hover{background:#b90d2c!important}
+.ms-btn-icon{border-radius:8px;color:#DC1937;background:#F8F9FD;border:1px solid #e89aaa}
+.ms-geo-bar{background:linear-gradient(0deg,#f4fbff,#fff)!important;grid-template-columns:120px repeat(5,minmax(130px,1fr))}
+.ms-geo-intro{font-size:13px;color:#0877af}
+.ms-geo-intro svg{color:#dc1937}
+.ms-geo-select>span{color:#237cad;font-size:11px}
+.ms-geo-select select{border-color:#edc4cd!important;color:#dc1937!important;font-size:12.5px!important;min-height:37px;padding-inline:12px}
+.ms-geo-select select:focus-visible{background:#dc1937!important;color:#fff!important}
+.ms-geo-select select:disabled{background:#f3f5f7!important;color:#9d6f7b!important;opacity:.6}
+.ms-forecast{border-top:4px solid #399fd4!important;padding-top:14px}
+.ms-panel-heading h2{color:#0c7fb9;font-size:18px}
+.ms-panel-heading small{color:#dc1937}
+.ms-mini-icon{color:#dc1937;background:#ffedf0}
+.ms-period-grid{background:#e7f5fc;gap:4px}
+.ms-period{min-height:38px;font-size:11.7px;background:#f8f9fd;border:1px solid #eac4cc}
+.ms-period:hover{background:#fff0f3}
+.ms-field label,.ms-param-title{color:#187fb1;font-size:12px;font-weight:900}
+.ms-field select,.ms-app .form-select{color:#DC1937!important;background:#F8F9FD!important;border-color:#eac4cc!important;height:41px!important;font-size:12.5px!important}
+.ms-field select:focus-visible{background:#dc1937!important;color:white!important}
+.ms-run-only{grid-template-columns:1fr}
+.ms-compat-select{display:none!important}
+.ms-parameter-field{position:relative;z-index:11}
+.ms-param-title{display:block}
+.ms-param-trigger {width:100%;height:41px;min-height:41px;border-radius:9px;display:flex;align-items:center;justify-content:space-between;padding-inline:12px;font-size:12.8px;cursor:pointer}
+.ms-param-trigger .ms-triangle{font-size:19px;line-height:1}
+.ms-param-panel{position:absolute;z-index:35;top:calc(100% + 4px);left:0;right:0;max-height:365px;overflow-y:auto;overflow-x:hidden;background:#fff;border:1px solid #90cde9;border-radius:11px;padding:7px;box-shadow:0 14px 25px #104d7175}
+.ms-param-panel[hidden]{display:none}
+.ms-param-panel details{border:1px solid #d0e9f6;border-radius:8px;margin:4px 0;background:#f7fcff;overflow:hidden}
+.ms-param-panel summary{list-style:none;position:relative;cursor:pointer;padding:9px 13px 9px 33px;font-size:12px;font-weight:900;background:#eaf7fe;color:#167fad;user-select:none}
+.ms-param-panel summary::-webkit-details-marker{display:none}
+.ms-param-panel summary::before{content:'+';position:absolute;left:12px;top:7px;font:900 19px/1.2 Arial;color:#dc1937}
+.ms-param-panel details[open] summary::before{content:'−'}
+.ms-param-panel details[open] summary{background:#e6f4fb;color:#c81234}
+.ms-param-panel button[data-param-choice]{width:100%;min-height:36px;text-align:right;border:0;border-top:1px solid #ebf5f9;background:white;color:#ba1835;font-size:12px;padding:8px 12px;border-radius:0;display:block;white-space:normal;cursor:pointer}
+.ms-param-panel button[data-param-choice]:hover{background:#ffebef}
+.ms-param-panel button[data-param-choice][aria-pressed="true"]{background:#dc1937;color:white;font-weight:900}
+.ms-param-panel button.ms-param-none{border-radius:7px;background:#eef7fd}
+.ms-note {background:#eaf8ff;color:#48758e}
+.ms-note p{font-size:11px}
+.ms-map-card{border-top:4px solid #399fd4!important}
+.ms-map-heading{background:linear-gradient(95deg,#e9f7ff,#fff);height:62px}
+.ms-map-kicker{color:#cc1c3a!important}
+.ms-map-heading h2{color:#0b7cae;font-weight:900;text-shadow:0 1px 0 white}
+.ms-map-meta{color:#a71938!important;background:#fff!important;border-color:#ebd2d7!important}
+.ms-map-surface{background:#0b2b44}
+/* Protected original model readiness colors: NO selectors in this stylesheet change .ms-model-rail .ms-rail-chip or its marker. */
+.ms-map-left-rail .ms-rail-tool,.ms-overlay-group .ms-overlay-button{background:#F8F9FD;color:#DC1937;border-color:#eac4cc;font-size:12px;font-weight:900}
+.ms-map-left-rail .ms-rail-tool:hover,.ms-overlay-group .ms-overlay-button:hover{background:#dc1937;color:#fff}
+.ms-map-left-rail .ms-rail-tool[data-expanded="true"],.ms-overlay-group .ms-overlay-button[data-expanded="true"]{background:#dc1937;color:#fff}
+.ms-overlay-group .ms-overlay-button[data-open="true"]{background:#dc1937;color:#fff}
+.ms-layer-head{background:#399fd4;color:white}
+.ms-layer-head h3,.ms-layer-head small{color:#fff!important}
+.ms-layer-head h3{text-shadow:0 1px 1px #106994}
+.ms-layer-set legend{color:#147fb5}
+.ms-switch-row input:checked+.ms-switch{background:#dc1937}
+input[type="range"]{accent-color:#dc1937}
+.ms-map-footer{background:#f3fbff;color:#246886}
+.ms-stat{border-top:2px solid #399fd4!important}
+.ms-stat>strong{color:#bd1735}
+.ms-page-foot{color:#42738e}
+.ms-toast{background:#399fd4;border:2px solid #fff;box-shadow:0 6px 25px #17618c77;font-size:12px}
+/* Compact forecast timeline moves from sidebar to beneath map, retaining its footprint. */
+.ms-forecast-track{height:84px;min-height:84px;margin:0;padding:9px 16px;display:flex;align-items:center;gap:12px;border-top:1px solid #cce7f3;border-bottom:1px solid #cce7f3;background:#f3fbff}
+.ms-track-navigation{display:flex;gap:5px;direction:ltr;flex:none}
+.ms-track-btn{width:36px;height:36px;min-width:36px;border-radius:9px;font-family:Arial;font-size:18px;font-weight:800;padding:0}
+.ms-track-play{width:42px;min-width:42px}
+.ms-track-body{min-width:0;flex:1;direction:ltr}
+.ms-track-line{display:flex;justify-content:space-between;align-items:center;color:#147dae;font-size:12px;font-weight:800;direction:rtl}
+.ms-track-line strong{color:#dc1937;font-size:12.5px}
+.ms-track-caption small{font-size:10px;color:#588499;font-weight:500}
+.ms-forecast-track input[type="range"]{width:100%;margin:4px 0;display:block;height:15px}
+.ms-forecast-track .ms-timeline-mark{font-size:9.5px;color:#276d91;direction:ltr}
+.ms-track-step{display:flex;align-items:center;gap:6px;color:#147ead;font-size:11px;font-weight:800;white-space:nowrap}
+.ms-track-step select{max-width:80px;height:34px;padding:0 6px;border:1px solid #edb1be;border-radius:7px;background:#fff;color:#dc1937;font-size:11px;cursor:pointer}
+.ms-local-fullscreen .ms-forecast-track{flex:none}
+/* Wide dropdown itself becomes the real colorbar once collapsed. */
+.ms-colorbar-picker{bottom:17px;left:50%;transform:translateX(-50%);width:min(630px,calc(100% - 260px));min-width:410px;padding:5px 10px 7px;pointer-events:auto!important;background:#f8f9fdf2;border:1px solid #fff;box-shadow:0 7px 22px #05294091;border-radius:10px;color:#9c1430;z-index:12;direction:rtl}
+.ms-palette-trigger{display:block;width:100%;height:37px;min-height:37px;cursor:pointer;padding:2px 6px 1px;border-radius:5px;box-shadow:none;border:0;background:transparent;color:#9e1432;text-align:right}
+.ms-palette-trigger:hover{background:#fff0f4;color:#b40f2d}
+.ms-palette-trigger:active{transform:scale(.995)}
+.ms-palette-top{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:900;line-height:1.1;padding:0 3px 3px}
+.ms-palette-chevron{font:900 16px Arial;color:#cc1c3b}
+.ms-colorbar-picker .ms-gradient-scale{display:block;width:100%;height:15px;border:1px solid #ffffffb9;border-radius:3px;background:linear-gradient(to right,#ccc,#ddd)}
+.ms-colorbar-picker .ms-colorbar-labels{min-height:20px;margin:1px 5px 0;position:relative;height:21px;font-size:10px;color:#8f1b39;opacity:1;font-weight:900;direction:ltr}
+.ms-colorbar-picker .ms-colorbar-labels span{position:absolute;transform:translateX(-50%);white-space:nowrap;bottom:0;min-width:36px;text-align:center;font-family:Tahoma,'Segoe UI',sans-serif}
+.ms-colorbar-picker .ms-colorbar-labels span:first-child{transform:translateX(0)}
+.ms-colorbar-picker .ms-colorbar-labels span:last-child{transform:translateX(-100%)}
+.ms-palette-options{position:absolute;z-index:30;bottom:calc(100% + 7px);left:-1px;right:-1px;max-height:min(320px,calc(100dvh - 220px));border:1px solid #8ecfe9;border-radius:12px;background:#fff;box-shadow:0 17px 34px #042d4db8;display:flex;flex-direction:column;overflow:hidden;animation:ms-menu-appear .16s ease-out}
+.ms-palette-options[hidden]{display:none}
+.ms-palette-list-head{flex:none;background:#399fd4;color:#fff;padding:8px 13px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+.ms-palette-list-head small{font-size:10px;font-weight:600;color:#f8f9fd}
+.ms-palette-scroll{overflow-y:auto;overscroll-behavior:contain;padding:6px;max-height:265px}
+.ms-palette-option{display:flex;align-items:center;gap:12px;width:100%;min-height:39px;padding:5px 8px;margin:2px 0;text-align:right;border:1px solid transparent;border-radius:7px;background:#f9fdff;color:#a51c39;cursor:pointer}
+.ms-palette-option:hover{border-color:#eb9bad;background:#fff0f3}
+.ms-palette-option[aria-pressed="true"]{border-color:#dc1937;background:#ffeaf0;color:#a40e28}
+.ms-palette-option:disabled{opacity:.6;cursor:not-allowed}
+.ms-palette-option .ms-palette-swatch{flex:1;min-width:95px;height:14px;border-radius:3px;border:1px solid #c5ddeb}
+.ms-palette-option .ms-palette-name{flex:0 0 180px;width:180px;white-space:normal;font-size:10.5px;font-weight:800;line-height:1.3}
+.ms-palette-option .ms-palette-unit{font:700 9px Tahoma;color:#54809c;white-space:nowrap}
+.ms-local-fullscreen{background:#e8f6fc!important}
+/* Never create a single-column mobile site: fixed desktop canvas horizontally pans. */
+@media(max-width:1400px){.ms-header-right{gap:13px}.ms-nav{gap:4px}.ms-top-item{font-size:12px;padding-inline:9px}.ms-sound-toggle span{display:none}}
+@media(max-width:800px){.ms-app{min-width:1180px;width:1180px}.ms-main::before{background-position:60% 0}.ms-header{position:relative}.ms-colorbar-picker{min-width:420px}}
+@media(prefers-reduced-motion:reduce){.ms-top-item,.ms-palette-options,.ms-nav-menu,.ms-param-panel{animation:none!important;transition:none!important}}
+/* Consistent selected-state contract: selected palette is SCARLET with WHITE ink. */
+.ms-palette-option[aria-pressed="true"]{background:#DC1937;color:#F8F9FD;border-color:#ab1530;text-shadow:0 1px 1px #850c22}
+.ms-palette-option[aria-pressed="true"] .ms-palette-name,.ms-palette-option[aria-pressed="true"] .ms-palette-unit{color:white}
+.ms-nav-menu>a[aria-current="page"]::after{display:none}
+.ms-palette-notice{padding:12px;font-size:11px;line-height:1.7;color:#8c2640;background:#fff2f5;border-radius:8px;margin:4px 0}

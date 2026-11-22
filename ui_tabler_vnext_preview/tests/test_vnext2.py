@@ -84,8 +84,9 @@ class NewShell(unittest.TestCase):
  def test_offline_link_navigation_is_file_safe(self):
   js=(BASE/'app.js').read_text(encoding='utf8')
   self.assertIn("location.protocol==='file:'",js)
-  self.assertIn("location.pathname+'#'+dest",js)
+  self.assertIn("location.hash=dest",js)
   self.assertIn("location.hash.startsWith('#/')",js)
+  self.assertIn("window.addEventListener('hashchange'",js)
   self.assertNotIn("location.href=dest",js)
  def test_export_theme_only_decorative(self):
   imagecss=(BASE/'home-atmosphere.css').read_text()

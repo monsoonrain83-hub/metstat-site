@@ -6,6 +6,7 @@ on:
       - "ui_patches/metstat_tabler_vnext_fullscreen.css"
       - "ui_patches/test_tabler_vnext_fullscreen.cjs"
       - "ui_tabler_vnext_preview/**"
+      - "ui_tabler_vnext_r3/**"
       - "docs/METSTAT_TABLER_DESKTOP_UI_VNEXT_20261122.md"
       - ".github/workflows/tabler-vnext-contract.yml"
   workflow_dispatch: {}
@@ -32,3 +33,16 @@ jobs:
       - name: "Static, accessibility, route and HTTP deep-link checks"
         working-directory: ui_tabler_vnext_preview
         run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: "r3 JavaScript syntax and source catalog"
+        run: |
+          node --check ui_tabler_vnext_r3/app.js
+          node --check ui_tabler_vnext_r3/route-data.js
+          node --check ui_tabler_vnext_r3/palette-data.js
+      - name: "r3 full-site 43-route structural and security contract"
+        working-directory: ui_tabler_vnext_r3
+        run: python -m unittest discover -s tests -p 'test_r3.py' -v
+      - name: "r3 repeatable offline HTML bundle"
+        working-directory: ui_tabler_vnext_r3
+        run: |
+          python build_offline.py
+          python -c "from pathlib import Path; p=Path('MetStat_vNext_r3_ALL_PAGES_INTERACTIVE_OFFLINE.html'); assert p.exists() and p.stat().st_size>150000"

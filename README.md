@@ -34,3 +34,16 @@ python indices.py --mock --out out
 
 # Only the daily GEFS forecast charts
 python indices.py --mock --only gefs --out out
+```
+
+`indices.py` needs `numpy`, `matplotlib` and `requests`. Uploading to a host requires your own server and key (`--host`, `--key`); see the docstring at the top of the script.
+
+## Data sources and licensing
+
+The source code is released under the **GNU General Public License v3.0** (see [LICENSE](LICENSE)).
+
+MetStat displays or processes data from third parties, including NOAA PSL, NOAA CPC (GEFS), Ogimet and CMIP6 contributors. That data remains the property of the respective providers and is subject to their own terms; it is not covered by this repository's license.
+
+## Contributing
+
+Issues and pull requests are welcome, in English or Persian.

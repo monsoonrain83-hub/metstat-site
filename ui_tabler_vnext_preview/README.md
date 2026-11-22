@@ -103,7 +103,7 @@ semantics** (green, red, blue, blinking) on the map rail.
 
 ### Testing / limitations
 
-`python -m unittest discover -s tests -p 'test_*.py' -v`: **23 passing tests**
+`python -m unittest discover -s tests -p 'test_*.py' -v`: **24 passing tests**
 covering document structure, CSS/JS syntax, route allowlist, palette origins,
 legend numerics, selector grouping, and status-color non-interference. Local
 Chromium screenshots/browser-interaction E2E could not be executed because the
@@ -112,3 +112,4 @@ managed browser blocks navigation even to local `file://` and `localhost` URLs
 The live site is **not changed**. Never upload the preview's `index.html` over
 production. Maintain cPanel backup, staging tests, direct URL 200/404 and safe
 rollbacks before promotion.
+Offline single-file navigation uses allowlisted hash routes (#/...) and does not require the preview server or a live domain.

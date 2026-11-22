@@ -7,7 +7,7 @@ html=BeautifulSoup((R/'index.html').read_text(),'html.parser')
 for t in html.select('script,link[rel="stylesheet"],meta[http-equiv="Content-Security-Policy"]'):t.decompose()
 css=(R/'styles.css').read_text().replace("url('assets/homepage_atmosphere.webp')", "url('data:image/webp;base64,"+base64.b64encode((R/'assets/homepage_atmosphere.webp').read_bytes()).decode('ascii')+"')")
 js=[]
-for n in ['route-data.js','palette-data.js','model-icons.js','app.js','account-r4.js','drawing-r4.js','feature-r5.js','ava-studio-r5.js']:
+for n in ['route-data.js','palette-data.js','model-icons.js','app.js','account-r4.js','drawing-r4.js','feature-r5.js','lightning-web-core.js','ava-studio-r5.js']:
  s=(R/n).read_text()
  if n=='app.js':s=s.replace("location.protocol==='file:'", "(location.protocol==='file:'||location.protocol==='about:')")
  js.append((n,s))

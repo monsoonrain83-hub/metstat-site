@@ -70,7 +70,7 @@ class HierarchyTests(unittest.TestCase):
   self.assertNotIn('src="app.js"',content)
   self.assertIn("connect-src 'none'",content)
  def test_all_sources_js_syntax(self):
-  for p in ['app.js','route-data.js','palette-data.js','model-icons.js','account-r4.js','drawing-r4.js','feature-r5.js','ava-studio-r5.js']:
+  for p in ['app.js','route-data.js','palette-data.js','model-icons.js','account-r4.js','drawing-r4.js','feature-r5.js','lightning-web-core.js','ava-studio-r5.js']:
    with self.subTest(p=p): subprocess.run(['node','--check',p],cwd=ROOT,check=True,capture_output=True)
 class LocalRouteHttpTests(unittest.TestCase):
  @classmethod

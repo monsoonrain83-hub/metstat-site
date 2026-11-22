@@ -39,3 +39,10 @@ Separate header **حساب کاربری**: ورود، ثبت‌نام، علاق
 | Site security | Preview no remote network/auth | CSP, deployed asset pinning, cPanel backup, rollback, server-side guards |
 
 **Do not merge the experimental preview into production until the live site's exact source tree has been compared and an authenticated staging release passes screenshot, route, click/tap, and rollback tests.**
+
+### Code boundary for future LightningLab migration
+
+
+a) Browser-local Web core is separated in `lightning-web-core.js` with 6 deterministic Node assertions, no network and no file upload.  
+b) HTML UI module `ava-studio-r5.js` calls this core and provides photo/video/voice UX and sampling.  
+c) Full scientific detector, Android codecs, timelines with real video export, saved projects and ML branches still require separate browser-native engineering, validation and backward-compatible API contracts. Never mark a heuristic jump as a confirmed lightning event.

@@ -11,7 +11,7 @@ html,n=re.subn(r'<link rel="stylesheet" href="styles.css">',lambda m:'<style>\n'
 # No phantom script/style references allowed. Fail instead of building a broken file.
 assert 'r5-enhancements.css' not in html and 'r5-enhancements.js' not in html
 inline=[]
-for name in ['route-data.js','palette-data.js','model-icons.js','app.js','account-r4.js','drawing-r4.js','feature-r5.js','ava-studio-r5.js']:
+for name in ['route-data.js','palette-data.js','model-icons.js','app.js','account-r4.js','drawing-r4.js','feature-r5.js','lightning-web-core.js','ava-studio-r5.js']:
  html,n=re.subn('<script defer src="'+re.escape(name)+'"></script>','',html,count=1)
  assert n==1,name
  inline.append('<script>\n'+(R/name).read_text(encoding='utf8').replace('</script>','<\\/script>')+'\n</script>')

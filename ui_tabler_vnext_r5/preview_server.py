@@ -28,6 +28,7 @@ ALLOWED = {
     '/model-icons.js',
     '/feature-r5.js',
     '/ava-studio-r5.js',
+    '/lightning-web-core.js',
     '/account-r4.js',
     '/drawing-r4.js',
     '/palette-data.js',

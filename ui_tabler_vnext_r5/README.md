@@ -27,3 +27,7 @@ Open `MetStat_vNext_r5_ALL_PAGES_AVA_STUDIO_INTERACTIVE_OFFLINE.html` locally on
 For inspection: `index.html`, `styles.css`, `app.js`, `route-data.js`, `route_catalog.json`, `model-icons.js`, `account-r4.js`, `drawing-r4.js`, `feature-r5.js`, `ava-studio-r5.js`, `palettes.json`, `palette-data.js`, asset `assets/homepage_atmosphere.webp` and the tests.
 
 No remote resources are fetched by the preview, user files are not uploaded, and account forms are mock-only. The model mini-icon graphics are locally authored SVG **preview marks**, not a claim of official ECMWF / NCEP logo licensing. Agency-owned official marks should be sourced and vetted before a production release.
+
+## Independent LightningLab Web Core
+
+`lightning-web-core.js` implements an independently testable **luminance-jump prototype kernel** for browser sampling with `meanLuma()` and `detectJumps()`; see `tests/test_lightning_web.cjs`. It is an explicitly non-scientific proof of the UI/dataflow, **not** the port of `Detector.kt`/`FlashAnalyzer.kt`. The same module is intended to be maintained in the LightningLab web branch and imported into MetStat only after reviewing compatible versions. No TFLite model weights are supplied.

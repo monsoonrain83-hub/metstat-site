@@ -74,3 +74,5 @@ jobs:
           python -c "from pathlib import Path; p=Path('MetStat_vNext_r5_ALL_PAGES_AVA_STUDIO_INTERACTIVE_OFFLINE.html'); assert p.is_file() and p.stat().st_size>250000"
       - name: "r5 browser lightning kernel deterministic checks"
         run: node ui_tabler_vnext_r5/tests/test_lightning_web.cjs
+      - name: "Android content URI offline route regression"
+        run: node ui_tabler_vnext_r5/tests/test_content_uri.cjs

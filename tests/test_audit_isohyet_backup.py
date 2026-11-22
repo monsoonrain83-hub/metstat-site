@@ -1,5 +1,6 @@
 import io
 import json
+import stat
 import tempfile
 import unittest
 import zipfile
@@ -50,6 +51,32 @@ class BackupAuditTests(unittest.TestCase):
             self.assertEqual(report["active_index"]["isohyet_reference_count"], 1)
             self.assertFalse(report["deploy_allowed"])
             self.assertFalse(report["live_verified"])
+
+    def test_reject_duplicate_casefolded_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "duplicate.zip"
+            self.make_zip(backup, {"index.html": "A", "INDEX.HTML": "B"})
+            with self.assertRaisesRegex(ValueError, "Duplicate"):
+                inspect_zip(backup)
+
+    def test_reject_symlink_even_when_name_is_irrelevant(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "symlink.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                link = zipfile.ZipInfo("hidden-link")
+                link.create_system = 3
+                link.external_attr = (stat.S_IFLNK | 0o777) << 16
+                z.writestr(link, "target")
+            with self.assertRaisesRegex(ValueError, "Symbolic"):
+                inspect_zip(backup)
+
+    def test_reject_compression_bomb_relevant_member(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "bomb.zip"
+            with zipfile.ZipFile(backup, "w", compression=zipfile.ZIP_DEFLATED) as z:
+                z.writestr("index.html", "X" * 1000000)
+            with self.assertRaisesRegex(ValueError, "compression ratio"):
+                inspect_zip(backup)
 
     def test_reject_zip_slip_and_absolute_members(self):
         for bad in ("../index.html", "/index.html", "C:/index.html"):

@@ -140,6 +140,30 @@ class BackupAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Symbolic"):
                 inspect_zip(backup)
 
+    def test_reject_unsafe_directory_entries_even_if_no_files_match(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "bad-dir.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                z.writestr("online/../", "")
+            with self.assertRaisesRegex(ValueError, "Unsafe"):
+                inspect_zip(backup)
+
+    def test_accept_normal_directory_entries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "normal-dir.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                z.writestr("online/", "")
+                z.writestr("online/station_match_v39.js", "resolver")
+            self.assertEqual(len(inspect_zip(backup)), 1)
+
+    def test_reject_repeated_directory_trailing_separator(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "double-slash-dir.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                z.writestr("online//", "")
+            with self.assertRaisesRegex(ValueError, "Unsafe"):
+                inspect_zip(backup)
+
     def test_reject_compression_bomb_relevant_member(self):
         with tempfile.TemporaryDirectory() as tmp:
             backup = Path(tmp) / "bomb.zip"

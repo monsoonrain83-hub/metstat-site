@@ -1,0 +1,13 @@
+/* FORECAST OUTPUT STYLE CONTRACT (reference only, not wired to renderer).
+ * Apply to annotation and legend wrappers AFTER rendering real scientific
+ * raster data; do not repaint raster classes, contour values or projection.
+ */
+.metstat-export-frame{--export-sky:#399FD4;--export-white:#F8F9FD;--export-red:#DC1937;box-sizing:border-box;background:var(--export-white);color:#123d5b;font:700 14px/1.45 Tahoma,Arial,sans-serif}
+.metstat-export-title{padding:12px 16px;background:var(--export-sky);color:var(--export-white);text-shadow:0 1px 1px #124f7a;font-size:19px;border-bottom:3px solid var(--export-white)}
+.metstat-export-subtitle{color:var(--export-red);background:var(--export-white);padding:7px 15px;font-size:12px}
+.metstat-export-map-raster{display:block;width:100%;height:auto;image-rendering:auto} /* NO recoloring */
+.metstat-export-legend{display:flex;flex-direction:column;gap:5px;padding:9px 14px 12px;background:#f8f9fd;border-top:2px solid var(--export-sky)}
+.metstat-export-legend-title{color:var(--export-red);font-weight:900;font-size:12px}
+.metstat-export-legend-strip{height:12px;border-radius:3px;overflow:hidden} /* actual selected MT_PALS colors */
+.metstat-export-legend-labels{display:flex;justify-content:space-between;font:700 10px Tahoma,Arial;color:#c51233;direction:ltr}
+.metstat-export-meta{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #aadbea;padding:8px 14px;color:#267cab;font-size:10px}

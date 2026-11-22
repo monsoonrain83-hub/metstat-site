@@ -164,6 +164,27 @@ class BackupAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Unsafe"):
                 inspect_zip(backup)
 
+    def test_reject_duplicate_directory_aliases(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "duplicate-directories.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                z.writestr("online/", "")
+                z.writestr("ONLINE/", "")
+            with self.assertRaisesRegex(ValueError, "Duplicate"):
+                inspect_zip(backup)
+
+    def test_reject_file_directory_name_collision(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "file-directory-collision.zip"
+            with zipfile.ZipFile(backup, "w") as z:
+                z.writestr("online/", "")
+                z.writestr("online", "not a directory")
+            with self.assertRaisesRegex(ValueError, "Duplicate"):
+                inspect_zip(backup)
+
+    def test_reject_del_control_character(self):
+        self.assertFalse(safe_name("online/" + chr(127) + "station_match_v39.js"))
+
     def test_reject_compression_bomb_relevant_member(self):
         with tempfile.TemporaryDirectory() as tmp:
             backup = Path(tmp) / "bomb.zip"

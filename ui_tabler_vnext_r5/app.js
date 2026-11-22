@@ -117,10 +117,31 @@ function renderNav(){
 function closeNav(except){document.querySelectorAll('[data-nav-trigger]').forEach(b=>{if(b===except)return;b.setAttribute('aria-expanded','false');const panel=document.getElementById(b.getAttribute('aria-controls'));if(panel)panel.hidden=true;});}
 function navActive(){const item=byPath.get(state.route)||byPath.get('/');document.querySelectorAll('.nav-button').forEach(btn=>btn.dataset.active=String(btn.dataset.navTrigger===item.group ||(item.group==='خانه'&&btn.dataset.group==='خانه')));document.querySelectorAll('[data-route]').forEach(a=>{if(a.dataset.route===state.route)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
 function canonical(path){return HISTORY_ALIASES[path]||path}
-function getRouteFromLocation(){let path=location.protocol==='file:'?(location.hash.startsWith('#/')?location.hash.slice(1):'/monitoring-forecast/weather-models'):location.pathname;return byPath.has(canonical(path))?canonical(path):'/monitoring-forecast/weather-models'}
-function changeUrl(path){if(location.protocol==='file:'){if(location.hash.slice(1)!==path)location.hash=path}else if(location.pathname!==path)history.pushState({metstatPreview:true},'',path);}
+// Locally opened documents can use file:, content: (Android Brave), data:,
+// blob:, or about:. Never use History.pushState from those opaque schemes.
+const offlineDocument=()=>!['http:','https:'].includes(location.protocol);
+function getRouteFromLocation(){
+ const hash=location.hash||'';
+ const requested=hash.startsWith('#/')?hash.slice(1):(offlineDocument()?'/monitoring-forecast/weather-models':location.pathname);
+ const path=canonical(requested.replace(/\/+$/,'')||'/');
+ return byPath.has(path)?path:'/monitoring-forecast/weather-models';
+}
+function changeUrl(path){
+ try{
+  if(offlineDocument()){
+   // Android content providers may restart the viewer on ANY URL mutation.
+   // Keep this document open and use the already updated in-memory state.
+   if(location.protocol==='content:')return;
+   if(location.hash.slice(1)!==path)location.hash=path;
+  }else if(location.pathname!==path){
+   history.pushState({metstatPreview:true},'',path);
+  }
+ }catch(_){
+  // SecurityError from opaque/restricted document URLs must not prevent rendering.
+ }
+}
 function periodFromRoute(path){const m=path.match(/\/weather-models\/(daily|weekly|monthly|seasonal|ensemble)$/);return m?m[1]:state.period}
-function routeTo(path,{push=true}={}){path=canonical(path);if(!byPath.has(path)){toast('این مسیر در کاتالوگ شبیه‌ساز تعریف نشده است');return}if(push)changeUrl(path);state.route=path;const p=byPath.get(path);if(isForecastRoute(path)&&p.kind!=='custom')state.lastForecast=path;
+function routeTo(path,{push=true}={}){path=canonical(path);if(!byPath.has(path)){toast('این مسیر در کاتالوگ شبیه‌ساز تعریف نشده است');return}state.route=path;if(push)changeUrl(path);const p=byPath.get(path);if(isForecastRoute(path)&&p.kind!=='custom')state.lastForecast=path;
  if(p.kind==='custom')state.mode='custom';else if(p.kind==='home')state.mode='home';else if(p.kind==='account')state.mode='account';else state.mode=isForecastRoute(path)?'forecast':'tool';
  if(p.kind==='forecast'){const newPeriod=periodFromRoute(path);if(newPeriod!==state.period)activatePeriod(newPeriod,{navigate:false});}
  document.title=`${p.title} | MetStat UI r5 preview`;
@@ -305,7 +326,7 @@ function bindListeners(){document.addEventListener('click',handleClick);
  $('sidebarContent').addEventListener('click',e=>{const b=e.target.closest('#generateCustom');if(b){clickSound();customGenerate()}});
  $('layersControls').addEventListener('input',e=>{const t=e.target;if(t.dataset.layerRange){$('out-'+t.dataset.layerRange).textContent=t.value;toast('تنظیم نمایشی '+t.dataset.layerRange+' = '+t.value)}if(t.dataset.layer==='graticule')$('schematic').style.opacity=t.checked?'1':'.82';if(t.dataset.layer==='wind')toast(t.checked?'انیمیشن باد (نمایش کنترل) روشن شد':'انیمیشن باد (نمایش کنترل) خاموش شد')});
  document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(state.layersOpen){setLayers(false);return}if(!$('paletteChoices').hidden){setPaletteOpen(false);return}closeNav();paramsClose();if(ROOT.classList.contains('map-fullscreen'))ROOT.classList.remove('map-fullscreen')});
- window.addEventListener('popstate',()=>{const p=getRouteFromLocation();if(p!==state.route)routeTo(p,{push:false})});window.addEventListener('hashchange',()=>{if(location.protocol==='file:'){const p=getRouteFromLocation();if(p!==state.route)routeTo(p,{push:false})}});
+ window.addEventListener('popstate',()=>{const p=getRouteFromLocation();if(p!==state.route)routeTo(p,{push:false})});window.addEventListener('hashchange',()=>{if(offlineDocument()||location.hash.startsWith('#/')){const p=getRouteFromLocation();if(p!==state.route)routeTo(p,{push:false})}});
  // Browser-managed pinch-to-zoom MUST remain enabled (user-scalable=yes, touch-action:pinch-zoom).
  // Do not attach preventDefault touch listeners to menus or body.
 }

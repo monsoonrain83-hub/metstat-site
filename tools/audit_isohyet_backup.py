@@ -55,6 +55,8 @@ def inspect_zip(path):
         if len(members) > MAX_ZIP_ENTRIES:
             raise ValueError("Too many archive members")
         seen = set()
+        files = set()
+        directories = set()
         for info in members:
             # Validate directory entries too; an unsafe member must not be silently ignored.
             name_to_validate = info.filename[:-1] if info.is_dir() else info.filename
@@ -66,6 +68,10 @@ def inspect_zip(path):
             if canonical in seen:
                 raise ValueError("Duplicate archive member path")
             seen.add(canonical)
+            if info.is_dir():
+                directories.add(canonical)
+            else:
+                files.add(canonical)
             if info.is_dir():
                 continue
             if not safe_name(info.filename):
@@ -86,6 +92,12 @@ def inspect_zip(path):
                 text = data.decode("utf-8", errors="replace")
                 row["isohyet_reference_count"] = sum(len(re.findall(term, text, re.I)) for term in NAV_TERMS)
             records.append(row)
+        # A ZIP may contain both `online` as a file and `online/asset.js`.
+        # Such a tree cannot be restored unambiguously on a filesystem.
+        for path in seen:
+            parts = path.split("/")
+            if any("/".join(parts[:i]) in files for i in range(1, len(parts))):
+                raise ValueError("Archive file is an ancestor of another member")
     return records
 
 

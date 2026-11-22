@@ -81,7 +81,20 @@ def audit(backup, active_index=None):
         result["warnings"].append("An ACTIVE file alone cannot prove Document Root, auth API or rollback")
     else:
         result["warnings"].append("No verified ACTIVE index supplied; do not patch live index")
-    present = {PurePosixPath(r["path"].replace(chr(92), "/")).name for r in rows}
+    # Different folders can contain conflicting versions of the same required asset.
+    # Never silently select one as the canonical restored file.
+    candidates = {}
+    for row in rows:
+        name = PurePosixPath(row["path"].replace(chr(92), "/")).name
+        if name in ASSETS:
+            candidates.setdefault(name, []).append(row)
+    for name, matches in candidates.items():
+        if len(matches) > 1:
+            result["warnings"].append(
+                "Ambiguous backup candidates for " + name + ": " + str(len(matches))
+                + " copies; verify canonical Document Root and SHA256 manually"
+            )
+    present = set(candidates)
     for required in ASSETS:
         if required not in present:
             result["warnings"].append("Missing from supplied archive: " + required)

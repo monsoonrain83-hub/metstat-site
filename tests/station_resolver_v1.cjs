@@ -9,4 +9,11 @@ assert.equal(r.scopeFromText('ایستگاههای شهر مشهد',['فارس']
 assert.equal(r.resolve('بوژان',[...stations,{...stations[0],id:'other',lat:37}]).status,'ambiguous');
 const key=r.resolve('نیشابور: بوژان',stations).key;
 assert.equal(r.resolve('نیشابور: بوژان',stations,{}, {[key]:'b'}).reason,'learned_verified_override');
+const noStationType={...stations[0],id:'osm-1',type:'village'};
+assert.equal(r.resolve('بوژان',[noStationType]).status,'unresolved','OSM village must not be confirmed as a station');
+assert.equal(r.resolve('بوژان',[{...stations[0],id:'unknown',type:undefined}]).status,'unresolved','Unknown type cannot become an attested station');
+assert.equal(r.resolve('بوژان',[{...stations[0],lat:''}]).status,'unresolved','Empty latitude is not 0');
+assert.equal(r.resolve('بوژان',[{...stations[0],lon:''}]).status,'unresolved','Empty longitude is not 0');
+assert.equal(r.resolve('بوژان',[{...stations[0],lat:0,lon:0}]).status,'unresolved','Outside-Iran coordinates cannot become a map station');
+assert.equal(r.resolve('بوژان',[...stations,noStationType]).candidate.id,'b','A valid rain gauge outranks an OSM place');
 console.log('context-aware station resolver tests passed');

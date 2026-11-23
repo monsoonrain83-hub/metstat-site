@@ -1,0 +1,23 @@
+name: MetStat offline host recovery audit
+on:
+  pull_request:
+    paths:
+      - 'tools/audit_isohyet_backup.py'
+      - 'tests/test_audit_isohyet_backup.py'
+      - '.github/workflows/recovery-audit.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  safe-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify backup audit is read-only and fail-closed
+        run: python -m unittest discover -s tests -p 'test_audit_isohyet_backup.py' -v
+      - name: Compile script and tests
+        run: python -m py_compile tools/audit_isohyet_backup.py tests/test_audit_isohyet_backup.py

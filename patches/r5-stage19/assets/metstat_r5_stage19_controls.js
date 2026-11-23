@@ -3,7 +3,7 @@
  */
 (() => {
   'use strict';
-  const version = 'r5-stage19-controls-1';
+  const version = 'r5-stage20-controls-1';
   const doc = document;
   const stat = window.MetStatR5Stage19 = {version, mounts: 0, palette: 'waiting', layers: 'waiting'};
   const NS = 'http://www.w3.org/2000/svg';
@@ -193,9 +193,24 @@
     }
     stat.geo = 'localized_known_geography';
   }
+  // Keep existing bookmark state while localizing its user-facing text.
+  function localizeModelFavorite() {
+    const english = isEnglish();
+    for (const el of doc.querySelectorAll('#nvMenus button.pfIn[data-pfk="nv.s"]')) {
+      const raw=el.textContent.trim();
+      const known=/^(?:☆\s*)?(?:This model\/parameter = my default|این (?:مدل\/پارامتر|Model\/Parameter) = پیش\u200c?فرض من)$/;
+      if (known.test(raw)) {
+        el.textContent='☆ '+(english?'This model/parameter = my default':'این مدل/پارامتر = پیش\u200cفرض من');
+      }
+      const title=english?'Save this model/parameter as my default':'ذخیره این مدل و پارامتر به\u200cعنوان پیش\u200cفرض من';
+      el.title=title;
+      el.setAttribute('aria-label',title);
+    }
+  }
   function mount() {
     localizeHeader();
     localizeGeography();
+    localizeModelFavorite();
     const card = doc.querySelector('.nvCard');
     if (!card) return;
     installPalette(card); installLayerIcon(card); localizeBorders(card);

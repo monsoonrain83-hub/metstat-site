@@ -110,3 +110,14 @@
 `HEAD / active SHA / input spec revision → problem reproduced → source owner and exact change → unit/DOM/browser/data security tests → staged artifacts and hashes → verified / failed / blocked → next reversible step`.
 
 **تعریف انجام‌شدن نهایی:** UI با R5 مطابقت عملکردی و هندسی دارد **و** خروجی داده واقعی دارای مدل/ران/زمان/رزولوشن/گستره صحیح روی خود `wtafkik.ir/monitoring-forecast/weather-models/online-maps` قابل استفاده است. بخش‌های فاقد داده با پیام شفاف مشخص می‌شوند؛ هیچ عملیات آزمایشی معادل انتشار نهایی اعلام نمی‌شود.
+
+## پیشرفت عملی مرحله ۲۴ — ۲ آذر ۱۴۰۵
+
+- مدیر تأیید کرد `index.html` نصب‌شده در cPanel، خروجی Stage22 بوده است (SHA-256 بسته: `339f863f863aef5a33e5567c5ec03d06a57fe9da8ad3ba908e62d2e4e73c44cb`). نسخه قدیمی `assets/index.html` مرجع اجرایی نیست.
+- Stage23 چهار موتور بومی از آرشیو هاست را در UI بازیابی کرد: `online/station_isohyet_v26.html`، `online/meteo_toolbox_v22.html`، `online/forecast_verification_v22.html`، `online/bulletin_maps_v21.html` (با هش ثابت هر فایل و بدون بازنویسی منطق علمی). وضعیت فعلی هاست پس از انتشار محلی مستقلاً بررسی نشده است.
+- Stage24 **دو مسیر جدید به موتور موجود** متصل کرد: `convert-unit` با تب calc و دسته «تبدیل واحد»، و `toolbox-spatial` با تب spatial برای شبکه IDW؛ این‌ها موتور محاسبه‌گر یا IDW کپی نمی‌سازند. چهار مسیر اصلی مرحله ۲۳ حفظ شده‌اند، مبدل‌های Stage22 هم پاک نشده‌اند.
+- آزمون Stage24: شش مسیر × چهار viewport، ۲۴/۲۴ سناریوی آفلاین موفق؛ اجرای واقعی ماشین‌حساب v22، ۱۰ m/s → ۳۶ km/h و ۱۹٫۴۴ knot، و بازشدن تب IDW موفق. تمام فایل‌های مشترک Stage22 و Base64ها بدون تغییر؛ خود iframe از HTTP واقعی به‌دلیل محدودیت محیط آزمون بررسی نشده است.
+- نسخه آزمایشی HTML Stage24 SHA-256: `a6d3c06bb3197671e2a7e1f3e2043b924a23ee35c76ca4f35ef9d1e1c66a90d8`. ابزار جدید `metstat_r5_stage24_restore.js` SHA-256: `daefd128ec8da4e50ecbc2b3b918cd3b074d7ed8b3cce6dc956972c6a6129442`؛ **هنوز در هاست منتشر نشده**.
+- آرشیو واقعی هاست: در ۲۱۲ فایل استخراج‌شده، دو گروه نسخهٔ بایت‌به‌بایت تکراری و ده نام فایل نصب/تعمیر/تشخیص PHP شناسایی شد. هیچ فایلی حذف نشد و ممیزی ایستا گواهی امنیت نیست. `display_errors` و نصب‌کننده‌های وبی به کنترل مستقل سمت سرور نیاز دارند.
+- انتشار ترجیحی برای Stage22: بسته کمینهٔ ۳ فایلی (`index.html` و `assets/metstat_r5_stage23_restore.css` و `assets/metstat_r5_stage24_restore.js`) فقط پس از بکاپ و تطبیق SHA ACTIVE؛ فایل‌های اصلی موتور فقط در صورت نبودن و با بررسی هش اضافه شوند. **هیچ جایگزینیِ بی‌بررسیِ کل هاست مجاز نیست**.
+- باقی‌مانده: P1/P2 زبان و R5 همه صفحات، P4 ادغام و گسترهٔ ECMWF/GFS و AIFS/AIGFS، P5 آنومالی و انتشارهای زمانی، P6 GIS/شهرستان/اکسل بارش/سیل، P7 امنیت PHP و ممیزی زنده. این موارد هنوز Done نیستند.

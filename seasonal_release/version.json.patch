@@ -1,0 +1,11 @@
+--- version.json
++++ version.json
+@@ -2,5 +2,5 @@
+   "build": "ms47-guarded-matching-20261116",
+   "base": "ms46-name-recall-20261116b",
+   "database": "private-rain-registry-v45",
+-  "ui_build": "r113"
+-}
++  "ui_build": "r115"
++}
+\ No newline at end of file

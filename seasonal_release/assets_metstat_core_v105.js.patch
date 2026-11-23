@@ -1,0 +1,58 @@
+--- assets/metstat_core_v105.js
++++ assets/metstat_core_v105.js
+@@ -14084,8 +14084,26 @@
+ function onStatus(t,f){ for(const [a,b,c] of [["onStatus","onStText","onStBar"],["anStatus","anStText","anStBar"]]){ const s=$(a); if(!s) continue; s.hidden=!t; $(b).textContent=t||""; if(f!=null) $(c).style.width=(f*100)+"%"; } }
+ 
+ async function onLoadManifest(){
++  if(ON.manRequest)return ON.manRequest;
++  ON.manRequest=onLoadManifestRequest();
++  try{return await ON.manRequest;}finally{ON.manRequest=null;}
++}
++async function onLoadManifestRequest(){
+   if(!/^https?:/.test(location.protocol)){ ON.man=null; return "این صفحه فقط روی هاست (wtafkik.ir) کار می‌کند؛ نقشه‌ها را برنامهٔ nwp_maps.py (GitHub Actions) می‌سازد و روی هاست می‌گذارد."; }
+-  try{ let r=null; for(let k=0;k<3&&!(r&&r.ok);k++){ const ac=new AbortController(), tm=setTimeout(()=>ac.abort(),k?20000:12000); try{ r=await fetch(ON.base+"data/manifest.json?"+Date.now(),{cache:"no-store",signal:ac.signal}); }catch(_){ r=null; } clearTimeout(tm); } if(!r||!r.ok) throw new Error(r?r.status:"timeout"); ON.man=await r.json(); try{ const MM=ON.man, fx=(L,pv)=>{ for(const i of L||[]){ if(i.f) continue; const o=MM.models&&MM.models[i.m], run=pv?(o&&o.prev&&o.prev.run):(o&&o.run); i.run=run; i.f=`data/nwp/${i.m}/${run}/${i.r}/${i.p}_${i.v}.${i.x||"png"}`; } }; fx(MM.items,0); fx(MM.items_prev,1); }catch(_){ } try{ for(const k of ["navgem","access"]) if(ON.man&&ON.man.models) delete ON.man.models[k]; }catch(_){ } try{ onPruneOld(); nvFixMonths(); }catch(_){ } }
++  try{
++    let catalog;
++    for(const [path,timeout] of [["model_catalog.php",12000],["data/manifest.json",20000],["data/manifest.json",20000]]){
++      const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),timeout);
++      try {
++        const response=await fetch(ON.base+path,{cache:"no-cache",signal:controller.signal});
++        if(!response.ok)continue;
++        const candidate=await response.json();
++        if(candidate && (Array.isArray(candidate.items)||candidate.status==="waiting")){catalog=candidate;break;}
++      }catch(error){ /* Retry using the original static catalog. */ }
++      finally{clearTimeout(timer);}
++    }
++    if(!catalog)throw new Error("Model catalog unavailable");
++    ON.man=catalog; try{ const MM=ON.man, fx=(L,pv)=>{ for(const i of L||[]){ if(i.f) continue; const o=MM.models&&MM.models[i.m], run=pv?(o&&o.prev&&o.prev.run):(o&&o.run); i.run=run; i.f=`data/nwp/${i.m}/${run}/${i.r}/${i.p}_${i.v}.${i.x||"png"}`; } }; fx(MM.items,0); fx(MM.items_prev,1); }catch(_){ } try{ for(const k of ["navgem","access"]) if(ON.man&&ON.man.models) delete ON.man.models[k]; }catch(_){ } try{ onPruneOld(); nvFixMonths(); }catch(_){ } }
+   catch(e){ ON.man=null; return "فهرست نقشه‌ها (online/data/manifest.json) پیدا نشد؛ برنامهٔ ساخت نقشه‌ها (GitHub Actions) هنوز اجرا نشده است (راهنمای نصب را ببینید)."; }
+   if(ON.man.status==="waiting") return `نقشه‌های اجرای قبلی حذف شده‌اند؛ دریافت اجرای ${onFmtRun(ON.man.next)} به‌زودی شروع می‌شود.`;
+   return "";
+@@ -21853,11 +21871,16 @@
+   if(SF.out.auto){ sfRenderIdxTable(); sfRenderViewer("auto"); } if(SF.out.cust) sfRenderViewer("cust"); }
+ function sfRender(){ const m=$("sfMain"); if(!m) return; m.innerHTML=sfHTML(); sfWire();
+   SF.col=SF.col||{}; m.querySelectorAll(".card>h3").forEach(h=>{ const c=h.parentNode, key=h.textContent.trim().slice(0,30), keepOpen=!!c.querySelector("#sfView"); const st=key in SF.col?SF.col[key]:!keepOpen; c.classList.toggle("pcol",st); h.onclick=()=>{ const v=c.classList.toggle("pcol"); SF.col[key]=v; }; h.title=SFT("جمع/باز کردن","Collapse / expand"); }); }
+-async function openSF(){ for(const id of ["landing","app","dsApp","cvApp","ltApp","wnApp","cqcApp","caApp","onApp","ciApp","saApp","anApp","labApp","synApp","drApp"]) if($(id)) $(id).hidden=true;
++async function openSF(advanced=false){ for(const id of ["landing","app","dsApp","cvApp","ltApp","wnApp","cqcApp","caApp","onApp","ciApp","saApp","anApp","labApp","synApp","drApp"]) if($(id)) $(id).hidden=true;
+   $("sfApp").hidden=false; store.set("mode","sf"); window.scrollTo(0,0); const m=$("sfMain"); m.innerHTML=`<p class="hint">${SFT("بارگذاری پایگاه داده و شاخص‌ها…","Loading database and indices…")}</p>`;
++  if(advanced!==true && !SF_ADMIN()) {
++    try { await sfOpenPublished(m); }
++    catch(e) { console.warn("Published forecast unavailable",e); m.textContent=SFT("دریافت نقشهٔ آماده ناموفق بود. صفحه را تازه کنید.","Published forecast unavailable. Please reload the page."); }
++    return;
++  }
+   try{ await sfLoad(); }catch(e){ m.innerHTML=`<p class="hint">⚠ ${e.message}</p>`; return; } sfRender(); try{ vOnPage(); }catch(e){} if(!SF.out.auto && !SF.busy) sfRunAuto(); }
+ for(const fn of ["switchMode","showLanding","openCQC","openDS","openCV","openLT","openWN","openCA","openON","openSA","openAN","openCI","openDR"]){ const f=window[fn]; if(typeof f!=="function") continue; window[fn]=function(...a){ if($("sfApp")) $("sfApp").hidden=true; return f.apply(this,a); }; }
+-document.addEventListener("langchange",()=>{ if($("sfApp")&&!$("sfApp").hidden&&SF.ready){ SF.cards.clear(); sfRender(); } });
++document.addEventListener("langchange",()=>{ if($("sfApp")&&!$("sfApp").hidden){ if($("sfMain").querySelector("[data-sfc-published]")) openSF(); else if(SF.ready){ SF.cards.clear(); sfRender(); } } });
+ 
+ /* r105: «آخرین به‌روزرسانی» = ساخت روزانهٔ نتیجه (نه فقط تاریخ فایل ۱ و ۱۵ ماه)؛ و پنهان‌شدن صفحه با باز شدن هر صفحهٔ دیگر */
+ (function(){ const fix=()=>{ const b=document.getElementById("sfUpdB"); if(b&&SF.upd) b.textContent=sfDTFmt(SF.upd); };
+@@ -24456,7 +24479,7 @@
+   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",go); else go(); }
+ /* r113: «وضعیت مدل‌های عددی» فقط داخل پنل مدیر (🛡) — برای هر مدل: ران جاری و قبلی، تعداد نقشه، آخرین ساعت اعتبار، وضعیت و سن آخرین به‌روزرسانی فهرست. فقط نمایش؛ از online/data/manifest.json می‌خواند. */
+ async function aNwpStatusHTML(){ const en=LANG==="en", T=(a,b)=>en?b:a;
+-  let man=null; try{ const r=await fetch(ON.base+"data/manifest.json?"+Date.now(),{cache:"no-store"}); if(r.ok) man=await r.json(); }catch(e){}
++  let man=null; try{ const r=await fetch(ON.base+(k?"data/manifest.json":"model_catalog.php"),{cache:"no-cache"}); if(r.ok) man=await r.json(); }catch(e){}
+   if(!man||!man.models) return `<h3>${T("وضعیت مدل‌های عددی","NWP model status")}</h3><p class="hint">${T("فهرست نقشه‌ها خوانده نشد.","Could not read the map manifest.")}</p>`;
+   const last={}, cnt={}; for(const i of man.items||[]){ if(!i.v) continue; const k=i.m; if(!last[k]||+i.v>+last[k]) last[k]=i.v; cnt[k]=(cnt[k]||0)+1; }
+   const age=man.updated?Math.round((Date.now()-Date.parse(man.updated))/60000):null, fmtR=r=>r?`${String(r).slice(0,4)}-${String(r).slice(4,6)}-${String(r).slice(6,8)} ${String(r).slice(8,10)}Z`:"—", fmtV=v=>!v?"—":String(v).length<10?"+"+FA(String(v))+"h":`${String(v).slice(0,4)}-${String(v).slice(4,6)}-${String(v).slice(6,8)} ${String(v).slice(8,10)}Z`;

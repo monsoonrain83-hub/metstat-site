@@ -21,8 +21,8 @@
     const palette = card.querySelector('#msMapPalette, .nvCbDd');
     if (!legend || !palette) {stat.palette = 'waiting_for_map'; return;}
     // R5's own picker, if present, owns this interaction. Do not stack controls.
-    if (card.querySelector('#paletteBtn, [data-r5-palette-native]')) {
-      stat.palette = 'native_picker_present'; return;
+    if (card.querySelector('#paletteBtn, [data-r5-palette-native]') || legend.getAttribute('aria-controls') === 'msR5ColorChoices') {
+      stat.palette = 'native_picker_preserved'; return;
     }
     legend.dataset.msR5Palette = version;
     const desc = isEnglish() ? 'Choose map color scale' : 'انتخاب رنگ‌بندی نقشه';
@@ -68,19 +68,62 @@
     summary.setAttribute('aria-label', isEnglish() ? 'Map layers and boundaries' : 'لایه‌ها و مرزهای نقشه');
     stat.layers = 'connected_to_original';
   }
+  // Only translate known map labels. Never touch IDs, option values, model
+  // names, data fields or the original event listeners/DOM structure.
+  const labels = [
+    ['.nvLayDd label:has([data-nvl="cnty"])','مرز شهرستان‌ها','County boundaries'],
+    ['.nvLayDd label:has([data-nvl="road"])','جاده‌ها','Roads'],
+    ['.nvLayDd label:has([data-nvl="riv"])','رودخانه‌ها','Rivers'],
+    ['.nvLayDd label:has([data-nvl="lake"])','دریاچه‌ها و دریاها','Lakes and seas'],
+    ['.nvLayDd label:has([data-nvl="vill"])','روستاها و شهرهای کوچک','Villages and towns'],
+    ['.nvLayDd label:has([data-nvl="pc"])','مراکز استان','Provincial capitals'],
+    ['.nvLayDd label:has([data-nvl="cs"])','مراکز شهرستان','County seats'],
+    ['.nvBrdDd > summary','ضخامت مرزها','Boundary widths'],
+    ['.nvBrdDd .ovp label:has(#nvBwC)','مرز شهرستان‌ها','County boundaries'],
+    ['.nvBrdDd .ovp label:has(#nvBwP)','مرز استان‌ها','Provincial boundaries'],
+    ['.nvRegBar > label','منطقه جغرافیایی','Geographic region'],
+    ['.nvTop .nvTl','مرزها','Boundaries']
+  ];
+  function changeTextNode(el, fa, en) {
+    if (!el) return;
+    const want=isEnglish()?en:fa;
+    // Native controls nested in labels remain identical; only their text node
+    // is rewritten. Staging after a language change is safe and idempotent.
+    const nodes=[...el.childNodes].filter(x=>x.nodeType===3);
+    const current=nodes.find(n=>n.nodeValue.trim());
+    if (!current) return;
+    if (current.nodeValue.trim() === want) return;
+    // Skip custom/unknown text. Do not stomp a label changed by another module.
+    if (![fa,en].includes(current.nodeValue.trim())) return;
+    current.nodeValue=current.nodeValue.replace(current.nodeValue.trim(),want);
+  }
   function localizeBorders(card) {
-    const select = card.querySelector('#nvBm');
-    if (!select) return;
-    const dict = isEnglish() ? {
-      prov:'Country and province', ctry:'Country only', cnty:'Country, province, county', none:'No boundaries'
-    } : {
-      prov:'مرز کشور و استان', ctry:'فقط مرز کشور', cnty:'کشور، استان و شهرستان', none:'بدون مرز'
+    const english=isEnglish();
+    for(const [selector,fa,en] of labels) changeTextNode(card.querySelector(selector),fa,en);
+    const select=card.querySelector('#nvBm');
+    const dict=english?{
+      prov:'Country and province',ctry:'Country only',cnty:'Country, province, county',none:'No boundaries'
+    }:{
+      prov:'مرز کشور و استان',ctry:'فقط مرز کشور',cnty:'کشور، استان و شهرستان',none:'بدون مرز'
     };
-    for (const opt of select.options) {
-      const target = dict[opt.value];
-      if (target && opt.textContent !== target) opt.textContent = target;
+    if(select){
+      for(const opt of select.options){
+        const value=dict[opt.value]; if(value && opt.textContent!==value)opt.textContent=value;
+      }
+      select.setAttribute('aria-label',english?'Boundary type':'نوع مرز');
     }
-    select.setAttribute('aria-label', isEnglish() ? 'Boundary type' : 'نوع مرز');
+    const staticTitles={
+      nvZi:['بزرگ‌نمایی','Zoom in'],nvZo:['کوچک‌نمایی','Zoom out'],
+      nvZr:['بازگشت به منطقهٔ انتخابی (Full extent)','Return to full geographic extent'],
+      nvInfoBtn:['توضیح نقشه و پارامتر','Map and parameter information'],
+      nvRefBtn:['بروزرسانی فهرست مدل‌ها و نقشه‌ها (بدون رفرش صفحه)','Update models and maps without reloading'],
+      nvSv:['ذخیره PNG','Save map']
+    };
+    for(const [id,captions] of Object.entries(staticTitles)){
+      const el=card.querySelector('#'+id);
+      if(el){el.title=captions[english?1:0];el.setAttribute('aria-label',captions[english?1:0]);}
+    }
+    changeTextNode(card.querySelector('#nvRefBtn .nvRfT'),'به روز رسانی','Update');
   }
   function mount() {
     const card = doc.querySelector('.nvCard');

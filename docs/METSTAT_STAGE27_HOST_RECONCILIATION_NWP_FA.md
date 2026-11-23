@@ -25,3 +25,17 @@ Date: 2026-11-23 (Iran local); status: **audit + NWP staging only**, not a live 
 
 ## Explicitly NOT completed
 Full AI GRIB decoding/regridding, scheduled download, published maps, host Stage 27 overlay, all-language UI verification, actual combined ECMWF/GFS production and live-site verification. Each needs separate test evidence and approval before production deployment.
+
+
+## R5 gap report reconciliation — 2026-11-23, administrator decisions
+Source: `metstat_R5_gap_report.md` compared a UI-only 305 KB R5 mockup with archived `host.zip` (6.4 MB index, archived CSS/JS). The report's 1,138 `!important`, 14 `MutationObserver` and 29 `setInterval` counts are **archive-specific findings, not independently confirmed for the currently deployed Stage22 index**. Recount on the exact active SHA before remediation.
+
+**Accept as investigation targets:** stacked stage19–24 CSS vs legacy r87–r127, competing DOM/control ownership, uncontrolled multilingual strings, incomplete native palette/timeline integration, possible legacy assets that survive despite newer overlays.
+
+**Do not copy the R5 mockup blindly:** it has no production forecast-data engine. Preserve approved deviations from the mockup: (a) the *existing* colored model buttons belong in one horizontal row at the top in fullscreen, never a newly added duplicate row or the mockup's vertical overlay; (b) EN/FA language toggle remains available; (c) the existing accuracy-monitoring and bulletin-map modules must not be deleted merely because absent from R5; (d) all device widths retain a zoomable desktop-style two-column shell, no mobile single-column reflow; (e) guest availability and real authentication must be preserved.
+
+**Safe replacement, not additive patching:** inventory `route → DOM owner → CSS rule owner → data dependency → translated strings`; identify the active constructor/handler before changing any one component. Replace or retire old UI ownership only after all callers/routes and rollback compatibility are tested. Never delete `assets` or rewrite `index.html` from archived ZIP on the strength of a filename alone. Different versions and hashes are not evidence of malicious modification.
+
+**Bilingual release gate for each component:** FA/RTL and EN/LTR checked on ordinary and fullscreen viewports (1440, 1280, 1024, 390 logical-pixel mobile with desktop canvas fit), including errors, tooltips and dynamically mounted modules. No unintended Persian UI in EN, and no untranslated UI strings in FA; scientific acronyms excepted. Confirm old buttons are gone from DOM ownership, not merely hidden by extra CSS.
+
+**P0 execution order:** (1) identify active Stage22/Stage26 deployment and route/asset checksums; (2) map one owner per component and inventory dead/redundant CSS/JS; (3) replace one component at a time with true R5 layout contracts while keeping approved differences; (4) browser regression and data-engine smoke checks; (5) only then quarantine and later remove verified-unused assets with rollback. `!important` and observer counts should trend down; reduction alone is not evidence of correctness.

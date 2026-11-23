@@ -1,0 +1,11 @@
+--- a/index.html
++++ b/index.html
+@@ -2495 +2495 @@
+- align-items:center!important;gap:5px!important;padding:0!important;margin:0!important;
++ align-items:center!important;gap:3px!important;padding:0!important;margin:0!important;
+@@ -21366 +21366 @@
+-   <canvas id="nvLg" class="nvLg"></canvas><div class="nvOv" id="nvOv"></div>
++   <canvas id="nvLg" class="nvLg" width="600" height="44"></canvas><div class="nvOv" id="nvOv"></div>
+@@ -30820 +30820 @@
+- ['composer','ترکیب نقشه‌های آفلاین و آنلاین','map',[
++ ['composer','نقشه‌های آنلاین و آفلاین','map',[

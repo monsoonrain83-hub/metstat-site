@@ -1,0 +1,45 @@
+/* Stage19 is an enhancement of existing controls, not a replacement layout. */
+.nvCard #nvLg[data-ms-r5-palette]{display:block;max-width:100%;cursor:pointer;border-radius:5px;outline-offset:3px}
+.nvCard #nvLg[data-ms-r5-palette]:focus-visible{outline:3px solid #399fd4}
+.nvCard .nvCbDd[data-ms-r5-palette-menu]{max-width:100%;z-index:35}
+.nvCard .nvCbDd[data-ms-r5-palette-menu][open] .ovp{max-height:min(55vh,500px);overflow:auto}
+.nvCard .nvLayDd > summary{display:inline-flex;align-items:center;gap:.4rem}
+.nvCard .nvLayDd > summary > svg[data-ms-r5-layers-icon]{height:19px;width:19px;flex:none;vertical-align:middle}
+/* R5 geometry parity for existing two-pane pages, with no duplicated controls. */
+html.ms9-active :is(#app,#dsApp,#cvApp,#ltApp,#onApp,#wnApp,#anAuto):not([hidden]) {
+  display:grid!important;
+  grid-template-columns:328px minmax(0,1fr)!important;
+  direction:rtl!important;
+  align-items:start;
+  gap:8px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  box-sizing:border-box;
+}
+html.ms9-active :is(#app,#dsApp,#cvApp,#ltApp,#onApp,#wnApp,#anAuto):not([hidden]) > aside {
+  grid-column:1!important;
+  min-width:0!important;
+  max-width:328px;
+  overflow-wrap:anywhere;
+}
+html.ms9-active :is(#app,#dsApp,#cvApp,#ltApp,#onApp,#wnApp,#anAuto):not([hidden]) > main {
+  grid-column:2!important;
+  min-width:0!important;
+  max-width:100%;
+}
+html.ms9-active #caApp:not([hidden]) {
+  display:grid!important;
+  grid-template-columns:328px minmax(0,1fr)!important;
+  gap:8px!important;
+  direction:rtl!important;
+  align-items:start;
+  width:100%!important;
+  max-width:none!important;
+}
+html.ms9-active #caApp:not([hidden]) > .caAsideTgl {grid-column:1 / -1;grid-row:1}
+html.ms9-active #caApp:not([hidden]) > aside {grid-column:1;grid-row:2;min-width:0}
+html.ms9-active #caApp:not([hidden]) > main {grid-column:2;grid-row:2;min-width:0}
+html.ms9-active .wrap :is(button,select,summary,input,a):focus-visible {
+ outline:2px solid #DC1937;outline-offset:2px;
+}

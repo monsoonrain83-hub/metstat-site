@@ -1,0 +1,78 @@
+name: "MetStat Tabler vNext isolated UI contract"
+on:
+  pull_request:
+    paths:
+      - "ui_patches/metstat_tabler_vnext_fullscreen_adapter.js"
+      - "ui_patches/metstat_tabler_vnext_fullscreen.css"
+      - "ui_patches/test_tabler_vnext_fullscreen.cjs"
+      - "ui_tabler_vnext_preview/**"
+      - "ui_tabler_vnext_r3/**"
+      - "ui_tabler_vnext_r4/**"
+      - "ui_tabler_vnext_r5/**"
+      - "docs/METSTAT_TABLER_DESKTOP_UI_VNEXT_20261122.md"
+      - ".github/workflows/tabler-vnext-contract.yml"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  ui-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: "Syntax: no runtime imports or untrusted injection"
+        run: node --check ui_patches/metstat_tabler_vnext_fullscreen_adapter.js
+      - name: "Safe original-node relocation and vertical map rail"
+        run: node ui_patches/test_tabler_vnext_fullscreen.cjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: "Install lightweight shell-check dependencies"
+        run: python -m pip install beautifulsoup4 tinycss2
+      - name: "Static, accessibility, route and HTTP deep-link checks"
+        working-directory: ui_tabler_vnext_preview
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: "r3 JavaScript syntax and source catalog"
+        run: |
+          node --check ui_tabler_vnext_r3/app.js
+          node --check ui_tabler_vnext_r3/route-data.js
+          node --check ui_tabler_vnext_r3/palette-data.js
+      - name: "r3 full-site 43-route structural and security contract"
+        working-directory: ui_tabler_vnext_r3
+        run: python -m unittest discover -s tests -p 'test_r3.py' -v
+      - name: "r3 repeatable offline HTML bundle"
+        working-directory: ui_tabler_vnext_r3
+        run: |
+          python build_offline.py
+          python -c "from pathlib import Path; p=Path('MetStat_vNext_r3_ALL_PAGES_INTERACTIVE_OFFLINE.html'); assert p.exists() and p.stat().st_size>150000"
+      - name: "r4 JavaScript syntax"
+        run: |
+          node --check ui_tabler_vnext_r4/app.js
+          node --check ui_tabler_vnext_r4/account-r4.js
+          node --check ui_tabler_vnext_r4/drawing-r4.js
+      - name: "r4 full-site 63-route and secure account/drawing contract"
+        run: python -m unittest discover -s ui_tabler_vnext_r4/tests -p test_r4.py -v
+      - name: "r4 standalone HTML can be rebuilt"
+        working-directory: ui_tabler_vnext_r4
+        run: |
+          python build_offline.py
+          python -c "from pathlib import Path; p=Path('MetStat_vNext_r4_ALL_PAGES_USER_DRAWING_INTERACTIVE_OFFLINE.html'); assert p.is_file() and p.stat().st_size>200000"
+      - name: "r5 authoritative sitemap and 68 direct routes"
+        run: |
+          node --check ui_tabler_vnext_r5/app.js
+          node --check ui_tabler_vnext_r5/model-icons.js
+          node --check ui_tabler_vnext_r5/ava-studio-r5.js
+          node --check ui_tabler_vnext_r5/feature-r5.js
+          python -m unittest discover -s ui_tabler_vnext_r5/tests -p test_r5.py -v
+      - name: "r5 offline single-file build"
+        working-directory: ui_tabler_vnext_r5
+        run: |
+          python build_offline.py
+          python -c "from pathlib import Path; p=Path('MetStat_vNext_r5_ALL_PAGES_AVA_STUDIO_INTERACTIVE_OFFLINE.html'); assert p.is_file() and p.stat().st_size>250000"
+      - name: "r5 browser lightning kernel deterministic checks"
+        run: node ui_tabler_vnext_r5/tests/test_lightning_web.cjs
+      - name: "Android content URI offline route regression"
+        run: node ui_tabler_vnext_r5/tests/test_content_uri.cjs

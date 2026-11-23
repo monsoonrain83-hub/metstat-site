@@ -1,0 +1,102 @@
+/* MetStat Tabler vNext - preview-only, fail-closed fullscreen relocation styling.
+ * Activates ONLY after bridge success marker; never rearranges legacy layout.
+ * Font, motion and model status align with the supplied Tabler-first design.
+ */
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock {
+  position:absolute;
+  z-index:70;
+  top:58px;
+  right:12px;
+  width:max-content;
+  max-height:calc(100% - 84px);
+  pointer-events:auto;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  direction:rtl;
+  scrollbar-width:thin;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods {
+  display:flex !important;
+  flex-flow:column nowrap !important;
+  align-items:flex-end !important;
+  justify-content:flex-start !important;
+  gap:6px !important;
+  max-height:none !important;
+  width:auto !important;
+  overflow:visible !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > * {
+  position:relative;
+  box-sizing:border-box !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:44px !important;
+  min-width:44px !important;
+  max-width:44px !important;
+  min-height:40px !important;
+  padding:5px 9px !important;
+  border-radius:10px !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  font-size:12px !important;
+  line-height:1.25 !important;
+  text-overflow:clip !important;
+  background:rgba(17,39,60,.92) !important;
+  border:1px solid rgba(255,255,255,.3) !important;
+  color:#fff !important;
+  box-shadow:0 3px 12px rgba(0,0,0,.25);
+  transition:width .22s ease,max-width .22s ease,background .18s ease !important;
+  outline-offset:2px;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > :is(:hover,:focus-visible,[data-expanded="true"]) {
+  width:138px !important;
+  min-width:138px !important;
+  max-width:138px !important;
+  background:rgba(23,53,78,.98) !important;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > :focus-visible {
+  outline:3px solid #91b8ff !important;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > *::before {
+  content:"";
+  display:block;
+  flex:0 0 9px;
+  width:9px;height:9px;
+  border-radius:50%;
+  margin-left:8px;
+  background:#8194a9;
+  box-shadow:0 0 0 4px rgba(255,255,255,.09);
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > [data-ms-status="ready"]::before {
+  background:#18a879;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > [data-ms-status="missing"]::before {
+  background:#e45a68;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > [data-ms-status="partial"]::before {
+  background:#448bda;
+}
+#nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > [data-ms-status="updating"]::before {
+  background:#f7b548;
+  animation:msVnextUpdating 1.35s ease-in-out infinite;
+}
+@keyframes msVnextUpdating {
+  0%,100% {opacity:1;transform:scale(1)}
+  50% {opacity:.4;transform:scale(.85)}
+}
+@media (prefers-reduced-motion:reduce) {
+  #nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > * {
+    transition:none !important;
+    animation:none !important;
+  }
+  #nvFs[data-ms-vnext-mounted="1"] .ms-vnext-model-dock #fsMods > *::before {
+    animation:none !important;
+  }
+}
+/* Unresponsive/clipped layouts and auto mobile stacking are FORBIDDEN.
+   A narrower viewport must scroll a desktop canvas; no secondary chips. */

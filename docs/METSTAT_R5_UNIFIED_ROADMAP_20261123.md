@@ -1,29 +1,112 @@
-# MetStat R5 unified roadmap — 2026-11-23 (review-only)
+# نقشه راه یکپارچه و قابل اجرا برای MetStat — مرجع R5 + الزامات ۱۴۰۵/۰۸/۳۰ + ممیزی MD + دستورهای مدیر
 
-**Authority and precedence:** `METSTAT_MASTER_REQUIREMENTS_1405-08-30_v1.md`, reference `OPEN_METSTAT_R5_ANDROID_FIXED(1).html`, `METSTAT_R5_VS_R96_GAP_AUDIT_20261123_FA.md`, `METSTAT_R96_INDEX_ASSETS_AUDIT_20261123_FA.md`, user requests in the MetStat project. R5 is UI/UX reference **only**; it contains preview/no-data stubs and must not overwrite live NWP/indices/synergy/GIS implementations.
+**ثبت:** ۲ آذر ۱۴۰۵ / ۲۳ نوامبر ۲۰۲۶  
+**وضعیت:** نقشه راه اجرایی + گزارش نخستین تغییر آزمایشی R9.6 Stage18؛ **نه اعلام انتشار روی wtafkik.ir**.  
+**مخازن:** `monsoonrain83-hub/metstat-site`، `monsoonrain83-hub/metstat-nwp`، `monsoonrain83-hub/metstat-sat-tiles`، `monsoonrain83-hub/iran-river-discharge-database`.  
+**مراجع:** `OPEN_METSTAT_R5_ANDROID_FIXED(1).html` (R5 نمایشی)، `METSTAT_MASTER_REQUIREMENTS_1405-08-30_v1.md` (الزام محصول و علم)، `METSTAT_R5_VS_R96_GAP_AUDIT_20261123_FA.md` (ماتریس فاصله)، `METSTAT_R96_INDEX_ASSETS_AUDIT_20261123_FA.md` (منشأ تداخل)، `chatgpt_prompts_metstat_v2.md` (اصل اصلاح کوچک، بدون داده‌دستکاری)، تصاویر و دستورهای اخیر مدیر.
 
-## Non-negotiables
-- Desktop two-column logical canvas (control sidebar on right ~328px, map/chart area on left) **at all device sizes**; mobile uses fit/zoom of the same canvas, not a single-column reflow.
-- One real state and element set for model, parameter, run, layers, extent, palette, playback and export; no duplicate toolbar/DOM ownership. The R201 asset must not reparent R9/R5 controls after render.
-- Preserve site routes, Persian RTL/Jalali rendering, English complete localization, optional guest login, scientific formulas and original Base64, site data/tiles, security and rollback.
-- No publishing/merging of this document-only PR. Any deployment requires SHA-identical ACTIVE cPanel sources, external backup, measured tests, administrator approval and rollback.
-- Done means actual, correct forecast tiles published and visible in the **existing on-site forecast page** with model, resolution, cycle, lead and valid-time provenance. A CI green badge, mock map, staged ZIP or new standalone page is not Done.
+## ۰. جمع‌بندی تصمیم‌های الزام‌آور
 
-## Priorities, owners and gates
-1. **P0 — Source integrity and regression gates.** Snapshot active index, CSS/JS assets, .htaccess, PHP, manifest and open PRs. Build a contract for 7 nav groups, 5 geographic selectors, canonical DOM ownership and an automated test matrix at 390x844, 844x390, 960x720 and 1440x900, two languages, regular/fullscreen. Gate: zero unexpected duplicate IDs, clipped controls, syntax errors, broken routes, map data changes.
-2. **P1 — Reconcile R5 model page.** Real parameter accordion driven by existing nvCat/nvP, two horizontal Direct/Derived choices, collapsible model/period/parameters/run; stacked-layers icon and single left map rail for zoom/full extent/borders/overlays; full-width colorbar itself opens palette choices; unified PNG/GIF export dialog. Maintain all original map functions; no dummy buttons. Gate: every UI action changes the real active model/parameter/zoom/output; valid PNG/GIF produced and verified.
-3. **P2 — Language and responsive desktop canvas.** Translate all menus/pages/modals/tooltips/errors and dynamically created controls from a single i18n dictionary, preserving scientific acronyms; accessibility edge tab, icon-only account/language/help, optional guest login. Fit same desktop canvas to portrait/landscape and reset page zoom independently of map zoom. Gate: every page × language × device/orientation × fullscreen passes visual and keyboard QA.
-4. **P3 — Restore *all* real pages and tools.** Inventory every nav route, backing JS, data/API and rendering path. Mount indices/ENSO, climate, satellite, mountain/application weather, synergy, verification, flash floods, maps, stations, document and meteorological converters in the same right-control/left-display shell; do not substitute R5 preview stubs. Gate: each route loads, works and has correct output/permissions, no 404 or placeholder for already-implemented engines.
-5. **P4 — Unified live global NWP.** One canonical same-cycle parameter/level/valid/region selector for ECMWF ~9km first else ~28km and GFS ~13km first else ~28km after read/finite coverage/unit QC; logical names ECMWF and GFS only. Preserve source/native/effective resolution/checksum provenance; ECMWF 00/12 real +360h and GFS real +384h only when fields actually exist. Validate AIFS/AIGFS source before adding real daily map products. World extent/tiles, dateline, five cascading location menus and actual admin boundaries; cPanel incremental budget ≤~5GB. Gate: live real frames visible on original forecast page, no Middle-East image falsely called global.
-6. **P5 — Climatology and publication correctness.** Daily anomaly families and pressure levels with correct baselines; daily 00/12 multimodel to +180h with ECMWF weight 60% and other independent physical models combined 40%, DEM correction once after mixing. Weekly EC46/CFS, monthly SEAS5/NMME/CanSIPS/IRI (IRI standalone), seasonal 3-month, stale/product-level manifests and backfill missing valid times; no zero-output successful publish. Gate: independent expected-vs-published frame count, run age, valid-time checks, event logs and QC.
-7. **P6 — GIS/stations/hydrology.** Country/region catalog + all 31 Iran provinces and verified county boundaries, no invented zoom. Station registry with provenance and ambiguity flags, Persian/Latin/finglish matching, multi-province filter and reproducible rain XLSX. Rain-driven flash flood potential from NWP + DEM + basins + soil/landcover, calibrated and marked uncertain. Gate: real geometries and reproducible data exports.
-8. **P7 — Security, performance and controlled release.** Review XSS/CSRF/auth/file upload/cPanel file execution/secrets, Core Web Vitals and cache/version consistency. Test production-shaped workflow against staging, backup, canary and rollback. Gate: admin approval and evidence of correct output and no security regression.
+1. **R5 مرجع هندسه، ناوبری، تراکم و تجربه کاربری است، نه موتور داده و نه نسخه قابل‌جایگزینی سایت.** ویژگی‌های تازهٔ تأییدشدهٔ مدیر (تب افقی مستقیم/ثانویه، پنل‌های جمع‌شونده، ابزار حساب آیکونی، EN/FA، دسترسی مهمان و ابزارهای ذخیره) بر پیش‌فرض نمایشی R5 تقدم دارند.
+2. **همه صفحات در تمام دستگاه‌ها ساختار دسکتاپی دارند:** ستون راست کنترل‌ها ≈۳۲۸px منطقی؛ ستون چپ نقشه/نمودار/خروجی؛ موبایل نمای این بوم را با زوم قابل‌کنترل نشان دهد، نه چیدمان تک‌ستونه.
+3. **هر کنترل فقط یک مالک و یک وضعیت مرکزی دارد.** یک دکمه واقعی مدل/ران/پارامتر، یک ریل ابزار نقشه، یک دیالوگ خروجی، یک فهرست لایه/مرز، یک منوی منطقه؛ سازوکار جابه‌جاکننده `metstat_map_ui_r201.js` نباید مجدداً سازوکار داخلی R9 را بازنویسی کند.
+4. **صفحات برای مهمان آزاد باشند**، ورود/ثبت‌نام/خروج/علاقه‌مندی‌ها در منوی آیکون حساب باقی بمانند؛ احراز هویت اختیاری است و تأیید سمت سرور برای ذخیره اطلاعات خصوصی هنوز لازم است.
+5. **پالت و اندازه‌گیری علمی تغییر نمی‌کنند** مگر آزمون و تأیید مدیر. نبود فایل یا فریم نقشه/مرز/ناحیه مجوز استفاده از عکس کهنه یا اکستنت اشتباه نیست.
+6. هیچ انتشار زنده بدون تأیید ACTIVE هاست، بکاپ خارج از Document Root، diff، آزمون، تأیید مدیر و برنامه بازگشت. CI سبز یا ZIP موفق برابر انتشار نیست.
 
-## Current implementation checkpoint (local candidate; not deployed)
-- R9.6 Stage16: Direct/Derived parameter accordion connected to the existing nvCat/nvP state.
-- Stage17: existing rendered colorbar is a palette trigger; one PNG/GIF export dialog connected to the old renderers.
-- **Stage18 local candidate:** four collapsible sidebar sections (state survives UI rebuild), SVG stacked-layers map tool and localized **new** control labels through `LANG/langchange`. No external asset changed; 14 inline JS syntax checks and exact 19 Base64 payloads passed. Mock-manifest Chromium QA: 390x844, 844x390, 960x720, 1440x900 all passed; no duplicate IDs or page errors; PNG/GIF modal controls visible and correctly nested. This does **not** prove a live GIF/PNG generated on cPanel.
+## ۱. ماتریس وضعیت و هدف‌ها
 
-**Remaining immediately:** localization audit of old R9 controls, owner reconciliation for the R201 map toolbar, actual manifest/data/PNG/GIF checks, all routes inventory, then integrated NWP producer→manifest→viewer QA. Track evidence by `source_sha → change → tests → pending/failed → rollback` and avoid duplicated feature implementations.
+| محور | وضعیت قابل اثبات در این نوبت | خروجی مقصد و معیار Done | اولویت |
+|---|---|---|---|
+| هدر، منوها، حساب، زبان | چارچوب R9 موجود؛ ناسازگاری فونت/برچسب در بخش‌ها | هفت منو بدون clipping؛ منوی حساب آیکونی، FA/EN کامل، راهنمای کوچک، ویلچر چسبیده به لبه | P1 |
+| پنل راست | Stage18: چهار گروه جمع‌شونده با کنترل‌های واقعی؛ بوم دو‌ستونه | تمام گروه‌ها keyboard-accessible، تنها آیتم مربوط باز، بدون ارتفاع اضافی؛ وضعیت باز/بسته حفظ شود | P1 |
+| پارامترها | Stage16/18: مستقیم/ثانویه و Accordion متصل به `nvCat/nvP` | گروه‌های بارش/دما/فشار/سطوح، زیرگروه و انتخاب واقعی همه متغیرها، بدون duplicate | P1 |
+| رنگ‌بندی و کالربار | Stage17: Canvas اصلی trigger انتخابگر؛ فهرست بصری | پالت‌ها با گرادیان و ticks واقعی، تمام عرض نقشه، انتخاب بدون تغییر ارزش رستر | P1 |
+| لایه‌ها/مرزها/ابزار | Stage18: SVG سه لایه، ریل کنار نقشه و پنل متصل؛ پوشش زیرکنترل‌ها هنوز نیازمند QA | کشور/استان/شهرستان/شهر/رود/جاده/مرز، همپوشانی، opacity، زوم/بازگشت، ریل چپ ثابت و قابل‌لمس | P1–P3 |
+| ذخیره PNG/GIF | Stage17: یک دیالوگ واقعی؛ آزمون بازشدن و دو تب در Stage18 موفق | اعتبارسنجی فایل خروجی واقعی PNG/GIF، فریم‌بندی، عرض، نام، جلوگیری از دانلود ناقص | P1 |
+| نمایش موبایل | تست هندسی محلی ۳۹۰، ۸۴۴، ۹۶۰، ۱۴۴۰؛ داده واقعی تست نشده | هر اندازه بدون بریدگی و تداخل؛ فول‌اسکرین افقی با نقشه با ارتفاع مفید؛ پنجره‌های کاربری/لایه و پالت قابل‌دسترسی | P2 |
+| ترجمه فارسی/انگلیسی | Stage18 فقط ویجت‌های تازه را دوزبانه کرده؛ بقیه سایت نیمه‌کاره | تمام متن‌های UI، tooltip، dialog، خطا، label map، صفحات lazy، RTL/LTR؛ اسم اختصارات علمی ثابت | P2–P3 |
+| صفحات فرعی | شواهد کد موتورهای قدیمی موجود؛ برخی placeholder به «در انتظار ادغام» ختم می‌شوند | تمام صفحات واقعی داخل shell دو‌ستونه، بدون حذف ماژول و قالب تک‌ستونه | P3 |
+| ECMWF / GFS | سیاست اولویت در ماژول NWP / PRهای باز؛ اتصال کامل producer→manifest→site تأیید نشده | فقط ECMWF و GFS منطقی؛ هر متغیر/زمان/منطقه یک منبع با QC و fallback همان run/valid | P4 |
+| AI آمریکا/اروپا، ICON، GEM، UKMO | برخی نام‌ها در UI؛ دسترسی داده با اعتبار واقعی راستی‌آزمایی نشده | افزودن واقعی AIFS/AIGFS و بقیه فقط با محصول، cycle، lead، محدوده و checksum معتبر | P4 |
+| جهان/ناحیه/مرز GIS | منوی پنج‌سطحی UI هست؛ جغرافیای واقعی ناقص | جهان، قاره، مناطق قراردادی، کشور، ۳۱ استان، شهرستان با boundary معتبر؛ زوم و بازگشت | P4–P6 |
+| آنومالی، هفتگی، ماهانه، فصلی | workflow/کد موجود؛ انتشار تازه/کامل روی هاست نیازمند audit | climatology/hindcast و units قابل دفاع، manifest شمارش یکتا، stale alerts، تولید مجدد فقط missing frames | P5 |
+| مولتی‌مدل و اصلاح DEM | فرمول‌ها موجود اما عملیاتی یکپارچه تأییدنشده | ECMWF وزن۶۰٪، سایر فیزیکی۴۰٪، تاریخ یکسان، یک عضو در هر رزولوشن ادغامی، DEM یکبار و پس از QC | P5 |
+| بانک ایستگاه و اکسل بارش | آرشیو ۵۷٬۰۷۶ نقطه مرجع است نه ادعای صحت کامل | matching چندزبانه با confidence/provenance؛ CSV/XLSX صحیح، فیلتر استان و خطای مبهم آشکار | P6 |
+| سرعت، امنیت و استقرار | بدون ممیزی کامل هاست و API | CSP، XSS/CSRF، auth/session، دسترسی فایل‌های خصوصی، size budget، TTFB/INP/LCP و rollback آزمایش‌شده | P0, P7 |
 
-**Related draft PRs:** site #19 geometry review; NWP #25 unified-resolution proposal, #30 output completeness, #31 unique forecast time audit. Their draft status does not imply production deployment.
+## ۲. برنامه اجرای مرحله‌ای با دروازه پذیرش
+
+### P0 — مهار رگرسیون و تعریف Spec Driven Development (پیش‌نیاز همه)
+- Snapshot از `index.html` **واقعاً فعال**، checksum فایل‌های ارجاعی `assets`، `.htaccess`، JSON manifest، مسیرهای PHP و وضعیت همه PRهای باز. برچسب `source_sha` برای هر تحویل.
+- `specs/R5_LAYOUT_CONTRACT.md` شامل شناسه‌های واقعی، قواعد CSS/layout، مالک DOM، acceptance matrix؛ `tests/R5_VISUAL_REGRESSION` برای چهار اندازه و دو زبان، معمولی/fullscreen.
+- بدون افزودن override غیرضروری، تایمر یا MutationObserver جدید؛ اگر R201 به صفحه اصلی DOM انتقال می‌دهد، اول مالکیت را حل کن.
+- **Gate:** build و smoke چهار رزولوشن، صفحه 404 ندهد، خروجی نقشه و auth قبلی تغییر نکند؛ rollback با همان zip بکاپ.
+
+### P1 — کنترل‌های واقعی صفحه مدل‌ها بر مبنای R5
+- Stage16: تب‌های مستقیم/ثانویه و فقط یک گروه باز (`nvCat`, `nvP` مبنای داده)؛ Stage17: کالربار به‌عنوان پالت و دیالوگ واحد PNG/GIF؛ **Stage18: چهار آکاردئون اصلی + آیکون لایه + ترجمه محدود.**
+- تداوم: انتقال تمام برچسب‌ها و تنظیمات ظاهری متعلق به نقشه به همان ریل چپ؛ راهنمای آیکون‌ها، Full extent، refresh، draw، zoom؛ بستن منو با کلیک خارج.
+- یکپارچه‌سازی Save: PNG و GIF و عرض و ساعت‌های شروع/پایان را فقط در دیالوگ ذخیره، با استفاده از `nvGif` و `nvExport` قدیمی.
+- **Gate:** تغییر مدل/دوره/ران/پارامتر/پالت نتیجه واقعی `nvResolve` را تغییر دهد، فایل PNG/GIF سالم و زمان/مقیاس خروجی مطابق اصل باشد، controls duplicate نداشته باشد.
+
+### P2 — ثبات نمایش در چهار اندازه، دو زبان و دسترس‌پذیری
+- موبایل باید **بوم یکسان دسکتاپ** را fit کند؛ pinch و دکمه بازگشت به نمای کامل صفحه، مستقل از pan/zoom نقشه؛ رندر افقی موبایل بدون شکستن نقشه.
+- ترجمه با دیکشنری واحد و کلیدهای UI، نه تغییر دستی رشته‌ها پس از ساخت DOM. `langchange` باید بخش‌های lazy را هم متناسب sync کند. چک خودکار فارسی در صفحه EN و EN ناخواسته در UI فارسی (به‌جز نام علمی).
+- **Gate:** Chromium چهار viewport × دو زبان × normal/fullscreen × map tool/popover؛ عدم clipping/overflow و عدم تغییر محاسبات علمی.
+
+### P3 — بازیابی تمامی صفحات واقعی روی پوسته مشترک
+- صفحه‌به‌صفحه inventory route→mount→assets→API→workflow؛ مسیرهای `synnergy/analysis`، شاخص‌های اقلیمی ENSO/PDO/AMO/IOD/QBO، تصاویر ماهواره، هواشناسی کاربردی/کوهستان، نقشه‌های آنلاین/آفلاین، همه زیرصفحات «پایش و پیش‌بینی»، verification، flash flood، جعبه‌ابزار هواشناسی، پیش‌بینی ماهانه/فصلی و ابزارهای تبدیل فایل.
+- برای هر صفحه: سایدبار ≈۳۲۸px سمت راست، پنل اصلی چپ، placeholder فقط با علت مشخص؛ بازیابی ماژول اصلی با تست داده یا ممنوعیت ادعای انتشار.
+- مبدل‌ها: PDF/Word/TXT/CSV/Excel و GRIB/NetCDF/GeoTIFF/CSV فقط در صورت وجود backend واقعی و محدودیت امنیت آپلود، نه دکمه بدون عملکرد.
+- **Gate:** smoke هر route؛ بدون 404/403 غیرمنتظره، فایل ناسالم، حذف المان یا شبکه تک‌ستونه، و بدون حلقه redirect.
+
+### P4 — زنجیره واحد NWP تا جهان واقعی
+- canonical selector برای ECMWF ۹km→۲۸km و GFS ~۱۳km→۲۸km با شرط واحد/پارامتر/تراز/ساعت/ران/محدوده و پوشش معتبر؛ فریم جزئی high-res را بدون QC به‌عنوان کامل قبول نکن.
+- انتخاب و انتشار نام‌های منطقی `ecmwf` و `gfs`؛ metadata source resolution/native/effective و checksum هر فریم؛ عدم استفاده از رزولوشن‌های دوگانه به‌عنوان اعضای مولتی‌مدل.
+- چرخه‌های 00/12، +۳۶۰ ECMWF به شرط واقعی و +۳۸۴ GFS به شرط منبع؛ AIFS و AIGFS جدا از مولتی‌مدل فیزیکی تا دستور جدید.
+- جهان واقعی: گستره، projection، tiles، عبور ±۱۸۰، مناطق/قاره/کشور، محدودیت ظرفیت هاست. بودجه افزایشی ≤حدود ۵GB، جلوگیری از ارسال GRIB عظیم به cPanel.
+- **Gate:** نمونه‌های حقیقی high-res-present/coarse-only/missing، عدم fallback اشتباه جغرافیایی، مدل و valid time درست در نقشه و manifest زنده همان صفحه اصلی.
+
+### P5 — محصولات اقلیمی و اعتبار علمی
+- روزانه: بارش ۱/۳/۶/۲۴ساعته و تجمعی، سطح، ۸۵۰/۷۰۰/۵۰۰/۳۰۰/۲۰۰ hPa، anomalous fields با baseline واقعی و واحد درست.
+- مولتی‌مدل روزانه 00/12 تا +۱۸۰، وزن ۶۰٪ ECMWF، مجموع ۴۰٪ سایر اعضای فیزیکی، QC ماسک/هم‌مکان‌سازی/انباشت؛ اصلاح بارش DEM فقط یک‌بار پس از ترکیب.
+- هفتگی EC46/CFSv2 و ماهانه SEAS5/NMME/CanSIPS/IRI؛ فصلی سه‌ماهه. IRI مستقل، حذف از میانگین‌های وزنی. قوانین miss/retry/stale با مسئولیت production pipeline و نه درخواست کاربر.
+- بررسی مکمل بودن PRهای NWP برای اعتبار complete بودن (PR #30) و unique forecast times (PR #31) و سازگاری با مدل واقعی، پیش از ادغام.
+- **Gate:** manifest با count زمان یکتا، تاریخ publication و valid، مقایسه فریم‌های مورد انتظار با موجود، هشدار publication stale، عدم zero-output success.
+
+### P6 — GIS، بانک ایستگاه، اکسل همبارش و سیل
+- کاتالوگ معتبر continent→region→country→admin1→admin2؛ ۳۱ استان، شهرستان‌های واقعی ایران؛ فقط با polygon معتبر گزینه زوم فعال باشد؛ boundary/landcover/DEM/provenance.
+- بانک ایستگاهی: داده‌های قطعی/غیرقطعی جدا، نام فارسی/لاتین/فینگلیش و fuzzy matching با بازبینی دستی؛ جلوگیری از نسبت‌دادن مختصات روستا به ایستگاه.
+- بارش ایستگاه‌ها: انتخاب چنداستانی قبل از جست‌وجو، گزارش confidence/ambiguous/unmatched، XLSX قابل تحویل با حفظ هدر و metadata؛ نقشه همبارش باید بازتولید و آزمون شود.
+- سیلاب ناگهانی ایران از GFS و ECMWF مستقل با ۱/۳/۶/۲۴h، DEM/شیب/کاربری/حوضه/خاک و ارزیابی تاریخی.
+- **Gate:** GIS هندسی واقعی و کنترل کیفیت ایستگاهی، عدم false-positive؛ گزارش اعتبار مکانی و عدم‌قطعیت.
+
+### P7 — ممیزی امنیت، عملکرد و انتشار
+- حذف مسیر خصوصی در web root؛ canonical document root و `.htaccess` امن، جلوگیری از directory listing و PHP upload execution؛ اعتبارسنجی ورودی، کنترل XSS/SQLi/CSRF/session، فایل و MIME و quota.
+- اندازه‌گیری Core Web Vitals و request waterfall، cache-busting versioned assets و stale-cache، تولید batch نقشه قبل از درخواست کاربر به‌ویژه SEAS5.
+- deploy با artefact checksum، staging URL، smoke و rollback، بدون پوشاندن عیب با خطایابی روی سایت live.
+- **Gate:** هیچ secret در repository/artifact، restore قابل تکرار، map visual comparison، مدیر مجوز انتشار بدهد.
+
+## ۳. ثبت کار **انجام‌شده در همین نوبت**: R9.6 Stage18
+
+**ورودی دقیق:** `MetStat_R96_R5_STAGE17_R5_UI_CONTROLS_index.html`؛ `assets/metstat_map_ui_r201.js` داخل ZIP مرحله ۱۷ با هش یکسان حفظ شد.
+
+- افزودن جمع/بازشدن ۴ بخش واقعی در پنل راست: دوره پیش‌بینی، مدل، پارامترها و ران؛ state باز/بسته در بازسازی مجدد رابط حفظ می‌شود. هیچ select عملیاتی حذف یا duplicate نشده است.
+- آیکون لایه‌ها از glyph نامفهوم به SVG سه لایه روی هم تغییر یافت؛ ارتباط همان `details` و محتوای قبلی حفظ شد.
+- برچسب‌های جدید پنل، تب مستقیم/ثانویه، ابزارهای لایه و تنظیمات در فارسی/انگلیسی از `LANG` و رویداد `langchange` به‌روز می‌شوند؛ **کل سایت هنوز ترجمه کامل نشده**.
+- آزمون پنجره واحد PNG/GIF نشان داد دکمه تأیید و انصراف داخل دیالوگ اصلی است و تب GIF واقعاً فیلدهای وابسته را نشان می‌دهد؛ برخلاف تشخیص اولیه، *تگ بسته‌شدن اضافی وجود نداشت* و کد دیالوگ بدون تغییر باقی ماند.
+- چهار اندازه ۳۹۰×۸۴۴، ۸۴۴×۳۹۰، ۹۶۰×۷۲۰، ۱۴۴۰×۹۰۰: آزمون DOM، تغییر زبان، باز/بسته، بازسازی رابط، عدم ID تکراری و عدم pageerror: **۴/۴ موفق** با مانفیست آزمایشی.
+- Node.js: ۱۴ اسکریپت inline بدون خطای syntax؛ ۱۹ payload base64 با مقایسه دقیق رشته‌ای بدون تغییر.
+- خروجی: `MetStat_R96_R5_STAGE18_ACCORDION_I18N_EXPORT_TEST.zip` با `index.html` و نسخه هماهنگ `assets/metstat_map_ui_r201.js`، *بسته آزمایشی و نه انتشار*. فایل `metstat_r5_stage18_test_report.json` شواهد را دارد.
+
+## ۴. کارهای مسدود و نیازمند آزمون زنده
+
+- آخرین فایل ACTIVE cPanel و routeهای واقعی را باید با همین source مقایسه کرد؛ احتمال تفاوت با فایل آزمایشی وجود دارد.
+- داده واقعی نقشه، خروجی GIF و PNG قابل دانلود، پنج‌سطح GIS، ورود مهمان روی backend، تمام صفحات فرعی، مدل AI، برنامه SEAS5 و ذخیره‌سازی جهانی در این مرحله تأیید نشده‌اند.
+- مسیر مناسب: ابتدا PRهای review-only، تأیید CI و اندازه‌گیری روی staging با assets واقعی؛ بعد تأیید مدیر برای انتشار.
+
+## ۵. قالب گزارش هر اجرای بعدی
+
+`HEAD / active SHA / input spec revision → problem reproduced → source owner and exact change → unit/DOM/browser/data security tests → staged artifacts and hashes → verified / failed / blocked → next reversible step`.
+
+**تعریف انجام‌شدن نهایی:** UI با R5 مطابقت عملکردی و هندسی دارد **و** خروجی داده واقعی دارای مدل/ران/زمان/رزولوشن/گستره صحیح روی خود `wtafkik.ir/monitoring-forecast/weather-models/online-maps` قابل استفاده است. بخش‌های فاقد داده با پیام شفاف مشخص می‌شوند؛ هیچ عملیات آزمایشی معادل انتشار نهایی اعلام نمی‌شود.

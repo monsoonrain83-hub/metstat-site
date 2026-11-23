@@ -1,0 +1,7 @@
+/* Stage19 is an enhancement of existing controls, not a replacement layout. */
+.nvCard #nvLg[data-ms-r5-palette]{display:block;max-width:100%;cursor:pointer;border-radius:5px;outline-offset:3px}
+.nvCard #nvLg[data-ms-r5-palette]:focus-visible{outline:3px solid #399fd4}
+.nvCard .nvCbDd[data-ms-r5-palette-menu]{max-width:100%;z-index:35}
+.nvCard .nvCbDd[data-ms-r5-palette-menu][open] .ovp{max-height:min(55vh,500px);overflow:auto}
+.nvCard .nvLayDd > summary{display:inline-flex;align-items:center;gap:.4rem}
+.nvCard .nvLayDd > summary > svg[data-ms-r5-layers-icon]{height:19px;width:19px;flex:none;vertical-align:middle}

@@ -1,0 +1,78 @@
+{
+  "scope": "synthetic DOM only; NOT production or real weather maps",
+  "cases": [
+    {
+      "width": 390,
+      "height": 844,
+      "language": "fa",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "language": "en",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "language": "fa",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "language": "en",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 960,
+      "height": 720,
+      "language": "fa",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 960,
+      "height": 720,
+      "language": "en",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "language": "fa",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "language": "en",
+      "palette_click_keyboard": "pass",
+      "layer_icon_count": 1,
+      "boundary_i18n": "pass",
+      "dom_rebuild": "pass"
+    }
+  ],
+  "pass": 8
+}

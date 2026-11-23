@@ -125,7 +125,77 @@
     }
     changeTextNode(card.querySelector('#nvRefBtn .nvRfT'),'به روز رسانی','Update');
   }
+
+  // Top-level navigation belongs to the existing router. Modify only its
+  // text span; never replace button/icon/caret nodes or touch data-group.
+  const navigationText = {
+    monitor:  ['پایش و پیش‌بینی', 'Monitor & Forecast'],
+    applied:  ['هواشناسی کاربردی', 'Applied Weather'],
+    synoptic: ['تحلیل همدیدی', 'Synoptic'],
+    climate:  ['هسته تحلیل اقلیم', 'Climate'],
+    composer: ['نقشه‌های آنلاین و آفلاین', 'Online / Offline Maps'],
+    toolbox: ['جعبه ابزار هواشناسی', 'Weather Tools'],
+    ava:     ['استودیو آوا', 'Ava Studio']
+  };
+  function localizeHeader() {
+    const english = isEnglish();
+    for (const button of doc.querySelectorAll('.ms7-main[data-group]')) {
+      const names = navigationText[button.dataset.group];
+      if (!names) continue;
+      const span = [...button.children].find(el => el.tagName === 'SPAN' && !el.classList.contains('ms7-arrow'));
+      if (!span) continue;
+      const current = span.textContent.trim();
+      const target = names[english ? 1 : 0];
+      if (current === target) continue;
+      if (!names.includes(current)) continue; // preserve any unknown custom label
+      span.textContent = target;
+      button.setAttribute('aria-label', target);
+    }
+    stat.header = 'localized_known_navigation';
+  }
+  const geoWords = {
+    continent: {labels:['قاره','Continent'], options:{asia:['آسیا','Asia'],europe:['اروپا','Europe']}},
+    region: {labels:['منطقه','Region'], options:{me:['خاورمیانه','Middle East'],eu:['اروپا و شمال خزر','Europe and North Caspian']}},
+    country: {labels:['کشور','Country'], options:{'':['تمام کشورهای منطقه','All countries in region'],iran:['ایران','Iran']}},
+    province: {labels:['استان / ایالت','Province / State'], options:{'':['همه استان‌ها','All provinces']}},
+    county: {labels:['شهرستان','County'], options:{'':['زوم شهرستان هنوز فعال نیست','County zoom is not active']}}
+  };
+  const geoAliases = {
+    'Province / State':['Province / ایالت','ایالت / Province','Province'],
+    'All countries in region':['تمام Region','تمام منطقه','All Region'],
+    'All provinces':['تمام Provinces','تمام استان‌ها'],
+    'County zoom is not active':['زوم County هنوز Active نیست','County zoom not yet active'],
+    'Europe and North Caspian':['Europe and North کاسپین']
+  };
+  function localizeGeography() {
+    const english=isEnglish();
+    for (const el of doc.querySelectorAll('select[data-ms9-geo]')) {
+      const spec=geoWords[el.dataset.ms9Geo];
+      if (!spec) continue;
+      const name=spec.labels[english?1:0];
+      const parent=el.parentElement;
+      if (parent?.tagName==='LABEL') {
+        const labelNode=[...parent.childNodes].find(n=>n.nodeType===3 && n.nodeValue.trim());
+        if(labelNode) {
+          const old=labelNode.nodeValue.trim();
+          const known=[...spec.labels,...(geoAliases[spec.labels[1]]||[])];
+          if (old!==name && known.includes(old)) labelNode.nodeValue=labelNode.nodeValue.replace(old,name);
+        }
+      }
+      el.setAttribute('aria-label',name);
+      for (const option of el.options) {
+        const words=spec.options[option.value];
+        if(!words)continue;
+        const target=words[english?1:0],current=option.textContent.trim();
+        const known=[...words,...(geoAliases[words[1]]||[])];
+        if(current!==target && known.includes(current)) option.textContent=target;
+      }
+    }
+    stat.geo = 'localized_known_geography';
+  }
   function mount() {
+    localizeHeader();
+    localizeGeography();
     const card = doc.querySelector('.nvCard');
     if (!card) return;
     installPalette(card); installLayerIcon(card); localizeBorders(card);
@@ -145,6 +215,21 @@
     new MutationObserver(mutations => {
       if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) schedule();
     }).observe(root, {childList:true, subtree:true});
+    // Header is outside #onApp and can be rebuilt independently.
+    const nav = doc.querySelector('.top-in');
+    if (nav && !root.contains(nav)) {
+      new MutationObserver(mutations => {
+        if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) schedule();
+      }).observe(nav, {childList:true, subtree:true});
+    }
+    doc.addEventListener('langchange', schedule);
+    const geo = doc.querySelector('.ms9-geo-bar');
+    if (geo) {
+      new MutationObserver(mutations => {
+        if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) schedule();
+      }).observe(geo, {childList:true, subtree:true});
+    }
+
     doc.addEventListener('change', e => {
       if (e.target?.id === 'lang' || e.target?.matches?.('[data-lang]')) schedule();
     });

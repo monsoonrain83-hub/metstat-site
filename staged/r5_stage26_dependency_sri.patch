@@ -1,0 +1,47 @@
+--- a/assets/metstat_r5_stage24_restore.js
++++ b/assets/metstat_r5_stage24_restore.js
+@@ -2,7 +2,21 @@
+  * Only preapproved first-party HTML with SHA-256 equality can be mounted. */
+ (function(){'use strict';
+  const MODULES={"isohyet":{"path":"/online/station_isohyet_v26.html","sha256":"faae6460663df2170a68898c51f1e19f9a7f80080dacd7cc8f106a8f25cec629","title":"موتور همبارش ایستگاهی","navFa":"تهیه نقشه‌های همبارش از داده‌های ایستگاهی"},"toolbox-full":{"path":"/online/meteo_toolbox_v22.html","sha256":"7d2037068e621e79925ab6b64a5cba5232773fed450f62e826b534e98d930d87","title":"جعبه‌ابزار کامل هواشناسی","navFa":"جعبه‌ابزار کامل هواشناسی"},"verify-forecast":{"path":"/online/forecast_verification_v22.html","sha256":"8393def632f1adb74fa81ee9649f6c7092a1a569fb7918edee2a820f1e5a841c","title":"پایش دقت مدل‌ها","navFa":"پایش دقت مدل‌ها"},"bulletin-maps":{"path":"/online/bulletin_maps_v21.html","sha256":"081145bec35d883c1cd5a398823ac45bd50fa97f64361d9a56b79b38ecc2e6bd","title":"نقشه‌های بولتن","navFa":"نقشه‌های بولتن"},"toolbox-spatial":{"path":"/online/meteo_toolbox_v22.html","sha256":"7d2037068e621e79925ab6b64a5cba5232773fed450f62e826b534e98d930d87","title":"درون‌یابی بارش ایستگاهی IDW","navFa":"درون‌یابی ایستگاهی IDW","tab":"spatial"},"convert-unit":{"path":"/online/meteo_toolbox_v22.html","sha256":"7d2037068e621e79925ab6b64a5cba5232773fed450f62e826b534e98d930d87","title":"تبدیل واحدهای هواشناسی","navFa":"تبدیل واحدهای هواشناسی","tab":"calc","category":"تبدیل واحد"}};
+- const verify=async(path,expected)=>{
++  const INTEGRITY=Object.freeze({
++    layers:'sha256-sytJHHEF93x9I3Z92Hc/N+257aSAuQZ6Ks5vTWFjgLg=',
++    atlas:'sha256-sSFhSwrd9p7EuztLe4+fAx93PmnFo1x+zFjwW/SLcz0='
++  });
++  // Transform only the hash-verified archived rain HTML, never the original engines.
++  function pinIsohyetDependencies(html){
++    const layerTag='<script src="../assets/map_layers.js"></script>';
++    const atlasFetch="fetch('atlas_stations_v28.json',{cache:'no-cache'})";
++    if(html.split(layerTag).length!==2||html.split(atlasFetch).length!==2)
++      throw Error('Archived isohyet dependency signatures changed');
++    html=html.replace(layerTag,'<script src="../assets/map_layers.js" integrity="'+INTEGRITY.layers+'" crossorigin="anonymous" onload="document.documentElement.dataset.ms26Layers=\'ok\'" onerror="document.documentElement.dataset.ms26Layers=\'failed\'"></script>');
++    html=html.replace(atlasFetch,"fetch('atlas_stations_v28.json',{cache:'no-cache',integrity:'"+INTEGRITY.atlas+"'})");
++    return html;
++  }
++const verify=async(path,expected)=>{
+    if(!window.crypto||!crypto.subtle)throw Error('Secure context required for file verification');
+    const response=await fetch(path,{cache:'no-store',redirect:'error',credentials:'same-origin'});
+    if(!response.ok)throw Error('HTTP '+response.status);
+@@ -33,6 +47,12 @@
+      if(!root.isConnected)return;
+      try{
+        const d=frame.contentDocument;if(!d||!d.body)return;
++       // The rain polygon script is not allowed to run if its SRI fails.
++       if(route==='isohyet'&&d.documentElement.dataset.ms26Layers!=='ok'){
++         const error=document.createElement('p');error.className='ms23-loading ms23-error';
++         error.setAttribute('role','alert');error.textContent='مرزهای نقشه همبارش با نسخه تأییدشده مطابقت ندارند؛ ماژول برای جلوگیری از نمایش نقشه نادرست متوقف شد.';
++         frame.remove();root.replaceChildren(error);return;
++       }
+        d.body.classList.add('embed');
+        const style=d.createElement('style');style.setAttribute('data-ms23-fit','');
+        style.textContent='html,body{min-width:0}body>.shell,body>.layout{max-width:none}';d.head.append(style);
+@@ -46,7 +66,7 @@
+    });
+    Promise.resolve().then(()=>verify(spec.path,spec.sha256)).then(verifiedHtml=>{
+      if(!root.isConnected)return;
+-     frame.srcdoc=verifiedHtml;root.append(frame);banner.remove();
++     frame.srcdoc=spec.path.endsWith('/station_isohyet_v26.html')?pinIsohyetDependencies(verifiedHtml):verifiedHtml;root.append(frame);banner.remove();
+    }).catch(e=>{
+      if(!root.isConnected)return;
+      banner.textContent='این ماژول در فایل‌های نصب‌شده پیدا نشد یا با نسخه بررسی‌شده مطابقت ندارد. برای جلوگیری از نمایش نسخه اشتباه باز نشد.';

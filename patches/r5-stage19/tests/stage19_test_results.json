@@ -9,7 +9,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 390,
@@ -19,7 +21,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 844,
@@ -29,7 +33,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 844,
@@ -39,7 +45,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 960,
@@ -49,7 +57,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 960,
@@ -59,7 +69,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 1440,
@@ -69,7 +81,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     },
     {
       "width": 1440,
@@ -79,7 +93,9 @@
       "layer_icon_count": 1,
       "boundary_i18n": "pass",
       "stage18_native_palette_preserved": "pass",
-      "dom_rebuild": "pass"
+      "dom_rebuild": "pass",
+      "header_navigation_i18n": "pass",
+      "geography_i18n": "pass"
     }
   ],
   "pass": 8

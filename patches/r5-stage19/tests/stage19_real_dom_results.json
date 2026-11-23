@@ -1,0 +1,78 @@
+{
+  "scope": "actual Stage18 full HTML loaded offline by browser set_content, no network or real NWP data; NOT viewport-fit/full-route QA",
+  "cases": [
+    {
+      "width": 390,
+      "height": 844,
+      "initial": "en",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "initial": "fa",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "initial": "en",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "initial": "fa",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 960,
+      "height": 720,
+      "initial": "en",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 960,
+      "height": 720,
+      "initial": "fa",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "initial": "en",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "initial": "fa",
+      "header_groups": 7,
+      "geo_selectors": 5,
+      "locale_roundtrip": "pass",
+      "original_options_values": "preserved"
+    }
+  ],
+  "pass": 8
+}

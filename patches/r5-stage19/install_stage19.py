@@ -9,6 +9,7 @@ import hashlib
 from pathlib import Path
 import shutil
 import sys
+import re
 
 CSS = 'assets/metstat_r5_stage19_controls.css'
 JS = 'assets/metstat_r5_stage19_controls.js'
@@ -34,8 +35,14 @@ def install(index: Path, dry_run: bool) -> str:
         dst = index.parent / rel
         if dst.exists() and sha256(dst) != sha256(home / rel):
             raise FileExistsError(f'Refusing to overwrite differing asset: {dst}')
-    text = text.replace('</head>', f'<link rel="stylesheet" href="{CSS}?v=19" {MARK}>\n</head>', 1)
-    text = text.replace('</body>', f'<script defer src="{JS}?v=19" {MARK}></script>\n</body>', 1)
+    # Never use str.replace('</body>', ..., 1): embedded JS templates contain
+    # literal body closers. Match actual document boundary tags only.
+    head_re = re.compile(r'</head>(?=\s*<body\b)', re.IGNORECASE)
+    body_re = re.compile(r'</body>(?=\s*</html>\s*\Z)', re.IGNORECASE)
+    if len(head_re.findall(text)) != 1 or len(body_re.findall(text)) != 1:
+        raise ValueError('Unable to identify unique document boundary tags')
+    text = head_re.sub(f'<link rel="stylesheet" href="{CSS}?v=19" {MARK}>\n</head>', text, count=1)
+    text = body_re.sub(f'<script defer src="{JS}?v=19" {MARK}></script>\n</body>', text, count=1)
     if dry_run:
         return 'dry-run passed (no files written)'
     backup = index.with_suffix(index.suffix + '.stage19.bak')

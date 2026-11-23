@@ -50,7 +50,7 @@ def make(stage26: Path, host_archive: Path, dest: Path):
     # Script initialisation order is preserved. Both IIFEs still wait for DOM.
     result[CANONICAL_JS] += b"\n;\n" + result.pop(OLD_JS) + b"\n"
     # Only map-specific selectors are combined; no page layout rewrite.
-    result[CANONICAL_CSS] = restored[CANONICAL_CSS] + b"\n" + result.pop(OLD_CSS)
+    result[CANONICAL_CSS] = result.pop(OLD_CSS) + b"\n" + restored[CANONICAL_CSS]
     for name in MISSING:
         if name != CANONICAL_CSS:
             result[name] = restored[name]

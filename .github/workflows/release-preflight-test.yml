@@ -1,0 +1,34 @@
+name: Validate MetStat release safety
+on:
+  pull_request:
+    paths:
+      - 'tools/metstat_release_preflight.py'
+      - 'releases/MetStat_r121_RELEASE_MANIFEST.json'
+      - 'tests/test_release_preflight.py'
+      - '.github/workflows/deploy-site.yml'
+      - '.github/workflows/release-preflight-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/metstat_release_preflight.py'
+      - 'releases/MetStat_r121_RELEASE_MANIFEST.json'
+      - 'tests/test_release_preflight.py'
+      - '.github/workflows/deploy-site.yml'
+      - '.github/workflows/release-preflight-test.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and parse manifest
+        run: |
+          python -m py_compile tools/metstat_release_preflight.py tests/test_release_preflight.py
+          python -m json.tool releases/MetStat_r121_RELEASE_MANIFEST.json > /dev/null
+      - name: Exercise fail-closed SHA-256 release gate
+        run: python -m unittest discover -s tests -p test_release_preflight.py -v

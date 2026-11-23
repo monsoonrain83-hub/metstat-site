@@ -8,7 +8,7 @@ results=[]
 html='''<!doctype html><html lang="fa"><head></head><body><main id="onApp"><section class="nvCard">
 <canvas id="nvLg" width="600" height="44"></canvas>
 <details class="nvCbDd"><summary>رنگ‌بندی</summary><div><button data-cb="def">Default</button></div></details>
-<details class="nvLayDd"><summary>لایه‌ها</summary><div>layer toggles</div></details>
+<details class="nvLayDd"><summary>لایه‌ها</summary><div><label><input type="checkbox" data-nvl="road"> جاده‌ها</label><label><input type="checkbox" data-nvl="riv"> رودخانه‌ها</label></div></details>
 <select id="nvBm"><option value="prov">x</option><option value="ctry">x</option><option value="cnty">x</option><option value="none">x</option></select>
 </section></main></body></html>'''
 with sync_playwright() as p:
@@ -25,10 +25,12 @@ with sync_playwright() as p:
         iconCount: document.querySelectorAll('.nvLayDd svg[data-ms-r5-layers-icon]').length,
         border: document.querySelector('#nvBm option').textContent,
         status: window.MetStatR5Stage19.palette,
+        road: document.querySelector('.nvLayDd [data-nvl="road"]').parentNode.textContent.trim(),
         ids: [...document.querySelectorAll('[id]')].map(x=>x.id)
       })''')
       assert initial['palette'] and initial['iconCount']==1,initial
       assert initial['border']==('Country and province' if lang=='en' else 'مرز کشور و استان'),initial
+      assert initial['road']==('Roads' if lang=='en' else 'جاده‌ها'),initial
       page.locator('#nvLg').click()
       assert page.locator('.nvCbDd').get_attribute('open') is not None
       page.locator('#nvLg').focus()
@@ -37,6 +39,10 @@ with sync_playwright() as p:
       page.locator('#nvLg').focus()
       page.keyboard.press('Space')
       assert page.locator('.nvCbDd').get_attribute('open') is not None
+      # R5 Stage18 owns the palette click when this native ARIA target exists.
+      page.evaluate("""() => {const el=document.querySelector('#nvLg');el.setAttribute('aria-controls','msR5ColorChoices');el.replaceWith(el.cloneNode(true));}""")
+      page.wait_for_timeout(100)
+      assert page.evaluate('window.MetStatR5Stage19.palette')=='native_picker_preserved'
       # Trigger a subtree replacement and verify idempotent mounting.
       page.evaluate('''() => {
         const original=document.querySelector('.nvCard');
@@ -48,10 +54,10 @@ with sync_playwright() as p:
       }''')
       page.wait_for_timeout(100)
       assert page.locator('.nvLayDd svg[data-ms-r5-layers-icon]').count()==1
-      assert page.locator('#nvLg[data-ms-r5-palette]').count()==1
+      assert page.locator('#nvLg[aria-controls="msR5ColorChoices"]').count()==1
       assert len(initial['ids'])==len(set(initial['ids']))
       results.append({'width':w,'height':h,'language':lang,'palette_click_keyboard':'pass',
-                      'layer_icon_count':1,'boundary_i18n':'pass','dom_rebuild':'pass'})
+                      'layer_icon_count':1,'boundary_i18n':'pass','stage18_native_palette_preserved':'pass','dom_rebuild':'pass'})
       page.close()
   browser.close()
 report={'scope':'synthetic DOM only; NOT production or real weather maps','cases':results,'pass':len(results)}

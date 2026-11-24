@@ -2,6 +2,8 @@ name: station-qc-guard
 on:
   push:
     paths:
+      - station_name_suggestions.js
+      - tests/station_name_suggestions.cjs
       - station_qc_guard.js
       - tests/station_qc_guard.cjs
       - station_resolver_v1.js
@@ -21,3 +23,4 @@ jobs:
         run: |
           node tests/station_qc_guard.cjs
           node tests/station_resolver_v1.cjs
+          node tests/station_name_suggestions.cjs

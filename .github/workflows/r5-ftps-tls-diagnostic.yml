@@ -1,0 +1,46 @@
+name: R5 FTPS certificate diagnostic (no authentication)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-ftps-tls-diagnostic.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Classify TLS certificate failure without FTP credentials
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          python3 - <<'PY'
+          import ftplib, ssl, os, json
+          from pathlib import Path
+          report={"authenticated":False,"writes":False,"tls_verified":False}
+          try:
+              host=os.environ.get("FTP_SERVER","").strip()
+              if not host or any(c in host for c in "/:\r\n"):
+                  raise ValueError("missing or invalid host")
+              with ftplib.FTP_TLS(context=ssl.create_default_context(),timeout=20) as ftp:
+                  ftp.connect(host,21)
+                  ftp.auth()
+                  report["tls_verified"]=True
+                  report["tls_version"]=ftp.sock.version()
+          except ssl.SSLCertVerificationError as exc:
+              report["verify_code"]=exc.verify_code
+              report["category"]={9:"not_yet_valid",10:"expired",18:"self_signed",19:"self_signed_chain",20:"missing_or_untrusted_issuer",21:"unable_to_verify_leaf",62:"hostname_mismatch",64:"ip_address_mismatch"}.get(exc.verify_code,"other_certificate_error")
+          except Exception as exc:
+              report["category"]=type(exc).__name__
+          Path("ftps-tls-diagnostic.json").write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          if not report["tls_verified"]: raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ftps-tls-diagnostic
+          path: ftps-tls-diagnostic.json
+          if-no-files-found: warn
+          retention-days: 7

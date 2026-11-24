@@ -1,0 +1,138 @@
+name: Verify and archive current R5 frontend (no deployment)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-current-release-verify.yml, scripts/patch-r5-custom-routes.py]
+permissions:
+  contents: read
+concurrency:
+  group: r5-current-release-verify
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/patch-r5-custom-routes.py
+      - name: Validate the current frontend against live public files and package it
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures,hashlib,json,os,urllib.request,urllib.parse,zipfile
+          from pathlib import Path
+          root=Path("r5-candidate")
+          index=root/"index.html"
+          old=root/"assets/ms_r5_perf_core_ddee74fdbe848c59.js"
+          new=root/"assets/ms_r5_perf_core_5bf9868a04910eee.js"
+          digest=lambda b:hashlib.sha256(b).hexdigest()
+          assert digest(index.read_bytes())=="4426f3190fffd9d506cd7a6350507603c55ce88df07e009d6a7f8cd3d7ff44b3"
+          assert digest(new.read_bytes())=="5bf9868a04910eee68c29c37f8a701932fd1c9f11c55c805d79234539f190c8a"
+          assert new.name in index.read_text() and old.name not in index.read_text()
+          files=[index]+sorted(p for p in (root/"assets").iterdir() if p.is_file() and p!=old)
+          assert len(files)==26
+          manifest={str(p.relative_to(root)):{"sha256":digest(p.read_bytes()),"size":p.stat().st_size} for p in files}
+          class SameOrigin(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,req,fp,code,msg,headers,newurl):
+                  u=urllib.parse.urlparse(newurl)
+                  if u.scheme!="https" or u.hostname!="wtafkik.ir" or u.port not in (None,443):
+                      raise ValueError("Unexpected redirect")
+                  return super().redirect_request(req,fp,code,msg,headers,newurl)
+          def compare(item):
+              n,m=item
+              try:
+                  req=urllib.request.Request("https://wtafkik.ir/"+urllib.parse.quote(n,safe="/")+"?ms_verify="+os.environ["GITHUB_RUN_ID"],headers={"Accept-Encoding":"identity","Cache-Control":"no-cache","User-Agent":"MetStat-release-verifier/1.0"})
+                  with urllib.request.build_opener(SameOrigin()).open(req,timeout=30) as r:
+                      data=r.read(m["size"]+1)
+                      return {"path":n,"match":r.status==200 and len(data)==m["size"] and digest(data)==m["sha256"]}
+              except Exception as e:
+                  return {"path":n,"match":False,"error":str(e)[:160]}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              results=list(pool.map(compare,manifest.items()))
+          Path("current-frontend-drift.json").write_text(json.dumps(results,indent=2))
+          for r in results: print(r)
+          assert all(r["match"] for r in results), "Live frontend differs; no current release artifact"
+          out=Path("current-release")
+          out.mkdir()
+          with zipfile.ZipFile(out/"metstat-r5-current-frontend-20261125.zip","w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+              for p in files:
+                  name=str(p.relative_to(root))
+                  info=zipfile.ZipInfo(name,date_time=(2026,11,25,0,0,0))
+                  info.compress_type=zipfile.ZIP_DEFLATED
+                  z.writestr(info,p.read_bytes())
+          (out/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
+          print("26 current frontend files verified; no host writes.")
+          PY
+      - run: find r5-candidate/assets -type f -name '*.js' -print0 | xargs -0 -n 1 node --check
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Verify real live browser navigation without frontend interception
+        run: |
+          cat > test.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+          const base='https://wtafkik.ir';
+          const paths=JSON.parse(fs.readFileSync('r5-custom-routes.json','utf8'));
+          (async()=>{
+            const browser=await chromium.launch();
+            const report=[];
+            try {
+              const ctx=await browser.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'});
+              await ctx.route('**/*',route=>{
+                const req=route.request(),u=new URL(req.url());
+                if(u.origin!==base||!['GET','HEAD'].includes(req.method()))return route.abort();
+                return route.continue();
+              });
+              const page=await ctx.newPage();
+              async function wait(dest){
+                await page.waitForFunction(d=>window.MS_R5_CUSTOM_ROUTE?.current()===d&&document.querySelector('#ms7Custom')?.hidden===false,dest,{timeout:15000});
+                assert.equal(new URL(page.url()).pathname,paths[dest]);
+                assert.equal(await page.locator('#ms7Custom h2').count(),1);
+                report.push({dest,url:page.url(),title:await page.locator('#ms7Custom h2').innerText()});
+              }
+              async function nav(group,dest){
+                await page.locator('#ms7Nav [data-group="'+group+'"]').click();
+                await page.locator('#ms7Fly [data-dest="'+dest+'"]').click();
+                await wait(dest);
+              }
+              await page.goto(base+'/convection',{waitUntil:'domcontentloaded'});
+              await page.waitForFunction('ROUTE_PATH===true');
+              await nav('toolbox','convert-unit');await nav('ava','ava-photo');
+              await page.goBack();await wait('convert-unit');
+              await page.goForward();await wait('ava-photo');
+              await page.reload({waitUntil:'domcontentloaded'});await wait('ava-photo');
+              for(const [dest,url] of Object.entries(paths)){
+                await page.goto(base+url,{waitUntil:'domcontentloaded'});await wait(dest);
+              }
+              await page.locator('#ms7Nav [data-group="monitor"]').click();
+              await page.locator('#ms7Fly [data-dest="on"]').click();
+              await page.waitForFunction(()=>!document.body.classList.contains('ms7-custom')&&location.pathname.includes('/weather-models'));
+              report.push({native:page.url()});
+              await page.goBack();await wait('ava-lightning');
+              console.log(JSON.stringify(report,null,2));
+            }finally{
+              fs.writeFileSync('live-navigation.json',JSON.stringify(report,null,2));
+              await browser.close();
+            }
+          })().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+          node test.cjs
+      - name: Preserve verification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r5-current-release-verification
+          path: |
+            current-frontend-drift.json
+            live-navigation.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Archive verified current frontend reference (not an installer)
+        uses: actions/upload-artifact@v4
+        with:
+          name: metstat-r5-current-frontend-20261125
+          path: current-release/
+          if-no-files-found: error
+          retention-days: 30

@@ -23,27 +23,40 @@ jobs:
           set -euo pipefail
           archive=metstat-r5-live-20261124.zip
           if [ ! -f "$archive" ]; then
-            echo "::notice::Awaiting the verified host frontend baseline ZIP; no deployment performed."
-            exit 0
+            echo "::error::Missing pinned frontend baseline ZIP."
+            exit 1
           fi
           echo '3f045718ad311d23a120e7fb5ecf4c5e3a0b49cbdfbbf14ab49e6e2143b22ab3  metstat-r5-live-20261124.zip' | sha256sum -c -
           python3 - <<'PY'
-          import zipfile, re
-          from pathlib import PurePosixPath
+          import zipfile, re, hashlib, json, stat
+          from pathlib import PurePosixPath, Path
           with zipfile.ZipFile("metstat-r5-live-20261124.zip") as z:
               names=z.namelist()
               assert len(names)==len(set(names))==26
               assert "index.html" in names
-              for n in names:
+              for item in z.infolist():
+                  n=item.filename
+                  assert not item.is_dir() and not stat.S_ISLNK(item.external_attr >> 16)
                   p=PurePosixPath(n)
                   assert not p.is_absolute() and ".." not in p.parts
-                  assert n=="index.html" or (len(p.parts)==2 and p.parts[0]=="assets")
+                  assert n=="index.html" or (len(p.parts)==2 and p.parts[0]=="assets" and p.suffix in {".js",".css",".webp"})
               assert z.testzip() is None
               html=z.read("index.html").decode("utf-8")
               refs=re.findall(r"""(?:src|href)=["'](assets/[^"'?]+)""",html)
               assert refs and all(r in names for r in refs)
               assert len([n for n in names if n.endswith(".js")])==19
               z.extractall("r5-verify")
+              manifest={n:{"size":len(z.read(n)),"sha256":hashlib.sha256(z.read(n)).hexdigest()} for n in sorted(names)}
+              Path("r5-release").mkdir(exist_ok=True)
+              Path("r5-release/manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
           PY
           find r5-verify/assets -type f -name '*.js' -print0 | xargs -0 -n 1 node --check
           echo 'Verified frontend baseline only; no FTP or production changes.' >> "$GITHUB_STEP_SUMMARY"
+          cp "$archive" r5-release/
+      - name: Archive verified frontend release (no host writes)
+        uses: actions/upload-artifact@v4
+        with:
+          name: metstat-r5-verified-frontend-${{ github.sha }}
+          path: r5-release/
+          if-no-files-found: error
+          retention-days: 14

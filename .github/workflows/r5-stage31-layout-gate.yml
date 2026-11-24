@@ -6,6 +6,8 @@ on:
       - tests/test_r5_layout_contract.py
       - tools/r5_preview_mobile_pan_patch.py
       - tests/test_r5_preview_mobile_pan_patch.py
+      - tools/r5_stage33_release_gate.py
+      - tests/test_r5_stage33_release_gate.py
       - .github/workflows/r5-stage31-layout-gate.yml
       - specs/R5_LAYOUT_CONTRACT.md
   workflow_dispatch:

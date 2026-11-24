@@ -45,3 +45,13 @@ The reference HTML was injected into an isolated Chromium page; this is **not** 
 - Map Stage29 IDs and CSS owners to the R5 geometry; fix **original** layout and control owners (no redundant CSS overrides/timers/observers), then run actual Chromium tests at four widths × FA/EN × normal/fullscreen.
 - Verify original `#fsMods` moves/restores exactly once, five geo levels use real boundaries, menus close appropriately, map/legend/export handlers and all existing routes still work.
 - Perform real NWP, security, cache, route and rollback checks before admin-authorized cPanel publication; static R5 parity alone is never Done.
+
+
+## Stage40 mandatory Atlas two-column scientific layout contract (2026-11-24)
+
+- The native climate atlas source has **two** settings asides: `#caAside` and the second `#caAside2`, created during actual `caLayoutSplit()` after the station database loads. Neither can be treated as a nonexistent/demo element or detached and recreated.
+- In R5, these TWO *groups* occupy **one right settings column**: first aside (station, province, parameter and period) in row 1; second aside (map, multi-index, analog) immediately below in row 2. The original `#caApp>main` spans both rows in the left results column. **Do not allocate three columns or assign both asides to the same grid cell.**
+- Under 981px, the site **must retain the same two-column desktop composition** (230px right track in 700–980px landscape, 328px in portrait 390px desktop canvas). Do not apply legacy mobile `display:flex; flex-direction:column` to the R5 atlas, do not auto-collapse controls via `caMobileReveal` or `caCollapse`, and do not invent a second menu toggle.
+- Preserve original scientific computation, station matching, chart calculation, data paths and DOM IDs, and show `#caEmpty` message whenever no real data is present. A valid test **must actually create the second native aside** by invoking `caLayoutSplit()`; an empty `#caAside` is an insufficient proxy.
+- Browser acceptance across 1440×900, 960×720, 844×390 and 390×844: settings groups share right-track x/width but **never overlap vertically**; `main.right` stays left of both groups; no duplicated controls, auto-collapse, page errors or unexpected document overflow; unrelated routes unaffected.
+- Stage39 was discovered to violate these rules when the second sidebar is created; the Stage40 candidate fixes them. See `docs/METSTAT_R5_STAGE40_ATLAS_NATIVE_TWO_COLUMN_20261124.md` and strict `tests/test_r5_stage40_host_gate.py`.

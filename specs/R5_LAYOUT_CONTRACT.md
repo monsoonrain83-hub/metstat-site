@@ -55,3 +55,13 @@ The reference HTML was injected into an isolated Chromium page; this is **not** 
 - Preserve original scientific computation, station matching, chart calculation, data paths and DOM IDs, and show `#caEmpty` message whenever no real data is present. A valid test **must actually create the second native aside** by invoking `caLayoutSplit()`; an empty `#caAside` is an insufficient proxy.
 - Browser acceptance across 1440×900, 960×720, 844×390 and 390×844: settings groups share right-track x/width but **never overlap vertically**; `main.right` stays left of both groups; no duplicated controls, auto-collapse, page errors or unexpected document overflow; unrelated routes unaffected.
 - Stage39 was discovered to violate these rules when the second sidebar is created; the Stage40 candidate fixes them. See `docs/METSTAT_R5_STAGE40_ATLAS_NATIVE_TWO_COLUMN_20261124.md` and strict `tests/test_r5_stage40_host_gate.py`.
+
+
+## Stage41 interactive R5 settings acceptance (2026-11-24)
+
+- Climate Atlas native settings groups `#caAside` and `#caAside2` stay in **one right-hand column**, existing chart/map `main` remains on the left. Existing `caLayoutSplit()` owns the headings. Each visible group heading must support Tab focus, Enter, Space, mouse click, a visible focus ring and synchronized `aria-expanded`; no cloned buttons or new control owner.
+- Monthly/seasonal forecast `#sfMain .sfSet` control card **starts open**, and the primary `#sfView` forecast also **starts open**. The other cards may be collapsed and can be manually opened without jumping the map. State keys must be **semantic/translation-stable** (`settings`, `indices`, `method`, `forecast`, `scenario`) rather than `h3.textContent` so switching FA⇄EN or re-rendering does not reset the user's state.
+- All R5 interactive panel toggles must have the same action on keyboard and mouse and must not register more than one listener on reinit; `aria-expanded` and hidden child content must match.
+- Four browser geometries × both languages; no horizontal clipping except the explicitly scrollable 960px desktop canvas in narrow portrait. The 44 non-Atlas route geometries cannot change in this isolated Stage41 source modification.
+- Stage40 was diagnosed as keyboard-inaccessible with hidden seasonal settings by default (5/11 interactive acceptance checks), while the Stage41 browser fixture passed 11/11 at each of 4 viewports, including 48 actual Enter/Space operations and state retention. See `docs/METSTAT_R5_STAGE41_ATLAS_SEASONAL_INTERACTION_20261124.md`.
+- Actual climate-station and seasonal data products, cPanel routes, Figma and the final hosted site require separate staging acceptance: green offline CI is not deployment approval.

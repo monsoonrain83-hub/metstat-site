@@ -6,6 +6,7 @@ from test_r5_stage39_host_gate import zipfile as make_zip
 
 SCRIPT_MARKERS = (
     'h.setAttribute("role","button");'
+    'h.setAttribute("aria-expanded",String(!c.classList.contains("pcol")));'
     'h.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } };'
     'const key=c.classList.contains("sfSet")?"settings":c.querySelector("#sfIdxTab")?"indices":"method";'
     'Object.prototype.hasOwnProperty.call(SF.col,key)?SF.col[key]:!(key==="settings"||key==="forecast");'

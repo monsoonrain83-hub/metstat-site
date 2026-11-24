@@ -36,7 +36,13 @@ def scan(root: Path) -> dict:
     issues = []
     checked = 0
     for path, expected in {**STAGE22, **PINNED, **OPTIONAL_BASE}.items():
-        full = (root / path).resolve()
+        original = root / path
+        # A staged root must consist of regular files, not mutable symlink aliases.
+        # Check every path component before resolving, including dangling links.
+        if any(part.is_symlink() for part in (original, *original.parents) if part != root and part.is_relative_to(root)):
+            issues.append({"path": path, "problem": "symlink-not-allowed"})
+            continue
+        full = original.resolve()
         if not full.is_relative_to(root):
             issues.append({"path": path, "problem": "escaped-root"})
             continue
@@ -45,7 +51,16 @@ def scan(root: Path) -> dict:
         if not full.is_file():
             issues.append({"path": path, "problem": "missing"})
             continue
-        actual = hashlib.sha256(full.read_bytes()).hexdigest()
+        # Stream large source/engine files rather than loading them entirely into RAM.
+        digest = hashlib.sha256()
+        try:
+            with full.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(chunk)
+        except OSError as exc:
+            issues.append({"path": path, "problem": "unreadable", "error": type(exc).__name__})
+            continue
+        actual = digest.hexdigest()
         checked += 1
         if actual != expected:
             issues.append({"path": path, "problem": "unexpected-version",

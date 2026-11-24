@@ -26,6 +26,9 @@ on:
       - tests/test_r5_stage41_host_gate.py
       - tools/r5_stage41_native_panel_patch.py
       - tests/test_r5_stage41_native_panel_patch.py
+      - tools/r5_native_applied_router.py
+      - tests/test_r5_native_applied_router.py
+      - docs/METSTAT_R5_NATIVE_ROUTING_CLEANUP_20261124.md
       - docs/METSTAT_R5_STAGE41_ATLAS_SEASONAL_INTERACTION_20261124.md
       - docs/METSTAT_R5_STAGE40_ATLAS_NATIVE_TWO_COLUMN_20261124.md
       - docs/METSTAT_R5_STAGE39_TWO_COLUMN_SCIENCE_20261124.md

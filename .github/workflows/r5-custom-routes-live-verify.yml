@@ -1,0 +1,66 @@
+name: R5 custom routes post-install verification (read-only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-custom-routes-live-verify.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r5-custom-routes-live-verify
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Detect installed release and compare all custom routes
+        run: |
+          python3 - <<'PY'
+          import hashlib, urllib.request, urllib.parse, concurrent.futures, json, os
+          from pathlib import Path
+          base="https://wtafkik.ir/"
+          old="3f8392291aa1e01fc09dc7e529907a5402925d151a9c30c034e9b718f1915d6b"
+          new="4426f3190fffd9d506cd7a6350507603c55ce88df07e009d6a7f8cd3d7ff44b3"
+          core="5bf9868a04910eee68c29c37f8a701932fd1c9f11c55c805d79234539f190c8a"
+          class SameOrigin(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,req,fp,code,msg,headers,newurl):
+                  u=urllib.parse.urlparse(newurl)
+                  if u.scheme!="https" or u.hostname!="wtafkik.ir" or u.port not in (443,None):
+                      raise ValueError("Unexpected redirect")
+                  return super().redirect_request(req,fp,code,msg,headers,newurl)
+          def probe(p):
+              try:
+                  req=urllib.request.Request(base+p+"?ms_verify="+os.environ["GITHUB_RUN_ID"],headers={"Accept-Encoding":"identity","Cache-Control":"no-cache","User-Agent":"MetStat-release-verifier/1.0"})
+                  with urllib.request.build_opener(SameOrigin()).open(req,timeout=25) as r:
+                      b=r.read(20*1024*1024+1)
+                      return {"path":p,"status":r.status,"sha256":hashlib.sha256(b).hexdigest()}
+              except Exception as e:
+                  return {"path":p,"error":str(e)[:180]}
+          initial=probe("index.html")
+          report={"index":initial}
+          if initial.get("status")==200 and initial.get("sha256")==old:
+              report["release"]="previous baseline still active; new install not verified"
+          elif initial.get("status")==200 and initial.get("sha256")==new:
+              paths=["monitoring-forecast/station-isohyet","monitoring-forecast/forecast-verification","monitoring-forecast/bulletin-maps","meteorological-toolbox","meteorological-toolbox/unit-converter","meteorological-toolbox/station-idw","meteorological-toolbox/weather-file-converter","meteorological-toolbox/media-converter","meteorological-toolbox/document-converter","ava-studio/voice","ava-studio/video","ava-studio/photo","ava-studio/lightning","monitoring-forecast/weather-models","synoptic-analysis/synergy","offline-online-maps/multi-model","assets/ms_r5_perf_core_5bf9868a04910eee.js"]
+              with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+                  rows=list(pool.map(probe,paths))
+              for r in rows:
+                  expected=core if r["path"].startswith("assets/") else new
+                  r["match"]=r.get("status")==200 and r.get("sha256")==expected
+              report["routes"]=rows
+              report["release"]="verified" if all(r["match"] for r in rows) else "incomplete deployment"
+          else:
+              report["release"]="unverified or unexpected index"
+          Path("post-install.json").write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          if report["release"]!="verified":
+              raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r5-custom-routes-post-install-report
+          path: post-install.json
+          if-no-files-found: warn
+          retention-days: 7

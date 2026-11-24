@@ -4,6 +4,8 @@ on:
     paths:
       - tools/r5_layout_contract.py
       - tests/test_r5_layout_contract.py
+      - tools/r5_preview_mobile_pan_patch.py
+      - tests/test_r5_preview_mobile_pan_patch.py
       - .github/workflows/r5-stage31-layout-gate.yml
       - specs/R5_LAYOUT_CONTRACT.md
   workflow_dispatch:

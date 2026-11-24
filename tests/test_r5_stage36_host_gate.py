@@ -15,7 +15,11 @@ def fixture():
         '<div id="onEmpty"></div><div id="onViewer" hidden></div>'
         '<script>const a="metstat:nv-model-options";'
         'const b="metstat:nv-model-options";'
-        'document.addEventListener(\'langchange\',syncGeo);'\n        'if(st.__msNvPointerBound) return;'\n        'NV.resizeObserver.disconnect(); NV.resizeObserver=null;'\n        'NVF.on=true; nvfBtnLab(); NVF.on=false; nvfBtnLab();'\n        '</script>'
+        'document.addEventListener(\'langchange\',syncGeo);'
+        'if(st.__msNvPointerBound) return;'
+        'NV.resizeObserver.disconnect(); NV.resizeObserver=null;'
+        'NVF.on=true; nvfBtnLab(); NVF.on=false; nvfBtnLab();'
+        '</script>'
         '</body></html>'
     )
     assert len(source.encode()) > 1024

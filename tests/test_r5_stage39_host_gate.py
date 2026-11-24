@@ -3,7 +3,7 @@ from io import BytesIO
 import unittest
 from zipfile import ZipFile
 from tools.r5_stage39_host_gate import check, sha, SOURCE_SHA256, TARGET_SHA256
-from tests.test_r5_stage37_host_gate import fixture as base_fixture
+from test_r5_stage37_host_gate import fixture as base_fixture
 
 CSS = (
     'html.ms9-active #ciMain{display:grid;grid-template-columns:var(--ms9-sidebar-width,328px) minmax(0,1fr)}'

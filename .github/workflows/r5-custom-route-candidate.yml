@@ -1,0 +1,97 @@
+name: R5 custom route candidate test (no deployment)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-custom-route-candidate.yml, scripts/patch-r5-custom-routes.py]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/patch-r5-custom-routes.py
+      - run: node --check r5-candidate/assets/ms_r5_perf_core_5bf9868a04910eee.js
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Browser navigation with pinned local frontend, live read-only module requests
+        run: |
+          cat > test.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+          const base='https://wtafkik.ir',root=path.resolve('r5-candidate');
+          const paths=JSON.parse(fs.readFileSync('r5-custom-routes.json','utf8'));
+          const native=['/convection','/monitoring-forecast/weather-models','/monitoring-forecast/weather-models/online-maps','/synoptic-analysis/synergy','/offline-online-maps/multi-model'];
+          (async()=>{
+            const browser=await chromium.launch();
+            const report=[];
+            try {
+              const ctx=await browser.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'});
+              await ctx.route('**/*',async route=>{
+                const req=route.request(),u=new URL(req.url());
+                if(u.origin!==base||!['GET','HEAD'].includes(req.method()))return route.abort();
+                const p=u.pathname;
+                let file;
+                if(p==='/'||p==='/index.html'||native.includes(p)||Object.values(paths).includes(p))file=path.join(root,'index.html');
+                else if(p.startsWith('/assets/'))file=path.resolve(root,'.'+p);
+                if(file&&file.startsWith(root+path.sep)&&fs.existsSync(file)&&fs.statSync(file).isFile()){
+                  const ext=path.extname(file),type=({'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.webp':'image/webp'})[ext]||'application/octet-stream';
+                  return route.fulfill({status:200,headers:{'content-type':type,'x-metstat-routes':'r20261124'},body:req.method()==='HEAD'?'':fs.readFileSync(file)});
+                }
+                if(p.startsWith('/online/')&&!p.endsWith('.php'))return route.continue();
+                return route.fulfill({status:404,body:'Not part of navigation fixture'});
+              });
+              const page=await ctx.newPage();
+              async function wait(dest){
+                await page.waitForFunction(d=>window.MS_R5_CUSTOM_ROUTE?.current()===d&&document.querySelector('#ms7Custom')?.hidden===false,d,{timeout:15000});
+                assert.equal(new URL(page.url()).pathname,paths[dest]);
+                assert.equal(await page.locator('#ms7Custom h2').count(),1);
+                report.push({dest,url:page.url(),title:await page.locator('#ms7Custom h2').innerText()});
+              }
+              async function nav(group,dest){
+                await page.locator('#ms7Nav [data-group="'+group+'"]').click();
+                await page.locator('#ms7Fly [data-dest="'+dest+'"]').click();
+                await wait(dest);
+              }
+              await page.goto(base+'/convection',{waitUntil:'domcontentloaded'});
+              await page.waitForFunction('ROUTE_PATH===true');
+              await nav('toolbox','convert-unit');await nav('ava','ava-photo');
+              await page.goBack();await wait('convert-unit');
+              await page.goForward();await wait('ava-photo');
+              await page.reload({waitUntil:'domcontentloaded'});await wait('ava-photo');
+              for(const [dest,url] of Object.entries(paths)){
+                await page.goto(base+url,{waitUntil:'domcontentloaded'});await wait(dest);
+              }
+              await page.locator('#ms7Nav [data-group="monitor"]').click();
+              await page.locator('#ms7Fly [data-dest="on"]').click();
+              await page.waitForFunction(()=>!document.body.classList.contains('ms7-custom')&&location.pathname.includes('/weather-models'));
+              report.push({native:page.url()});
+              await page.goBack();await wait('ava-lightning');
+              console.log(JSON.stringify(report,null,2));
+            }finally{
+              fs.writeFileSync('candidate-navigation.json',JSON.stringify(report,null,2));
+              await browser.close();
+            }
+          })().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+          node test.cjs
+      - name: Save navigation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r5-candidate-navigation-report
+          path: candidate-navigation.json
+          if-no-files-found: warn
+      - name: Archive verified candidate frontend changes
+        uses: actions/upload-artifact@v4
+        with:
+          name: r5-custom-route-candidate
+          path: |
+            r5-candidate/index.html
+            r5-candidate/assets/ms_r5_perf_core_5bf9868a04910eee.js
+            r5-custom-routes.json
+          if-no-files-found: error

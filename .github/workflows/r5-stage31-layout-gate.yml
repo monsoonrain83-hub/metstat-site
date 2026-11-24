@@ -14,6 +14,8 @@ on:
       - tests/test_r5_stage36_host_gate.py
       - tools/r5_stage37_host_gate.py
       - tests/test_r5_stage37_host_gate.py
+      - tools/r5_stage37_patch.py
+      - tests/test_r5_stage37_patch.py
       - .github/workflows/r5-stage31-layout-gate.yml
       - specs/R5_LAYOUT_CONTRACT.md
   workflow_dispatch:

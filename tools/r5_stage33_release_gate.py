@@ -46,7 +46,7 @@ def checks(original, candidate, package, *, original_hash=ORIGINAL, stage32_hash
     if baseline_hash == original_hash:
         required.update(ASSET_SHA)
     candidate_hash = sha(candidate)
-    scripts = lambda blob: re.findall(rb"<script\\b[^>]*>(.*?)</script\\s*>", blob, re.I | re.S)
+    scripts = lambda blob: re.findall(rb"<script\b[^>]*>(.*?)</script\s*>", blob, re.I | re.S)
     original_ids = IDs()
     original_ids.feed(original.decode("utf-8"))
     candidate_ids = IDs()
@@ -55,6 +55,7 @@ def checks(original, candidate, package, *, original_hash=ORIGINAL, stage32_hash
         "baseline_pinned": base_known,
         "candidate_sha_pinned": candidate_hash == stage33_hash,
         "scripts_unchanged": scripts(original) == scripts(candidate) if baseline_hash == stage32_hash else None,
+        "script_blocks_present": len(scripts(original)) >= 10 and len(scripts(candidate)) >= 10,
         "no_added_important_rules": candidate.count(b"!important") <= original.count(b"!important"),
         "no_new_duplicate_ids": not any(count > 1 for count in Counter(candidate_ids.ids).values()),
         "dom_id_count_unchanged": len(candidate_ids.ids) == len(original_ids.ids),
@@ -72,8 +73,8 @@ def checks(original, candidate, package, *, original_hash=ORIGINAL, stage32_hash
                 no_duplicate = len(names) == len(set(names))
                 no_paths = all(n == "index.html" or n in ASSET_SHA for n in names)
                 size_ok = all(i.file_size <= LIMIT for i in z.infolist())
-                crc_ok = z.testzip() is None if size_ok else False
                 expected_set = set(names) == required
+                crc_ok = z.testzip() is None if size_ok and no_duplicate and no_paths and expected_set else False
                 sha_ok = sha(z.read("index.html")) == stage33_hash if expected_set and crc_ok else False
                 assets_ok = all(sha(z.read(name)) == expected for name, expected in ASSET_SHA.items()) if baseline_hash == original_hash and expected_set and crc_ok else True
             checks_map.update(zip_unique=no_duplicate, zip_safe_paths=no_paths, zip_size_cap=size_ok, zip_crc=crc_ok, zip_members_expected=expected_set, zip_index_sha=sha_ok, zip_assets_pinned=assets_ok)

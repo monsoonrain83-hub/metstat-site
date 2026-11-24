@@ -19,4 +19,4 @@ jobs:
         with:
           python-version: '3.12'
       - name: Run isolated offline R5 contract regressions
-        run: python -m unittest discover -s tests -p test_r5_layout_contract.py -v
+        run: python -m unittest discover -s tests -p 'test_r5_*.py' -v

@@ -16,6 +16,9 @@ on:
       - tests/test_r5_stage37_host_gate.py
       - tools/r5_stage37_patch.py
       - tests/test_r5_stage37_patch.py
+      - tools/r5_stage39_host_gate.py
+      - tests/test_r5_stage39_host_gate.py
+      - docs/METSTAT_R5_STAGE39_TWO_COLUMN_SCIENCE_20261124.md
       - specs/R5_CANONICAL_VISUAL_GOLDEN_20261124.json
       - tools/r5_uiux_report_gate.py
       - tools/r5_browser_golden_capture.py

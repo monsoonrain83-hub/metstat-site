@@ -86,7 +86,7 @@ def check(active_index: bytes, overlay: bytes, *,
             checks["unique_dom_ids"] = not any(c > 1 for c in Counter(parser.ids).values())
             checks["required_native_nodes"] = all(source.count(token) == 1 for token in
                 ('id="onEmpty"', 'id="onViewer" hidden', 'id="onAside"'))
-            checks["stage35_events"] = source.count("metstat:nv-model-options") == 2 and (
+            checks["stage36_events"] = source.count("metstat:nv-model-options") == 2 and (
                 "document.addEventListener('langchange',syncGeo)" in source)
             checks["poll_removed"] = "setInterval(badgeModel,1800)" not in source
             checks["pointer_single_owner"] = "if(st.__msNvPointerBound) return;" in source

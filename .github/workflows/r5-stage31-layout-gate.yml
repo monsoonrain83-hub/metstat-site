@@ -1,0 +1,52 @@
+name: MetStat R5 stage31 layout-contract tests
+on:
+  pull_request:
+    paths:
+      - tools/r5_layout_contract.py
+      - tests/test_r5_layout_contract.py
+      - tools/r5_preview_mobile_pan_patch.py
+      - tests/test_r5_preview_mobile_pan_patch.py
+      - tools/r5_stage33_release_gate.py
+      - tests/test_r5_stage33_release_gate.py
+      - tools/r5_stage35_host_gate.py
+      - tests/test_r5_stage35_host_gate.py
+      - tools/r5_stage36_host_gate.py
+      - tests/test_r5_stage36_host_gate.py
+      - tools/r5_stage37_host_gate.py
+      - tests/test_r5_stage37_host_gate.py
+      - tools/r5_stage37_patch.py
+      - tests/test_r5_stage37_patch.py
+      - tools/r5_stage39_host_gate.py
+      - tests/test_r5_stage39_host_gate.py
+      - tools/r5_stage40_host_gate.py
+      - tests/test_r5_stage40_host_gate.py
+      - tools/r5_stage40_atlas_patch.py
+      - tests/test_r5_stage40_atlas_patch.py
+      - tools/r5_stage41_host_gate.py
+      - tests/test_r5_stage41_host_gate.py
+      - tools/r5_stage41_native_panel_patch.py
+      - tests/test_r5_stage41_native_panel_patch.py
+      - docs/METSTAT_R5_STAGE41_ATLAS_SEASONAL_INTERACTION_20261124.md
+      - docs/METSTAT_R5_STAGE40_ATLAS_NATIVE_TWO_COLUMN_20261124.md
+      - docs/METSTAT_R5_STAGE39_TWO_COLUMN_SCIENCE_20261124.md
+      - specs/R5_CANONICAL_VISUAL_GOLDEN_20261124.json
+      - tools/r5_uiux_report_gate.py
+      - tools/r5_browser_golden_capture.py
+      - tests/test_r5_uiux_report_gate.py
+      - docs/METSTAT_R5_FIGMA_UIUX_PRO_MAX_POLICY_20261124.md
+      - .github/workflows/r5-stage31-layout-gate.yml
+      - specs/R5_LAYOUT_CONTRACT.md
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-r5-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run isolated offline R5 contract regressions
+        run: python -m unittest discover -s tests -p 'test_r5_*.py' -v

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "source": "OPEN_METSTAT_R5_ANDROID_FIXED(1).html",
+  "source_sha256": "2792e674660f07135acb91f6cbf92f8740f4c9ff8c073e94767927b1c8dbadf9",
+  "role": "immutable design reference; never replace the operational cPanel index",
+  "colors": {
+    "--sky": "#399fd4",
+    "--paper": "#f8f9fd",
+    "--scarlet": "#dc1937"
+  },
+  "geography": [
+    "geoContinent",
+    "geoRegion",
+    "geoCountry",
+    "geoProvince",
+    "geoCounty"
+  ],
+  "nav_groups": 7,
+  "model_status_controls": 7,
+  "rtl": true,
+  "desktop_layout_at_all_viewports": true,
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "sidebar_px": 328,
+      "map_px": 1082,
+      "header_px": 64,
+      "app_min_width_px": 960
+    },
+    {
+      "width": 960,
+      "height": 720,
+      "sidebar_px": 230,
+      "map_px": 718,
+      "header_px": 64,
+      "app_min_width_px": 0
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "sidebar_px": 230,
+      "map_px": 602,
+      "header_px": 44,
+      "app_min_width_px": 0
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "sidebar_px": 305,
+      "map_px": 636,
+      "header_px": 64,
+      "app_min_width_px": 960,
+      "known_portrait_clip": true
+    }
+  ],
+  "important_decisions": {
+    "fullscreen_model_controls": "move exactly the original controls horizontally at top; never clone original model buttons",
+    "desktop_on_phone": "maintain two columns, even on mobile; no single-column responsive conversion",
+    "portrait_pan": "unmodified R5 has clipped map at 390px and requires explicit non-destructive horizontal access remediation",
+    "figma": "existing file key h9lb9hKlGLTJ5yeqXtUnix not inspected: connector returned no editor access on 2026-11-24",
+    "ui_ux_pro_max": "apply accessibility/contrast/keyboard/touch/performance/feedback guidance from nextlevelbuilder/ui-ux-pro-max-skill, except explicit administrator desktop-everywhere and R5 palette/geometry"
+  },
+  "validation": "4 isolated Chromium viewport tests of exact reference via page.set_content, no live server/CDN/API/data integrity"
+}

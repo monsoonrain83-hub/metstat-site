@@ -1,0 +1,76 @@
+name: R5 FTPS release preflight (read-only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-ftps-readonly-preflight.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r5-ftps-preflight
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Verify configured FTPS target and critical live files (no writes)
+        env:
+          FTPS_SERVER: ${{ secrets.FTP_SERVER }}
+          FTPS_USER: ${{ secrets.FTP_USERNAME }}
+          FTPS_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTPS_DIR: ${{ secrets.FTP_DIR }}
+        run: |
+          python3 - <<'PY'
+          import ftplib, hashlib, json, os, ssl
+          from pathlib import Path
+          expected={
+              "index.html": (892294,"4426f3190fffd9d506cd7a6350507603c55ce88df07e009d6a7f8cd3d7ff44b3"),
+              "assets/ms_r5_perf_core_5bf9868a04910eee.js": (5116099,"5bf9868a04910eee68c29c37f8a701932fd1c9f11c55c805d79234539f190c8a"),
+              ".htaccess": (5640,"ee5ebbffbbe315f86f83913cd5a814e7e80350303296b2021a1e4bcf7435226c"),
+              "online/.htaccess": (567,"1f3562fb03e7a3746f461a40babdd02dec77f0f136b31db6fc68c194cfdab3ad"),
+              "online/nwp_upload.php": (31302,"4b57c03a5498194efeec5bafc7a4a8e11885da7529563c3232d6f1ed10dcc9f9")
+          }
+          report={"mode":"read-only FTPS","connection":"unverified","files":[]}
+          try:
+              server,user,password=(os.environ[k] for k in ("FTPS_SERVER","FTPS_USER","FTPS_PASSWORD"))
+              if not all((server,user,password)):
+                  raise ValueError("Required settings missing")
+              if any(c in server for c in "/:\r\n"):
+                  raise ValueError("Server must be a hostname")
+              with ftplib.FTP_TLS(context=ssl.create_default_context(),timeout=25) as ftp:
+                  ftp.connect(server,21)
+                  ftp.login(user,password)
+                  ftp.prot_p()
+                  ftp.cwd(os.environ.get("FTPS_DIR") or "/")
+                  report["connection"]="verified TLS and configured directory"
+                  for name,(size,hash_expected) in expected.items():
+                      h=hashlib.sha256()
+                      count=[0]
+                      def receive(data):
+                          count[0]+=len(data)
+                          if count[0]>max(size*2,1048576):
+                              raise ValueError("Unexpected response size")
+                          h.update(data)
+                      try:
+                          ftp.retrbinary("RETR "+name,receive)
+                          report["files"].append({"path":name,"match":count[0]==size and h.hexdigest()==hash_expected,"size":count[0]})
+                      except Exception as e:
+                          report["files"].append({"path":name,"match":False,"error_type":type(e).__name__})
+                          break
+          except Exception as e:
+              report["error_type"]=type(e).__name__
+          report["passed"]=len(report["files"])==len(expected) and all(r["match"] for r in report["files"]) and "error_type" not in report
+          Path("ftps-preflight.json").write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          if not report["passed"]:
+              raise SystemExit(1)
+          PY
+      - name: Archive non-sensitive verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r5-ftps-preflight
+          path: ftps-preflight.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,0 +1,69 @@
+name: R5 live host drift audit (read-only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-live-host-drift.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r5-live-host-drift
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare public static files to the pinned frontend baseline
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures, hashlib, json, os, ssl, urllib.request, urllib.parse, zipfile
+          from pathlib import Path
+          p = Path("metstat-r5-live-20261124.zip")
+          assert hashlib.sha256(p.read_bytes()).hexdigest() == "3f045718ad311d23a120e7fb5ecf4c5e3a0b49cbdfbbf14ab49e6e2143b22ab3"
+          with zipfile.ZipFile(p) as z:
+              expected = {n: (len(z.read(n)), hashlib.sha256(z.read(n)).hexdigest()) for n in z.namelist()}
+          assert len(expected) == 26 and "index.html" in expected
+          routes = ["monitoring-forecast/weather-models", "synoptic-analysis/synergy", "offline-online-maps/multi-model"]
+          expected.update({r: expected["index.html"] for r in routes})
+          base = "https://wtafkik.ir/"
+          class SameOrigin(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  u = urllib.parse.urlparse(newurl)
+                  if u.scheme != "https" or u.hostname != "wtafkik.ir" or u.port not in (None, 443):
+                      raise ValueError("Unexpected redirect outside host")
+                  return super().redirect_request(req, fp, code, msg, headers, newurl)
+          def probe(item):
+              path, (size, digest) = item
+              try:
+                  url = base + urllib.parse.quote(path, safe="/") + "?ms_audit=" + os.environ["GITHUB_RUN_ID"]
+                  req = urllib.request.Request(url, headers={"User-Agent":"MetStat-Host-Drift-Audit/1.0","Accept-Encoding":"identity","Cache-Control":"no-cache"})
+                  opener = urllib.request.build_opener(SameOrigin())
+                  with opener.open(req, timeout=25) as r:
+                      data = r.read(size + 1)
+                      actual = hashlib.sha256(data).hexdigest()
+                      status = "match" if len(data) == size and actual == digest else "mismatch"
+                      return {"path":path,"status":status,"http":r.status,"expected_size":size,"received_bytes":len(data),"expected_sha256":digest,"actual_sha256":actual}
+              except Exception as e:
+                  return {"path":path,"status":"unverified","error":type(e).__name__ + ": " + str(e)[:200]}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              rows = list(pool.map(probe, sorted(expected.items())))
+          counts = {s:sum(r["status"] == s for r in rows) for s in ("match","mismatch","unverified")}
+          Path("host-drift.json").write_text(json.dumps({"counts":counts,"results":rows}, indent=2))
+          for r in rows:
+              print(r["status"], r["path"])
+          print(counts)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("Read-only comparison; no server writes.\n\n" + str(counts) + "\n")
+          if counts["mismatch"] or counts["unverified"]:
+              raise SystemExit(1)
+          PY
+      - name: Save drift report even if host is unreachable
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r5-live-host-drift
+          path: host-drift.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,0 +1,32 @@
+name: Verify archived host NWP uploader (no deployment)
+on:
+  push:
+    branches: [main]
+    paths: [MetStat_nwp_upload_HOST_BASELINE_20261124.zip, .github/workflows/host-upload-baseline-verify.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate exact host archive and API contract
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, zipfile
+          p=Path("MetStat_nwp_upload_HOST_BASELINE_20261124.zip")
+          assert p.is_file(), "Upload the archived host baseline first"
+          with zipfile.ZipFile(p) as z:
+              assert z.namelist()==["nwp_upload.php"]
+              b=z.read("nwp_upload.php")
+          assert hashlib.sha256(b).hexdigest()=="4b57c03a5498194efeec5bafc7a4a8e11885da7529563c3232d6f1ed10dcc9f9"
+          for action in ("begin","put","putm","end","gridput","gpccput","sfput","ping","diag"):
+              assert ("'"+action+"'").encode() in b, action
+          Path("verified-host-uploader.php").write_bytes(b)
+          PY
+          php -l verified-host-uploader.php
+          echo "Host uploader archive verified; no server writes." >> "$GITHUB_STEP_SUMMARY"

@@ -21,8 +21,8 @@ class R5GoldenUITests(unittest.TestCase):
                 "passed": True, "page_errors": [],
                 "measurements": {
                     "nav": c["nav_groups"], "models": c["model_status_controls"],
-                    "geographies": c["geography"], "lang": "fa", "dir": "rtl",
-                    "tokens": c["colors"],
+                    "geographies": list(c["geography"]), "lang": "fa", "dir": "rtl",
+                    "tokens": dict(c["colors"]),
                     "sidebar": {"x": 700, "width": e["sidebar_px"]},
                     "map": {"x": 0, "width": e["map_px"]},
                     "header": {"height": e["header_px"]},

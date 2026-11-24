@@ -47,7 +47,7 @@ jobs:
               });
               const page=await ctx.newPage();
               async function wait(dest){
-                await page.waitForFunction(d=>window.MS_R5_CUSTOM_ROUTE?.current()===d&&document.querySelector('#ms7Custom')?.hidden===false,d,{timeout:15000});
+                await page.waitForFunction(d=>window.MS_R5_CUSTOM_ROUTE?.current()===d&&document.querySelector('#ms7Custom')?.hidden===false,dest,{timeout:15000});
                 assert.equal(new URL(page.url()).pathname,paths[dest]);
                 assert.equal(await page.locator('#ms7Custom h2').count(),1);
                 report.push({dest,url:page.url(),title:await page.locator('#ms7Custom h2').innerText()});

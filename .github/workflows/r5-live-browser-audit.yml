@@ -1,0 +1,98 @@
+name: R5 live browser navigation audit (read-only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/r5-live-browser-audit.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r5-browser-audit
+  cancel-in-progress: false
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium test environment
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check live page shell and record custom menu address behavior
+        run: |
+          cat > audit.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs');
+          const base='https://wtafkik.ir';
+          const report={direct:[],navigation:[],pageErrors:[]};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            try {
+              const context=await browser.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'});
+              await context.route('**/*',route=>{
+                const request=route.request();
+                let url;
+                try {url=new URL(request.url());}catch{return route.abort();}
+                if(!['GET','HEAD'].includes(request.method()) || url.origin!==base) return route.abort();
+                return route.continue();
+              });
+              const page=await context.newPage();
+              page.on('pageerror',e=>report.pageErrors.push(String(e).slice(0,500)));
+              const direct=[
+                ['/monitoring-forecast/weather-models','onApp'],
+                ['/synoptic-analysis/synergy','synApp'],
+                ['/offline-online-maps/multi-model','anApp']
+              ];
+              for(const [path,id] of direct){
+                const row={path,id};
+                try{
+                  const response=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:45000});
+                  row.http=response?.status();
+                  await page.locator('#ms7Nav').waitFor({state:'visible',timeout:20000});
+                  await page.waitForFunction(id=>{const e=document.getElementById(id);return e&&!e.hidden&&e.getClientRects().length>0;},id,{timeout:20000});
+                  row.ok=row.http===200;
+                }catch(e){row.ok=false;row.error=String(e).slice(0,500);}
+                row.url=page.url();
+                report.direct.push(row);
+              }
+              async function select(group,dest){
+                await page.locator('#ms7Nav [data-group="'+group+'"]').click({timeout:10000});
+                await page.locator('#ms7Fly [data-dest="'+dest+'"]').click({timeout:10000});
+              }
+              for(const [group,dest] of [['toolbox','convert-unit'],['ava','ava-photo'],['toolbox','toolbox-full']]){
+                const row={group,dest};
+                try{
+                  await page.goto(base+'/convection',{waitUntil:'domcontentloaded',timeout:45000});
+                  await page.locator('#ms7Nav').waitFor({state:'visible',timeout:20000});
+                  await page.waitForTimeout(1200);
+                  row.before=page.url();
+                  await select(group,dest);
+                  await page.locator('#ms7Custom').waitFor({state:'visible',timeout:15000});
+                  await page.waitForTimeout(800);
+                  row.after=page.url();
+                  row.title=await page.locator('#ms7Custom h2').first().innerText();
+                  row.staleConvection=new URL(row.after).pathname.endsWith('/convection') || new URL(row.after).hash.includes('convection');
+                  row.contentOpened=true;
+                }catch(e){row.contentOpened=false;row.error=String(e).slice(0,500);}
+                report.navigation.push(row);
+              }
+            }finally{
+              fs.writeFileSync('browser-audit.json',JSON.stringify(report,null,2));
+              console.log(JSON.stringify(report,null,2));
+              await browser.close();
+            }
+            if(report.direct.length!==3 || report.direct.some(r=>!r.ok))process.exitCode=1;
+          })().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+          node audit.cjs
+      - name: Preserve browser report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r5-live-browser-audit
+          path: browser-audit.json
+          if-no-files-found: warn
+          retention-days: 7

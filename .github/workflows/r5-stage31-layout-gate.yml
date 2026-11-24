@@ -16,6 +16,10 @@ on:
       - tests/test_r5_stage37_host_gate.py
       - tools/r5_stage37_patch.py
       - tests/test_r5_stage37_patch.py
+      - specs/R5_CANONICAL_VISUAL_GOLDEN_20261124.json
+      - tools/r5_uiux_report_gate.py
+      - tests/test_r5_uiux_report_gate.py
+      - docs/METSTAT_R5_FIGMA_UIUX_PRO_MAX_POLICY_20261124.md
       - .github/workflows/r5-stage31-layout-gate.yml
       - specs/R5_LAYOUT_CONTRACT.md
   workflow_dispatch:

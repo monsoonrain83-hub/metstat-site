@@ -58,7 +58,7 @@ python indices.py --mock --only gefs --out out
 
 The source code is released under the **GNU General Public License v3.0** (see [LICENSE](LICENSE)).
 
-MetStat displays or processes data from third parties, including NOAA PSL, NOAA CPC (GEFS), Ogimet and CMIP6 contributors. That data remains the property of the respective providers and is subject to their own terms; it is not covered by this repository's license.
+MetStat displays or processes data from third parties, including NOAA PSL, NOAA CPC (GEFS), Ogimet and CMIP6 contributors. Third-party data and assets retain their applicable rights and terms; GPL applies to original project source, not automatically to these materials. See [data and licensing](docs/DATA_AND_LICENSING.md).
 
 ## Contributing
 

@@ -1,4 +1,4 @@
-name: Verify R5 integration prerequisites
+name: Verify R5 live shell and anonymous authorization gate
 on:
   push:
     branches: [audit/r5-v61-integration-20261125]
@@ -11,20 +11,30 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
-      - name: Compare live bytes without exposing source or data
+      - name: Read-only shell and unauthorized status checks
         run: |
           python3 - <<'PY'
-          import urllib.request, hashlib, concurrent.futures, json
+          import urllib.request, urllib.error, hashlib,json
           base='https://wtafkik.ir'
-          paths=['/index.html','/monitoring-forecast/station-isohyet','/online/station_isohyet_unified_v62_cartography.html','/assets/metstat_r5_stage24_restore_v62_bb46d8da8b7c.js','/assets/metstat_r5_stage24_restore_v61_manualfix_492ce63bd7d6.js','/admin/rainfall_admin_v61.php','/online/rainfall_admin_v61.php','/auth.php?a=admin_console']
-          def inspect(p):
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs):return None
+          opener=urllib.request.build_opener(NoRedirect())
+          for path in ['/index.html','/monitoring-forecast/station-isohyet','/online/station_isohyet_unified_v62_cartography.html','/online/station_isohyet_unified_v64.html']:
               try:
-                  req=urllib.request.Request(base+p+'?r5_verify=20261125',headers={'Cache-Control':'no-cache','Accept-Encoding':'identity'})
-                  with urllib.request.urlopen(req,timeout=15) as r:
-                      if r.geturl().split('?')[0]!=base+p: return {'path':p,'redirected':True}
-                      b=r.read(6000001)
-                      return {'path':p,'status':r.status,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b)}
-              except Exception as e:return {'path':p,'status':getattr(e,'code',0),'error':type(e).__name__}
-          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-              for x in pool.map(inspect,paths):print(json.dumps(x))
+                  with opener.open(urllib.request.Request(base+path,headers={'Cache-Control':'no-cache','Accept-Encoding':'identity'}),timeout=15) as r:
+                      b=r.read(4000000); print(json.dumps({'path':path,'http':r.status,'sha256':hashlib.sha256(b).hexdigest()}))
+              except urllib.error.HTTPError as e:print(json.dumps({'path':path,'http':e.code}))
+          for action,method in [('me','GET'),('rainfall_admin_v63','POST'),('admin_console','GET')]:
+              try:
+                  req=urllib.request.Request(base+'/auth.php?a='+action,method=method,data=b'{"action":"admin-status"}' if method=='POST' else None,headers={'X-Requested-With':'MetStat','Content-Type':'application/json','Origin':base,'Cache-Control':'no-store'})
+                  try:r=opener.open(req,timeout=15)
+                  except urllib.error.HTTPError as e:r=e
+                  with r:
+                      status=r.status
+                      try:d=json.loads(r.read(50000))
+                      except Exception:d={}
+                      err=d.get('error','')
+                      safe=err if err in ['auth','forbidden','unknown_action','csrf','origin','method','server_db','bad_request'] else ('other' if err else '')
+                      print(json.dumps({'action':action,'http':status,'error':safe,'guest':('user' in d and d['user'] is None)}))
+              except Exception as e:print(json.dumps({'action':action,'failure':type(e).__name__}))
           PY

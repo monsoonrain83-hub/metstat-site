@@ -1,0 +1,22 @@
+name: Operational station lookup availability (aggregate only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  status:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Read public API health only
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs):return None
+          req=urllib.request.Request('https://wtafkik.ir/online/rain_station_lookup_v45.php',data=b'{"action":"status"}',headers={'Content-Type':'application/json','Accept':'application/json','Origin':'https://wtafkik.ir'},method='POST')
+          with urllib.request.build_opener(NoRedirect()).open(req,timeout=30) as res:
+              status=json.loads(res.read(1024*1024))
+          assert status.get('ready') is True,'Station API unavailable'
+          print(json.dumps({'ready':True}))
+          PY

@@ -9,4 +9,16 @@ assert.equal(r.scopeFromText('ایستگاههای شهر مشهد',['فارس']
 assert.equal(r.resolve('بوژان',[...stations,{...stations[0],id:'other',lat:37}]).status,'ambiguous');
 const key=r.resolve('نیشابور: بوژان',stations).key;
 assert.equal(r.resolve('نیشابور: بوژان',stations,{}, {[key]:'b'}).reason,'learned_verified_override');
+
+for(const bad of ['', '   ', null, false, true, 0, NaN, Infinity, 'abc', 23, 42]){
+ assert.equal(r.resolve('بوژان',[{...stations[0],lat:bad}]).status,'unresolved');
+}
+assert.equal(r.resolve('بوژان',[{...stations[0],lon:100}]).status,'unresolved');
+assert.equal(r.resolve('بوژان',[{...stations[0],province:'  '}]).status,'unresolved');
+assert.equal(r.resolve('بوژان',[null,{...stations[0],aliases:'بوژان'}]).status,'verified');
+assert.equal(r.resolve('بوژان',[{...stations[0],lat:'36.1',lon:'59.2'}]).status,'verified');
+assert.equal(r.resolve('بوژان',[stations[0],{...stations[0],province:'فارس',id:'other'}]).status,'ambiguous');
+const inherited=Object.create({[key]:'b'});
+assert.equal(r.resolve('نیشابور: بوژان',stations,{},inherited).reason,'unique_exact');
+
 console.log('context-aware station resolver tests passed');

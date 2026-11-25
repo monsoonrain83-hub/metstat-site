@@ -1,0 +1,30 @@
+name: Verify R5 integration prerequisites
+on:
+  push:
+    branches: [audit/r5-v61-integration-20261125]
+    paths: [.github/workflows/r5-v61-integration-prerequisites.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Compare live bytes without exposing source or data
+        run: |
+          python3 - <<'PY'
+          import urllib.request, hashlib, concurrent.futures, json
+          base='https://wtafkik.ir'
+          paths=['/index.html','/assets/metstat_r5_stage24_restore.js','/assets/map_layers.js','/assets/terrain_dem.js','/online/station_isohyet_unified_v61.html','/online/rain_station_lookup_unified_v61.php','/online/rainfall_admin_v61.php','/meteorological-toolbox/converter/unit']
+          def inspect(p):
+              try:
+                  req=urllib.request.Request(base+p+'?r5_verify=20261125',headers={'Cache-Control':'no-cache','Accept-Encoding':'identity'})
+                  with urllib.request.urlopen(req,timeout=15) as r:
+                      if r.geturl().split('?')[0]!=base+p: return {'path':p,'redirected':True}
+                      b=r.read(6000001)
+                      return {'path':p,'status':r.status,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b)}
+              except Exception as e:return {'path':p,'status':getattr(e,'code',0),'error':type(e).__name__}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              for x in pool.map(inspect,paths):print(json.dumps(x))
+          PY

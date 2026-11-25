@@ -46,7 +46,7 @@ jobs:
               console.log(JSON.stringify({kind:'browser',details,requestedPaths:[...used].sort(),engineMatchesArchive:eng.ok()&&hash==='faae6460663df2170a68898c51f1e19f9a7f80080dacd7cc8f106a8f25cec629'}));
               for(const [name,method] of [['rain_station_lookup_v45.php','POST'],['rain_station_lookup_v44.php','POST'],['osm_place_lookup_v86.php','GET']]){
                 try{
-                  const url=base+'/online/'+name+(method==='GET'?'?action=status':'');
+                  const url=base+'/online/'+name+(method==='GET'?'?a=status':'');
                   const res=method==='POST'?await ctx.request.post(url,{data:{action:'status'},headers:{Origin:base},maxRedirects:0,timeout:20000}):await ctx.request.get(url,{maxRedirects:0,timeout:20000});
                   const data=await res.json();
                   console.log(JSON.stringify({kind:'health',endpoint:name,http:res.status(),ready:data.ready===true,version:String(data.version??'').replace(/[^0-9.]/g,'')}));

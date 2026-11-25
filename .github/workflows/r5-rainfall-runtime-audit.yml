@@ -1,0 +1,58 @@
+name: R5 rainfall runtime dependency audit
+on:
+  push:
+    branches: [audit/r5-rainfall-runtime-20261125]
+    paths: [.github/workflows/r5-rainfall-runtime-audit.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install chromium --with-deps
+      - name: Audit live dependencies without publishing private data
+        run: |
+          cat > audit.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const crypto=require('node:crypto');
+          const base='https://wtafkik.ir';
+          (async()=>{
+            const browser=await chromium.launch();
+            try{
+              const ctx=await browser.newContext({serviceWorkers:'block',viewport:{width:1440,height:900}});
+              const used=new Set();
+              await ctx.route('**/*',route=>{
+                const req=route.request(),u=new URL(req.url());
+                if(u.origin!==base||!['GET','HEAD'].includes(req.method()))return route.abort();
+                return route.continue();
+              });
+              ctx.on('request',req=>{const u=new URL(req.url());if(u.origin===base&&/atlas|station|isohyet|osm|map_layers|geo_r203/.test(u.pathname))used.add(u.pathname)});
+              const page=await ctx.newPage();
+              await page.goto(base+'/monitoring-forecast/station-isohyet',{waitUntil:'domcontentloaded',timeout:45000});
+              await page.waitForFunction(()=>Array.from(document.querySelectorAll('iframe')).some(f=>{try{return !!f.contentWindow.MetStatIsohyetV28}catch{return false}}),null,{timeout:45000});
+              let details=await page.evaluate(async()=>{
+                const f=Array.from(document.querySelectorAll('iframe')).find(f=>{try{return !!f.contentWindow.MetStatIsohyetV28}catch{return false}});
+                const w=f.contentWindow;
+                for(let i=0;i<150&&!w.MetStatMatchAtlasInfo;i++)await new Promise(r=>setTimeout(r,100));
+                return {bridgePresent:typeof window.MetStatAtlasBridgeV28==='function',stationCount:w.MetStatIsohyetV28.getState().atlas.length,atlasSource:w.MetStatMatchAtlasInfo?.source??null};
+              });
+              const eng=await ctx.request.get(base+'/online/station_isohyet_v26.html',{maxRedirects:0,timeout:30000});
+              const hash=crypto.createHash('sha256').update(await eng.body()).digest('hex');
+              console.log(JSON.stringify({kind:'browser',details,requestedPaths:[...used].sort(),engineMatchesArchive:eng.ok()&&hash==='faae6460663df2170a68898c51f1e19f9a7f80080dacd7cc8f106a8f25cec629'}));
+              for(const [name,method] of [['rain_station_lookup_v45.php','POST'],['rain_station_lookup_v44.php','POST'],['osm_place_lookup_v86.php','GET']]){
+                try{
+                  const url=base+'/online/'+name+(method==='GET'?'?action=status':'');
+                  const res=method==='POST'?await ctx.request.post(url,{data:{action:'status'},headers:{Origin:base},maxRedirects:0,timeout:20000}):await ctx.request.get(url,{maxRedirects:0,timeout:20000});
+                  const data=await res.json();
+                  console.log(JSON.stringify({kind:'health',endpoint:name,http:res.status(),ready:data.ready===true,version:String(data.version??'').replace(/[^0-9.]/g,'')}));
+                }catch(e){console.log(JSON.stringify({kind:'health',endpoint:name,ready:false,unverified:true}));}
+              }
+            }finally{await browser.close();}
+          })().catch(e=>{console.error('Browser audit failed:',e.message);process.exitCode=1});
+          JS
+          node audit.cjs

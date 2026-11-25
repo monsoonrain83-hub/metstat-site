@@ -1,0 +1,43 @@
+name: Rainfall catalog schema checks (no deployment)
+on:
+  push:
+    branches: [feature/r5-routes-rainfall-catalog-20261125]
+    paths: [rainfall_catalog/**, .github/workflows/rainfall-catalog-schema-check.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate catalog constraints in a disposable database
+        run: |
+          python3 - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db=sqlite3.connect(':memory:')
+          db.executescript(Path('rainfall_catalog/schema_v1.sql').read_text())
+          db.execute("INSERT INTO source(id,name,imported_at) VALUES ('test','synthetic fixture','2026-11-25')")
+          def put(i,kind,ck,cap,state,lat=35,lon=50,province='زنجان'):
+              db.execute("INSERT INTO location(id,kind,name_fa,province,latitude,longitude,coordinate_kind,precip_capable,review_state) VALUES(?,?,?,?,?,?,?,?,?)",(i,kind,'آزمایشی',province,lat,lon,ck,cap,state))
+          def reject(*args):
+              try: put(*args)
+              except sqlite3.IntegrityError: return
+              raise AssertionError('Invalid record accepted')
+          put('sensor','station','sensor_verified',1,'verified')
+          put('osm','place','place_reference',0,'verified')
+          put('hydro','station','sensor_verified',0,'verified')
+          put('uncertain','station','sensor_unverified',1,'pending')
+          put('no_province','station','sensor_verified',1,'verified',35,50,None)
+          put('no_evidence','station','sensor_verified',1,'verified')
+          reject('bad_osm','place','sensor_verified',1,'verified')
+          reject('bad_lat','station','sensor_verified',1,'verified',0,50)
+          reject('bad_null','station','sensor_verified',1,'verified',None,50)
+          for i in ['sensor','osm','hydro','uncertain','no_province']:
+              db.execute("INSERT INTO source_record(source_id,source_record_id,location_id,evidence_ref) VALUES('test',?,?,?)",(i,i,'synthetic'))
+          assert db.execute('SELECT id FROM eligible_precip_location').fetchall()==[('sensor',)]
+          assert db.execute('PRAGMA integrity_check').fetchone()==('ok',)
+          print('Catalog schema eligibility and invalid record checks passed. Synthetic fixtures only; no host access.')
+          PY

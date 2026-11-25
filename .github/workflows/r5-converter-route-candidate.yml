@@ -1,0 +1,67 @@
+name: R5 converter routing regression (no deployment)
+on:
+  pull_request:
+    paths: [scripts/patch-r5-converter-routes.py, .github/workflows/r5-converter-route-candidate.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  routes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/patch-r5-custom-routes.py && python3 scripts/patch-r5-converter-routes.py
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Browser regression on locally reconstructed frontend
+        run: |
+          cat > test.cjs <<'JS'
+          const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+          const spec=JSON.parse(fs.readFileSync('r5-converter-routes.json','utf8'));
+          const base='https://metstat.test',root=path.resolve('r5-candidate');
+          (async()=>{
+            const browser=await chromium.launch();
+            try{
+              const ctx=await browser.newContext({serviceWorkers:'block',viewport:{width:1440,height:900}});
+              await ctx.route('**/*',r=>{
+                const u=new URL(r.request().url());if(u.origin!==base||!['GET','HEAD'].includes(r.request().method()))return r.abort();
+                let f=path.resolve(root,'.'+u.pathname);if(!f.startsWith(root+'/')&&f!==root)return r.abort();
+                if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){
+                  if(!path.extname(u.pathname)&&!u.pathname.startsWith('/online/'))f=path.join(root,'index.html');else return r.fulfill({status:404,body:''});
+                }
+                const type={'.html':'text/html; charset=utf-8','.js':'application/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png'}[path.extname(f)]||'application/octet-stream';
+                return r.fulfill({status:200,headers:{'Content-Type':type,'X-MetStat-Routes':'r20261124'},body:r.request().method()==='HEAD'?'':fs.readFileSync(f)});
+              });
+              const page=await ctx.newPage();
+              async function wait(dest,p){
+                await page.waitForFunction(d=>window.MS_R5_CUSTOM_ROUTE?.current()===d&&document.querySelector('#ms7Custom')?.hidden===false,dest,{timeout:15000});
+                assert.equal(new URL(page.url()).pathname,p);
+                assert.equal(await page.locator('#ms7Custom h2').count(),1);
+              }
+              for(const [d,p] of Object.entries(spec.canonical)){
+                await page.goto(base+p);await wait(d,p);await page.reload();await wait(d,p);console.log('direct + reload',d);
+              }
+              for(const [alias,d] of Object.entries(spec.aliases)){
+                await page.goto(base+alias);await wait(d,spec.canonical[d]);console.log('alias',d);
+              }
+              await page.goto(base+'/convection');
+              await page.waitForFunction(()=>window.MetStatR7&&typeof ROUTE_PATH!=='undefined'&&ROUTE_PATH,{},{timeout:15000});
+              assert.equal(await page.evaluate(()=>window.MS_R5_CUSTOM_ROUTE.active),false);
+              await page.locator('#cvApp').waitFor({state:'visible'});
+              for(const [d,p] of Object.entries(spec.canonical)){
+                await page.locator('#ms7Nav [data-group="toolbox"]').click();
+                await page.locator('#ms7Fly [data-dest="'+d+'"]').click();
+                await wait(d,p);
+              }
+              await page.goBack();await wait('convert-media',spec.canonical['convert-media']);
+              await page.goForward();await wait('convert-document',spec.canonical['convert-document']);
+              console.log('Menu, history and native convection passed. No live site writes.');
+            } finally { await browser.close(); }
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          JS
+          node test.cjs

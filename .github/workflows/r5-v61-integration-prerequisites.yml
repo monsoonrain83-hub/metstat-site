@@ -16,7 +16,7 @@ jobs:
           python3 - <<'PY'
           import urllib.request, hashlib, concurrent.futures, json
           base='https://wtafkik.ir'
-          paths=['/index.html','/assets/metstat_r5_stage24_restore.js','/assets/map_layers.js','/assets/terrain_dem.js','/online/station_isohyet_unified_v61.html','/online/rain_station_lookup_unified_v61.php','/online/rainfall_admin_v61.php','/meteorological-toolbox/converter/unit']
+          paths=['/index.html','/monitoring-forecast/station-isohyet','/online/station_isohyet_unified_v62_cartography.html','/assets/metstat_r5_stage24_restore_v62_bb46d8da8b7c.js','/assets/metstat_r5_stage24_restore_v61_manualfix_492ce63bd7d6.js','/admin/rainfall_admin_v61.php','/online/rainfall_admin_v61.php','/auth.php?a=admin_console']
           def inspect(p):
               try:
                   req=urllib.request.Request(base+p+'?r5_verify=20261125',headers={'Cache-Control':'no-cache','Accept-Encoding':'identity'})

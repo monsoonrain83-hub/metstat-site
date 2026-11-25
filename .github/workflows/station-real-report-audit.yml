@@ -1,0 +1,161 @@
+name: Station real rainfall report audit (88 lookups)
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/station-coordinate-qc-20261125]
+    paths: [.github/workflows/station-real-report-audit.yml]
+permissions:
+  contents: read
+concurrency:
+  group: station-real-report-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare public registry suggestions with operational lookup API
+        run: |
+          cat > report-input.txt <<'EOF'
+          زنجان
+          ماه نشان|18.3
+          دندی|17.1
+          دانشگاه زنجان|16.4
+          فیله خاصه|16.2
+          حلب|15.5
+          نیک پی|14.7
+          سجاس|11.1
+          زنجان|11
+          خدابنده|8
+          خیرآباد زنجان|5.2
+          آب بر|3.5
+          صائین قلعه|2.6
+          ابهر|1.4
+          چورزق|1.3
+          گیلوان|0.3
+          سمنان
+          شهميرزاد|0.1
+          سیستان و بلوچستان
+          نیکشهر|4.1
+          فارس
+          زرقان|0.5
+          صفاشهر|0.5
+          شیراز|0.4
+          نمدان|0.4
+          فیروز آباد-فارس|0.2
+          خفر|0.2
+          قزوین
+          نیروگاه شهید رجایی|3
+          رازمیان|2.1
+          قزوین|0.4
+          سيردان|0.4
+          کوهين|0.3
+          آبیک|0.2
+          قزوین اسماعیل آباد|0.2
+          قم
+          کهک|0.6
+          جمکران|0.6
+          جعفریه|0.6
+          سلفچگان|0.2
+          مرکز تحقیقات هواشناسی قم|0.2
+          کردستان
+          سروآباد|39.8
+          سقز|35.8
+          هزارکانیان|31.1
+          بانه|30
+          سنندج|24
+          مريوان|23.7
+          موچش|21.4
+          آویهنگ|20.8
+          کامیاران|20.6
+          زرینه|18.4
+          قاملو|16.2
+          بيجار|15.4
+          دیواندره|14.7
+          باباراشانی|14.5
+          دهگلان|13.6
+          یاسوکند|13.2
+          قروه|12.5
+          بهارستان|11.8
+          کرمانشاه
+          کنگاور|31
+          کرمانشاه|30.5
+          اسلام آباد غرب|29.3
+          گواور|26.4
+          سرآرود-کرمانشاه|26.1
+          سنقر|23.6
+          روانسر|23.2
+          هرسین|21.4
+          صحنه|21.2
+          جوانرود|19.3
+          کوزران|19.2
+          گهواره|17.6
+          کرندغرب|9.8
+          تازه آباد-کرمانشاه|8.8
+          سرپل ذهاب|7
+          گیلانغرب|5
+          قصر شیرین|2.4
+          پاوه|0.2
+          گیلان
+          ماسوله|5.2
+          آستارا|4.1
+          اسب بونی|3
+          املش|2.4
+          ماسال|1.9
+          دیلمان|1.2
+          جیرنده|0.8
+          تالش|0.8
+          کياشهر|0.4
+          رشت-کشاورزی|0.4
+          لنگرود|0.4
+          لاهيجان|0.3
+          ازبرم|0.3
+          رودسر|0.2
+          آستانه اشرفیه|0.2
+          منجیل|0.1
+          فومن|0.1
+          EOF
+          python3 - <<'PY'
+          import json,urllib.request,collections
+          from pathlib import Path
+          rows=[]
+          province=''
+          for line in Path('report-input.txt').read_text().splitlines():
+              if '|' not in line: province=line;continue
+              name,rain=line.split('|')
+              rows.append(dict(name=name,province=province,rain=float(rain)))
+          assert len(rows)==88
+          # Ordinary public lookup only; no emergency geolocation, no submissions.
+          url='https://wtafkik.ir/online/rain_station_lookup_v45.php'
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs):return None
+          opener=urllib.request.build_opener(NoRedirect())
+          def post(obj):
+              req=urllib.request.Request(url,data=json.dumps(obj,ensure_ascii=False).encode(),headers={'Content-Type':'application/json','Accept':'application/json','Origin':'https://wtafkik.ir'},method='POST')
+              with opener.open(req,timeout=150) as res:
+                  return json.loads(res.read(8*1024*1024))
+          status=post({'action':'status'})
+          assert status.get('ready') is True, 'Operational lookup unavailable'
+          payload=post({'queries':[{'name':r['name'],'province':r['province']} for r in rows]})
+          result=payload.get('results')
+          assert isinstance(result,list) and len(result)==len(rows), 'Unexpected API response shape'
+          out=[]
+          for row,res in zip(rows,result):
+              c=res.get('candidates') or []
+              places=res.get('places') or []
+              top=c[0] if c else {}
+              out.append({**row,'status':res.get('status','unknown'),'reason':res.get('reason',''),'candidate_count':len(c),'reference_count':len(places),'top_name':top.get('fa',''),'top_id':top.get('id',''),'top_province':top.get('ostan',''),'top_score':top.get('score'),'auto_match_allowed':top.get('auto_match_allowed'),'requires_review':top.get('requires_review')})
+          summary={'api_version':status.get('version'),'n':len(out),'status_counts':dict(collections.Counter(r['status'] for r in out)),'with_station_candidates':sum(bool(r['candidate_count']) for r in out),'reference_only':sum(not r['candidate_count'] and bool(r['reference_count']) for r in out),'no_station_or_reference':sum(not r['candidate_count'] and not r['reference_count'] for r in out)}
+          Path('live-station-report.json').write_text(json.dumps({'summary':summary,'rows':out},ensure_ascii=False,indent=2))
+          print(json.dumps(summary,ensure_ascii=False))
+          for r in out:
+              print(json.dumps(r,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-station-report-88
+          path: live-station-report.json
+          if-no-files-found: warn
+          retention-days: 14

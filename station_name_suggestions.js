@@ -18,7 +18,8 @@ function distance(a,b){
 const numeric=v=>(typeof v==='number'||(typeof v==='string'&&v.trim()!==''))&&Number.isFinite(Number(v));
 function inScope(c,s){
  if(!c||!norm(c.province)||!numeric(c.lat)||!numeric(c.lon)||Number(c.lat)<24||Number(c.lat)>41||Number(c.lon)<43||Number(c.lon)>64)return false;
- for(const k of ['province','county','district'])if(norm(s[k])&&compact(c[k])!==compact(s[k]))return false;
+ if(norm(s.province)&&compact(c.province)!==compact(s.province))return false;
+ for(const k of ['county','district'])if(norm(s[k])&&norm(c[k])&&compact(c[k])!==compact(s[k]))return false;
  return true;
 }
 function score(q,n){
@@ -46,10 +47,15 @@ function suggest(input,candidates,scope={},limit=8){
   const names=[c.nameFa,c.nameEn,c.name,...(Array.isArray(c.aliases)?c.aliases:[])].filter(v=>typeof v==='string'&&v.length<=150);
   let best=null;
   for(const name of names){const hit=score(q,name);if(hit&&(!best||hit.score>best.score))best={...hit,matchedName:name};}
-  if(best)rows.push({candidate:c,...best,requiresConfirmation:true});
+  if(best){
+   const missingContext=['county','district'].filter(k=>norm(ctx[k])&&!norm(c[k]));
+   const matchScore=best.score;
+   rows.push({candidate:c,...best,matchScore,score:matchScore-(missingContext.length?15:0),missingContext,requiresConfirmation:true});
+  }
  }
  rows.sort((a,b)=>b.score-a.score||String(a.candidate.id??'').localeCompare(String(b.candidate.id??'')));
- return rows.slice(0,Math.max(0,Math.min(30,Number.isFinite(limit)?Math.floor(limit):8)));
+ const topScore=rows[0]?.score;const topTieCount=rows.filter(r=>r.score===topScore).length;
+ return rows.slice(0,Math.max(0,Math.min(30,Number.isFinite(limit)?Math.floor(limit):8))).map(r=>({...r,topTieCount,ambiguousTop:r.score===topScore&&topTieCount>1}));
 }
 return Object.freeze({norm,compact,skeleton,suggest});
 });

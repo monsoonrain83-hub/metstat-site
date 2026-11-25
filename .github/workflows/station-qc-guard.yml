@@ -2,6 +2,8 @@ name: station-qc-guard
 on:
   push:
     paths:
+      - station_registry_adapter.js
+      - tests/station_registry_adapter.cjs
       - station_name_suggestions.js
       - tests/station_name_suggestions.cjs
       - station_qc_guard.js
@@ -24,3 +26,15 @@ jobs:
           node tests/station_qc_guard.cjs
           node tests/station_resolver_v1.cjs
           node tests/station_name_suggestions.cjs
+          node tests/station_registry_adapter.cjs
+      - name: Audit actual public V33 station registry without modifying the host
+        run: |
+          curl --fail --silent --show-error --max-time 45 --proto '=https' https://wtafkik.ir/online/atlas_station_registry_v33.json -o station-registry.json
+          node tests/station_registry_adapter.cjs station-registry.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: station-registry-audit
+          path: station-registry-audit.json
+          if-no-files-found: warn
+          retention-days: 14

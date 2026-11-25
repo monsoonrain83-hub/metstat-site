@@ -25,4 +25,15 @@ assert.equal(s.suggest('بوژان',[null,records[1]])[0].requiresConfirmation,t
 assert.equal(s.suggest('قاسم آباد',records).every(x=>x.requiresConfirmation),true);
 assert.equal(s.suggest('',records).length,0);
 assert.equal(s.suggest('قاسم آباد',records,{},1).length,1);
-console.log('18 station suggestion regression assertions passed');
+const missingCounty={...records[1],county:''};
+const unknown=s.suggest('نیشابور: بوژان',[missingCounty],{province:'خراسان رضوی'})[0];
+assert.equal(unknown.candidate.id,'b');
+assert.deepEqual(unknown.missingContext,['county']);
+assert.equal(unknown.requiresConfirmation,true);
+assert.equal(unknown.score,85);
+assert.equal(s.suggest('نیشابور: بوژان',[{...records[1],county:'مشهد'}]).length,0);
+const tied=s.suggest('قاسم آباد',records,{},1)[0];
+assert.equal(tied.topTieCount,2);
+assert.equal(tied.ambiguousTop,true);
+assert.equal(s.suggest('نیشابور: بوژان',[missingCounty,records[1]])[0].score,100);
+console.log('26 station suggestion regression assertions passed');

@@ -1,3 +1,15 @@
+## MetStat project family
+
+MetStat is a multi-repository project with independent release and deployment boundaries. Start with the [website repository](https://github.com/monsoonrain83-hub/metstat-site) for the project overview.
+
+| Repository | Responsibility |
+|---|---|
+| [metstat-site](https://github.com/monsoonrain83-hub/metstat-site) | Web interface, climate tools, station workflows and server integration |
+| [metstat-nwp](https://github.com/monsoonrain83-hub/metstat-nwp) | Numerical weather prediction data ingestion, processing and product publication |
+| [LightningLab](https://github.com/monsoonrain83-hub/LightningLab) | Android atmospheric media analysis, lightning detection and photo/video tools; web integration requires a separately verified adapter |
+
+Production databases, credentials, private observations and provider-restricted data are not required to review the source and must not be distributed with it. See [architecture](docs/ARCHITECTURE.md), [security](SECURITY.md) and [contributing](CONTRIBUTING.md). Public source does not imply that third-party data, trained weights or assets are redistributable. No repository may deploy code from untrusted pull requests.
+
 # MetStat
 
 **MetStat** is a free, open-source (GPL-3.0) web platform for weather and climate analysis, built primarily for Persian-speaking forecasters, students and researchers in Iran. The interface is bilingual (Persian / English) and works with the Solar Hijri (Jalali) calendar.

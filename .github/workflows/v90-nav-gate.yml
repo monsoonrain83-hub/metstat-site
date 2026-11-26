@@ -1,0 +1,62 @@
+name: V90 navigation parity browser gate
+on:
+  pull_request:
+    paths:
+      - 'scripts/*v90*'
+      - '.github/workflows/v90-nav-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retrieve exact verified V89 artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts/15119121227/zip > v89-artifact.zip
+          echo '53f1925113ceb3c896e29428e04a320316c3de564baeb9c860d2b7036783691b  v89-artifact.zip' | sha256sum -c -
+          mkdir v89-artifact
+          unzip -j v89-artifact.zip MetStat_V89_upload.zip -d v89-artifact
+      - run: python3 scripts/build-v90-nav.py
+      - run: find v90-candidate/assets -name '*.js' -exec node --check {} +
+      - run: python3 scripts/check_retired_host_files.py v90-candidate
+      - run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_frontend_release.py' -v
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v90-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v90-reports
+          path: |
+            v90-live-baseline.json
+            v90-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v90-candidate')
+          with zipfile.ZipFile('MetStat_V90_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file():z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V90_upload.zip
+          python3 scripts/verify_frontend_release.py MetStat_V90_upload.zip v90-baseline > v90-release-provenance.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v90-verified-candidate
+          path: |
+            MetStat_V90_upload.zip
+            v90-release-provenance.json
+          retention-days: 14

@@ -1,0 +1,29 @@
+name: V97 normalized scan report contract
+on:
+  pull_request:
+    paths:
+      - 'scripts/scan_report.py'
+      - 'tests/test_scan_report.py'
+      - 'tests/fixtures/public-health-*.json'
+      - '.github/workflows/scan-report-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -p 'test_scan_report.py' -v
+      - name: Replay retained non-secret public evidence offline
+        run: |
+          python scripts/scan_report.py tests/fixtures/public-health-v93.json --previous tests/fixtures/public-health-v92.json --output findings
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v97-normalized-findings
+          path: findings/
+          retention-days: 7

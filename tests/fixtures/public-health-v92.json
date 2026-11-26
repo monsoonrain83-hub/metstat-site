@@ -1,0 +1,22 @@
+{
+  "target": "https://wtafkik.ir",
+  "utc": "2026-11-26T15:10:57Z",
+  "fixture_note": "Minimal non-secret evidence excerpt from the recorded bounded public audit; not a live scan.",
+  "root": {
+    "status": 200,
+    "headers": {
+      "x-frame-options": "SAMEORIGIN",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "same-origin"
+    },
+    "cookie_flags": [
+      {
+        "secure": false,
+        "httponly": true,
+        "samesite": false
+      }
+    ],
+    "explicit_http_resources": 0,
+    "ttfb_ms": 1121
+  }
+}

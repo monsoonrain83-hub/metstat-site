@@ -24,7 +24,7 @@ const tag='W/"'+sha(manifest)+'-0"';
     const {name:profileName,...contextOptions}=profile;
     const ctx=await browser.newContext({...contextOptions,serviceWorkers:'block'});
     const page=await ctx.newPage(),requests=[],errors=[],failures=[],manifestRequests=[];
-    const report={profile:profile.name,candidate};const wbRequests=[];
+    const report={profile:profile.name,candidate};const wbRequests=[];const wbEvents=[];report.wbEvents=wbEvents;report.wbRequests=wbRequests;
     reports.push(report);
     try{
      await ctx.route('**/*',async route=>{
@@ -38,11 +38,14 @@ const tag='W/"'+sha(manifest)+'-0"';
       if(u.pathname==='/'&&req.resourceType()==='document')return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:candidate?index:baselineIndex});
       if(!candidate&&u.pathname===old)return route.fulfill({status:200,contentType:'application/javascript; charset=utf-8',body:baselineCore});
       if(candidate&&u.pathname==='/assets/'+name)return route.fulfill({status:200,contentType:'application/javascript; charset=utf-8',body:core});
-      if(wbPaths.has(u.pathname)){assert(candidate,'baseline requested lazy WB layer');wbRequests.push(u.pathname);return route.fulfill({status:200,contentType:'image/png',body:fs.readFileSync(root+u.pathname)});}
+      if(wbPaths.has(u.pathname)){assert(candidate,'baseline requested lazy WB layer');wbRequests.push(u.pathname);const body=fs.readFileSync(root+u.pathname);wbEvents.push({stage:'route',path:u.pathname,bytes:body.length,sha256:sha(body)});return route.fulfill({status:200,contentType:'image/png',body});}
       return route.continue();
      });
      page.on('request',req=>{const u=new URL(req.url());if(u.origin===BASE&&overlays.test(u.pathname))requests.push(u.pathname);if(u.origin===BASE&&['/online/data/manifest.json','/online/model_catalog.php'].includes(u.pathname))manifestRequests.push(u.pathname+u.search);});
      page.on('pageerror',e=>errors.push(String(e.message).slice(0,150)));
+     page.on('request',req=>{const u=new URL(req.url());if(wbPaths.has(u.pathname))wbEvents.push({stage:'request',origin:u.origin,path:u.pathname,type:req.resourceType()});});
+     page.on('response',res=>{const u=new URL(res.url());if(wbPaths.has(u.pathname))wbEvents.push({stage:'response',path:u.pathname,status:res.status(),mime:res.headers()['content-type']});});
+     page.on('requestfailed',req=>{const u=new URL(req.url());if(wbPaths.has(u.pathname))wbEvents.push({stage:'failed',path:u.pathname,reason:req.failure()?.errorText});});
      page.on('requestfailed',req=>{const u=new URL(req.url());if(u.origin===BASE&&overlays.test(u.pathname))failures.push(u.pathname);});
      await ctx.addInitScript(()=>{
       window.__v81perf={lcp:null,long:[]};
@@ -193,6 +196,7 @@ const tag='W/"'+sha(manifest)+'-0"';
       assert.equal(requests.length,0,'V87 baseline overlay startup regression');
      }
      assert.equal(wbRequests.length,0,'WeatherBELL images loaded during online maps');
+     report.wbEnvironment=await page.evaluate(()=>({origin:location.origin,baseURI:document.baseURI,profileLayers:Object.entries(PROFILES.wb.layers).map(([key,value])=>({key,kind:value.startsWith('data:')?'embedded':value}))}));
      report.wb=await page.evaluate(async()=>{
        await useProfile('wb');
        const p=PROFILES.wb;

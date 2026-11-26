@@ -54,8 +54,20 @@ const reports=[];
      });
      report.initialOverlayRequests=requests.slice();
      report.initialErrors=errors.slice();
+     if(candidate) assert.equal(requests.length,0,'optional bundles requested at startup');
+     // Exercise the real model-map download function, not a synthetic canvas.
+     const downloadPromise=page.waitForEvent('download',{timeout:30000});
+     await page.evaluate(()=>nvExport(900));
+     const download=await downloadPromise;
+     assert.equal(await download.failure(),null,'PNG export failed');
+     const file=await download.path();
+     const png=fs.readFileSync(file);
+     assert(png.length>1000&&png.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),'invalid PNG');
+     const width=png.readUInt32BE(16),height=png.readUInt32BE(20);
+     assert(width>=900&&height>=400&&width<=1200&&height<=4000,'unexpected PNG dimensions');
+     assert(download.suggestedFilename().endsWith('.png'),'unexpected download format');
+     report.png={width,height,bytes:png.length,filename:download.suggestedFilename()};
      if(candidate){
-      assert.equal(requests.length,0,'optional bundles requested at startup');
       const results=await page.evaluate(async()=>{
        await Promise.all([wuZoomsReady(),wuZoomsReady(),ttOvLoad(),ttOvLoad()]);
        return {wu:Object.values(WU_ZOOM_IMG).filter(x=>x.complete&&x.naturalWidth>0).length,tt:TT_OV_IMG.naturalWidth};
@@ -80,7 +92,7 @@ const reports=[];
    assert(next.errors.every(e=>base.errors.includes(e)),'new browser errors');
   }
  }finally{
-  fs.writeFileSync('v81-browser-report.json',JSON.stringify({measuredAt:new Date().toISOString(),reports,note:'Only first-party GET/HEAD. Candidate HTML/JS fulfilled locally in browser; transfer bytes not directly comparable. No actual user export test.'},null,2));
+  fs.writeFileSync('v81-browser-report.json',JSON.stringify({measuredAt:new Date().toISOString(),reports,note:'Only first-party GET/HEAD. Candidate HTML/JS fulfilled locally in browser; transfer bytes not directly comparable. Real online-model PNG download exercised; Weather.us/Tropical Tidbits custom exports still not covered.'},null,2));
   await browser.close();
  }
 })().catch(e=>{console.error(e);process.exitCode=1;});

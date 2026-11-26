@@ -1,0 +1,20 @@
+name: V95 SQLite auth limiter contract
+on:
+  pull_request:
+    paths:
+      - 'server/auth/**'
+      - 'tests/auth_attempt_limiter.php'
+      - '.github/workflows/auth-limiter-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fixture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: php -r 'if (!in_array("sqlite", PDO::getAvailableDrivers(), true)) exit(1);'
+      - run: php -l server/auth/AttemptLimiter.php
+      - run: php -l tests/auth_attempt_limiter.php
+      - run: php tests/auth_attempt_limiter.php

@@ -9,19 +9,37 @@ INDEX_SHA = '219efe2c2d5eac09bffbe03fa8490920769d8dd0ccb90fa7ff6f739039881eb2'
 CORE_SHA = '482de779e30b7f58b2cae35bf2f3e1851b1603bfdddab8868c4fd1341d20f01f'
 OLD = 'let r=null; for(let k=0;k<3&&!(r&&r.ok);k++){ const ac=new AbortController(), tm=setTimeout(()=>ac.abort(),k?20000:12000); try{ r=await fetch(ON.base+"data/manifest.json?"+Date.now(),{cache:"no-store",signal:ac.signal}); }catch(_){ r=null; } clearTimeout(tm); } if(!r||!r.ok) throw new Error(r?r.status:"timeout"); ON.man=await r.json();'
 HELPER = '''async function ms82FetchManifest(base){
-  // Stable public URL: revalidate on every load. No stale-while-revalidate or TTL.
-  // Preserve the original cache-bypassing URL as the fallback for errors.
+  // Explicit conditional requests to the existing content-hash catalog.
+  // Keep at most one raw snapshot; never reuse it without a matching 304.
+  // Old static manifest remains the authoritative fallback.
   let last;
+  const catalog=base+"model_catalog.php";
+  const saved=ms82FetchManifest.cache;
   for(let k=0;k<3;k++){
     const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),k?20000:12000);
     try{
-      const path=base+"data/manifest.json"+(k?"?"+Date.now():"");
-      const r=await fetch(path,{cache:k?"no-store":"no-cache",signal:ac.signal});
-      if(!r.ok)throw new Error("manifest HTTP "+r.status);
-      const m=await r.json();
+      const prior=k===0&&saved&&saved.url===catalog?saved:null;
+      const path=k?base+"data/manifest.json?"+Date.now():catalog;
+      const opts={cache:"no-store",signal:ac.signal};
+      if(prior)opts.headers={"If-None-Match":prior.tag};
+      const r=await fetch(path,opts);
+      let raw,tag=null;
+      if(!k&&r.status===304){
+        if(!prior||r.headers.get("ETag")!==prior.tag)throw new Error("invalid catalog validator");
+        raw=prior.raw;tag=prior.tag;
+      }else{
+        if(!r.ok)throw new Error("manifest HTTP "+r.status);
+        raw=await r.text();
+        if(!k){
+          tag=r.headers.get("ETag");
+          if(!tag||!/^W\\/"[a-f0-9]{64}-[01]"$/.test(tag))throw new Error("unverified catalog ETag");
+        }
+      }
+      const m=JSON.parse(raw);
       if(!m||typeof m!=="object"||!m.models||typeof m.models!=="object"||!Array.isArray(m.items)||(m.items_prev!==undefined&&!Array.isArray(m.items_prev)))throw new Error("invalid manifest schema");
+      ms82FetchManifest.cache=!k&&tag&&raw.length<=16_000_000?{url:catalog,tag,raw}:null;
       return m;
-    }catch(e){last=e;}finally{clearTimeout(tm);}
+    }catch(e){last=e;ms82FetchManifest.cache=null;}finally{clearTimeout(tm);}
   }
   throw last||new Error("manifest unavailable");
 }

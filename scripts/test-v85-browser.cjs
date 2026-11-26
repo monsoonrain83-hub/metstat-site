@@ -81,7 +81,21 @@ const tag='W/"'+sha(manifest)+'-0"';
      report.targetModel=target;
      const chip=page.locator('#nvBar button[data-m="'+target+'"]:visible').first();
      report.modelButtons=await page.locator('#nvBar button[data-m]').evaluateAll(bs=>bs.map(b=>({key:b.dataset.m,active:b.classList.contains('on'),visible:!!b.getClientRects().length})));
-     report.interactionMs.push(await timed(async()=>{await chip.click();await page.waitForFunction(m=>NV.s.m===m,target,{timeout:10000});}));
+     await page.evaluate(()=>{window.__ms85ClickEvents=[];for(const t of ['pointerdown','pointerup','click'])document.addEventListener(t,e=>{const x=e.target.closest?.('button[data-m],#nvBar');if(x)window.__ms85ClickEvents.push({type:t,key:x.dataset.m||null,id:x.id,connected:x.isConnected});},true);});
+     try{
+       report.interactionMs.push(await timed(async()=>{await chip.click();await page.waitForFunction(m=>NV.s.m===m,target,{timeout:10000});}));
+       report.modelClick='pass';
+     }catch(e){
+       report.modelClick='fail';report.modelClickError=String(e.message).slice(0,200);
+       report.clickEvents=await page.evaluate(()=>window.__ms85ClickEvents);
+       if(candidate)throw e;
+       // A known baseline failure is recorded, never counted as a successful
+       // physical click. Use the existing model selector solely to establish
+       // the reference state for the data equivalence comparison.
+       await page.evaluate(m=>{const el=document.getElementById('nvM');if(![...el.options].some(o=>o.value===m&&!o.disabled))throw Error('model option unavailable');el.value=m;el.onchange();},target);
+       await page.waitForFunction(m=>NV.s.m===m,target,{timeout:10000});await ready();
+     }
+     report.clickEvents=await page.evaluate(()=>window.__ms85ClickEvents);
      report.states.push(await state());assert.equal(report.states.at(-1).m,target);
      const param=await page.evaluate(()=>[...document.querySelectorAll('#nvWx button[data-p]')].find(b=>!b.disabled&&b.dataset.p!==NV.s.p&&b.getClientRects().length)?.dataset.p);
      if(param){
@@ -125,6 +139,7 @@ const tag='W/"'+sha(manifest)+'-0"';
    const [base,next]=reports.filter(x=>x.profile===profile.name);
    assert.equal(next.initial.route,base.initial.route,'navigation regression');
    assert.deepEqual(next.states,base.states,'model/frame selection regression');
+   assert.equal(next.modelClick,'pass','candidate physical model click must succeed');
    assert(next.initial.mapImages>=1&&base.initial.mapImages>=1,'initial model map not confirmed');
    assert(next.errors.every(e=>base.errors.includes(e)),'new browser errors');
   }

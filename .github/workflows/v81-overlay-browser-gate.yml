@@ -1,0 +1,53 @@
+name: V81 on-demand overlay browser gate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/build-v81-overlay-candidate.py'
+      - 'scripts/test-v81-overlay-browser.cjs'
+      - '.github/workflows/v81-overlay-browser-gate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v81-overlay-browser-gate
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/build-v81-overlay-candidate.py
+      - run: find v81-candidate/assets -name '*.js' -exec node --check {} +
+      - run: python3 scripts/check_retired_host_files.py v81-candidate
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v81-overlay-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v81-browser-report
+          path: v81-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate (not deployed)
+        if: success()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v81-candidate')
+          with zipfile.ZipFile('MetStat_V81_browser_candidate.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  if p.is_file(): z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V81_browser_candidate.zip
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: v81-browser-verified-candidate
+          path: MetStat_V81_browser_candidate.zip
+          retention-days: 14

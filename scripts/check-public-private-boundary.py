@@ -1,4 +1,4 @@
-"""Read-only HEAD checks for existing harmless deny canaries and public files."""
+"""Read-only HEAD checks for known log/retired-file paths, deny canaries and public files."""
 import json
 import sys
 import urllib.error
@@ -7,6 +7,13 @@ import urllib.request
 BASE = "https://wtafkik.ir"
 CHECKS = {
     "/admin/private/deny-canary.txt": {403, 404},
+    # Files observed in the administrator-provided 25 Nov host archive.
+    "/debug.log": {403, 404},
+    "/error_log": {403, 404},
+    "/admin/error_log": {403, 404},
+    "/online/error_log": {403, 404},
+    "/online/api.zip": {403, 404},
+    "/online/assets.zip": {403, 404},
     "/metstat_data/index.html": {403, 404},
     "/online/data/manifest.json": {200},
     "/": {200},

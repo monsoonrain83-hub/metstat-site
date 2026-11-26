@@ -8,8 +8,8 @@ def sha(b):return hashlib.sha256(b).hexdigest()
 BASE_INDEX='054f9d61c2d418b66df078c3550b141416f3b6e9e01262b3b632243239cee770'
 BASE_CORE='830b402e8c88464a550e6351e906e729a56650c2c54c4d972546d7cd7c9dc5fa'
 BASE_ZIP='e9f6a92f8bf98ac423b22a3574cb61c1ffa892173efe788fbfea12d568cc0cc4'
-NEXT_INDEX='e3087dd163fdcd114df595d8b71c8b229cffdd2e565acd6836853c90298cb5ad'
-NEXT_CORE='13ff771e78308c226c9e93ece0c6e64ea8e1fbf7b40a5a1d031ff29ed674eb54'
+NEXT_INDEX='2bef1bb9201349b41d8202785c8ebff2bb56e03139dbd9cd31de0492df8f5a7d'
+NEXT_CORE='553f5ac11dfaa0a88ae6eddd8e276b1b2d4952e0f8a0edb61d24a6039acebfab'
 LAYER_HASHES={'bold':'a44890a39baebfa9ff7518ac4434ec69601644baa723fa974dcb0258c9776206','orig':'cf309ba5758f85d976215373bcfe1be27c64642f85b1e9d0d871b7a49a77ae2c','grid':'79a8dbfb2bd2d46b62b00d01ffab9792a0e93a74af603f6e073fce8b38426125'}
 def build(h,c):
     if sha(h)!=BASE_INDEX or sha(c)!=BASE_CORE:raise ValueError('unexpected V92 pair')
@@ -36,7 +36,22 @@ def build(h,c):
     }
     // Publish only after all layers decode successfully. A failed request can be retried.
     owner.baseMask=bm; owner.ov=ov;'''
-    s=s[:a]+block+s[b:];cb=s.encode();name='assets/ms_r5_perf_core_'+sha(cb)[:16]+'.js'
+    s=s[:a]+block+s[b:]
+    old_ref='''  const W0=PROFILES.wb, im=new Image(); im.src=W0.layers.orig; await im.decode();
+  const c=document.createElement("canvas"); c.width=W0.W; c.height=W0.H; const cx=c.getContext("2d",{willReadFrequently:true}); cx.drawImage(im,0,0);
+  const a=cx.getImageData(0,0,W0.W,W0.H).data;'''
+    new_ref='''  const W0=PROFILES.wb;
+  let c=W0.ov?.orig;
+  if(!c){
+    const im=new Image(); im.src=W0.layers.orig; await im.decode();
+    if(im.naturalWidth!==W0.W||im.naturalHeight!==W0.H) throw new Error("Invalid reference layer dimensions");
+    c=document.createElement("canvas"); c.width=W0.W; c.height=W0.H;
+    c.getContext("2d",{willReadFrequently:true}).drawImage(im,0,0);
+  }
+  const a=c.getContext("2d",{willReadFrequently:true}).getImageData(0,0,W0.W,W0.H).data;'''
+    if s.count(old_ref)!=1:raise ValueError('reference raster ownership mismatch')
+    s=s.replace(old_ref,new_ref,1)
+    cb=s.encode();name='assets/ms_r5_perf_core_'+sha(cb)[:16]+'.js'
     oldname='assets/ms_r5_perf_core_'+BASE_CORE[:16]+'.js'
     if h.count(oldname.encode())!=1:raise ValueError('core ownership mismatch')
     nh=h.replace(oldname.encode(),name.encode(),1)

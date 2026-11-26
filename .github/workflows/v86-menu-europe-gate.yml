@@ -6,6 +6,8 @@ on:
       - 'scripts/*v86*'
       - 'scripts/optimize-model-chips.py'
       - 'scripts/test-model-chips.cjs'
+      - 'web/forecast/frame-index.mjs'
+      - 'tests/test-forecast-frame-index.mjs'
       - '.github/workflows/v86-menu-europe-gate.yml'
 permissions:
   contents: read
@@ -21,6 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --test tests/test-forecast-frame-index.mjs
       - run: python3 scripts/build-v86-menu-europe.py
       - run: find v86-candidate/assets -name '*.js' -exec node --check {} +
       - run: |

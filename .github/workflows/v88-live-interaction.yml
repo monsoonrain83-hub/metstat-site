@@ -1,0 +1,29 @@
+name: V88 live interaction gate (read-only)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/measure-live-interaction.cjs'
+      - '.github/workflows/v88-live-interaction.yml'
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/measure-live-interaction.cjs
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/measure-live-interaction.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metstat-live-interaction
+          path: metstat-live-interaction.json
+          retention-days: 14
+          if-no-files-found: warn

@@ -4,11 +4,11 @@ on:
     paths:
       - 'scripts/scan_report.py'
       - 'tests/test_scan_report.py'
+      - 'tests/fixtures/public-health-*.json'
       - '.github/workflows/scan-report-contract.yml'
   workflow_dispatch:
 permissions:
   contents: read
-  actions: read
 jobs:
   verify:
     runs-on: ubuntu-24.04
@@ -19,17 +19,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s tests -p 'test_scan_report.py' -v
-      - name: Replay two prior public reports without contacting host
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Replay retained non-secret public evidence offline
         run: |
-          gh api repos/${{ github.repository }}/actions/artifacts/15130134188/zip > previous.zip
-          gh api repos/${{ github.repository }}/actions/artifacts/15133401464/zip > current.zip
-          echo '7645849f365e8e5aff59aef8089c6a227a5dd2802a768f9176b9ccb3c653d2d7  previous.zip' | sha256sum -c -
-          echo 'a4aa021770b840e23fa51a002948f47f17d7595c032bae2fd79f595356275941  current.zip' | sha256sum -c -
-          unzip -p previous.zip public-health-report.json > previous.json
-          unzip -p current.zip public-health-report.json > current.json
-          python scripts/scan_report.py current.json --previous previous.json --output findings
+          python scripts/scan_report.py tests/fixtures/public-health-v93.json --previous tests/fixtures/public-health-v92.json --output findings
       - uses: actions/upload-artifact@v4
         with:
           name: v97-normalized-findings

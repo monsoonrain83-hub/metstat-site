@@ -48,6 +48,18 @@ function nvBarRefresh(){
         if s.count(old)!=1: raise ValueError('menu patch anchor mismatch: '+old[:100])
         s=s.replace(old,new,1)
     return s
+def patch_pointer(s):
+    pairs=[
+    ('  st.addEventListener("pointerdown",e=>{ if(e.target.closest&&e.target.closest(".ztools,.mcSave,.nvFsB,.fsUi")) return; st.setPointerCapture(e.pointerId);', '''  // V85: model chips now live inside the map stage; never capture their pointer.
+  const isUi=e=>!!(e.target.closest&&e.target.closest(".ztools,.mcSave,.nvFsB,.fsUi,.nvChipRow,#nvBar,button,select,input,textarea,a,summary,label,[role='button']"));
+  st.addEventListener("pointerdown",e=>{ if(isUi(e)) return; st.setPointerCapture(e.pointerId);'''),
+    ('if(e.target.closest&&e.target.closest(".ztools,.mcSave,.nvFsB,.fsUi,button,select,a")) return; const v=NV.view;', 'if(isUi(e)) return; const v=NV.view;'),
+    ('st.addEventListener("wheel",e=>{ if(!(window.NVF&&NVF.on)) return; e.preventDefault(); const [x,y]=pos(e);', 'st.addEventListener("wheel",e=>{ if(isUi(e)||!(window.NVF&&NVF.on)) return; e.preventDefault(); const [x,y]=pos(e);'),
+    ('st.addEventListener("dblclick",e=>{ const [x,y]=pos(e); nvZoom(2,x,y); });','st.addEventListener("dblclick",e=>{ if(isUi(e)) return; const [x,y]=pos(e); nvZoom(2,x,y); });')]
+    for a,b in pairs:
+        if s.count(a)!=1: raise ValueError('pointer patch anchor mismatch: '+a[:80])
+        s=s.replace(a,b,1)
+    return s
 def sha(b): return hashlib.sha256(b).hexdigest()
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs): return None
@@ -61,7 +73,7 @@ def build(index,core):
     if sha(index)!=INDEX_SHA or sha(core)!=CORE_SHA:raise ValueError('V82 baseline mismatch')
     s=index.decode();c=core.decode()
     if c.count(OLD)!=1:raise ValueError('patch anchor mismatch')
-    c=patch_menu(c.replace(OLD,NEW,1));b=c.encode();name='ms_r5_perf_core_'+sha(b)[:16]+'.js'
+    c=patch_pointer(patch_menu(c.replace(OLD,NEW,1)));b=c.encode();name='ms_r5_perf_core_'+sha(b)[:16]+'.js'
     ref='<script src="/assets/'+CORE+'"></script>'
     if s.count(ref)!=1:raise ValueError('core ref mismatch')
     return s.replace(ref,'<script src="/assets/'+name+'"></script>',1).encode(),b,name

@@ -1,0 +1,67 @@
+name: V92 startup reload browser gate
+on:
+  pull_request:
+    paths:
+      - 'scripts/*v92*'
+      - '.github/workflows/v92-startup-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retrieve exact verified V90
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts/15125290038/zip > v90-artifact.zip
+          echo 'dfd7e4be159ea498d4ffa277522a30bcd7c05fb203e0fc333aeeca65d02ea4f2  v90-artifact.zip' | sha256sum -c -
+          mkdir v90-artifact
+          unzip -j v90-artifact.zip MetStat_V90_upload.zip -d v90-artifact
+      - run: python3 scripts/build-v92-startup.py
+      - run: find v92-candidate/assets -name '*.js' -exec node --check {} +
+      - run: python3 scripts/check_retired_host_files.py v92-candidate
+      - run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_frontend_release.py' -v
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v92-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v92-reports
+          path: |
+            v92-live-baseline.json
+            v92-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Verify explicit HTML and core replacements and archive
+        run: |
+          PYTHONPATH=scripts python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, zipfile, json, runpy
+          from verify_frontend_release import inspect_zip
+          b=runpy.run_path('scripts/build-v92-startup.py')
+          root=Path('v92-candidate')
+          with zipfile.ZipFile('MetStat_V92_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file():z.write(p,p.relative_to(root))
+          h,c,n,_=inspect_zip('MetStat_V92_upload.zip')
+          assert b['sha'](h)==b['NEXT_INDEX'] and b['sha'](c)==b['NEXT_CORE']
+          assert n=='assets/ms_r5_perf_core_'+b['NEXT_CORE'][:16]+'.js'
+          Path('v92-release-provenance.json').write_text(json.dumps({'index_sha256':b['sha'](h),'core_sha256':b['sha'](c),'core':n,'zip_sha256':b['sha'](Path('MetStat_V92_upload.zip').read_bytes())}))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V92_upload.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v92-verified-candidate
+          path: |
+            MetStat_V92_upload.zip
+            v92-release-provenance.json
+          retention-days: 14

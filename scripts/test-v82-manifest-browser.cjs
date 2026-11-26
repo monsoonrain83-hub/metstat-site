@@ -31,7 +31,7 @@ const reports=[];
       if(candidate&&u.pathname==='/assets/'+name)return route.fulfill({status:200,contentType:'application/javascript; charset=utf-8',body:core});
       return route.continue();
      });
-     page.on('request',req=>{const u=new URL(req.url());if(u.origin===BASE&&overlays.test(u.pathname))requests.push(u.pathname);if(u.origin===BASE&&u.pathname==='/online/data/manifest.json')manifestRequests.push(u.search);});
+     page.on('request',req=>{const u=new URL(req.url());if(u.origin===BASE&&overlays.test(u.pathname))requests.push(u.pathname);if(u.origin===BASE&&['/online/data/manifest.json','/online/model_catalog.php'].includes(u.pathname))manifestRequests.push(u.pathname+u.search);});
      page.on('pageerror',e=>errors.push(String(e.message).slice(0,150)));
      page.on('requestfailed',req=>{const u=new URL(req.url());if(u.origin===BASE&&overlays.test(u.pathname))failures.push(u.pathname);});
      await ctx.addInitScript(()=>{
@@ -54,7 +54,7 @@ const reports=[];
      });
      report.initialOverlayRequests=requests.slice();
      report.manifestRequests=manifestRequests.slice();
-     if(candidate)assert(manifestRequests.includes(''),'stable manifest URL not used');
+     if(candidate)assert(manifestRequests.includes('/online/model_catalog.php'),'stable catalog URL not used');
      report.initialErrors=errors.slice();
      assert.equal(requests.length,0,'optional bundles requested at startup');
      // Exercise the real model-map download function, not a synthetic canvas.

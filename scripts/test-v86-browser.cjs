@@ -92,17 +92,26 @@ const tag='W/"'+sha(manifest)+'-0"';
      }
      report.clickEvents=await page.evaluate(()=>window.__ms85ClickEvents);
      report.states.push(await state());assert.equal(report.states.at(-1).m,target);
-     const header=page.locator('#nvWx button[data-tg="par"]');
-     if(!await page.evaluate(()=>!!NVW.open.par))await header.click();
-     await page.waitForFunction(()=>NVW.open.par&&document.querySelector('#nvWx button[data-p]'),null,{timeout:10000});
-     const param=await page.evaluate(()=>[...document.querySelectorAll('#nvWx button[data-p]')].find(b=>!b.disabled&&b.dataset.p!==NV.s.p&&b.getClientRects().length)?.dataset.p);
-     assert(param,'alternate parameter must be available');
-     if(param){
-       report.targetParameter=param;
-       const alt=page.locator('#nvWx button[data-p="'+param+'"]:visible').first();
-       report.interactionMs.push(await timed(async()=>{await alt.click();await page.waitForFunction(p=>NV.s.p===p,param,{timeout:10000});}));
-       report.states.push(await state());assert.equal(report.states.at(-1).p,param);
+     // R5 replaced the legacy hidden nvWx panel. Exercise the visible
+     // canonical parameter picker rather than the compatibility DOM.
+     const section=page.locator('button[data-r5section="parameters"]:visible').first();
+     await section.waitFor({state:'visible',timeout:15000});
+     if(await section.getAttribute('aria-expanded')!=='true')await section.click();
+     const picker=page.locator('#msR5ParamPicker');
+     await picker.waitFor({state:'visible',timeout:10000});
+     const before=await page.evaluate(()=>NV.s.p);
+     const findParam=()=>page.evaluate(()=>[...document.querySelectorAll('#msR5ParamPicker button[data-r5param]')].find(b=>!b.disabled&&b.dataset.r5param!==NV.s.p&&b.getClientRects().length)?.dataset.r5param);
+     let param=await findParam();
+     if(!param){
+       const group=picker.locator('button[data-r5group][aria-expanded="false"]:visible').first();
+       await group.click();
+       param=await findParam();
      }
+     assert(param&&param!==before,'R5 alternate parameter must be available');
+     report.targetParameter=param;
+     const alt=picker.locator('button[data-r5param="'+param+'"]:visible').first();
+     report.interactionMs.push(await timed(async()=>{await alt.click();await page.waitForFunction(p=>NV.s.p===p,param,{timeout:10000});}));
+     report.states.push(await state());assert.equal(report.states.at(-1).p,param);
      // Compare selected frames, model list and run; timings are observational.
      // Exercise the real model-map download function, not a synthetic canvas.
      const downloadPromise=page.waitForEvent('download',{timeout:30000});

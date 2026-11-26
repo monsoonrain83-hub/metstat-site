@@ -8,6 +8,8 @@ on:
       - 'scripts/test-model-chips.cjs'
       - 'web/forecast/frame-index.mjs'
       - 'tests/test-forecast-frame-index.mjs'
+      - 'scripts/verify_frontend_release.py'
+      - 'tests/test_frontend_release.py'
       - '.github/workflows/v86-menu-europe-gate.yml'
 permissions:
   contents: read
@@ -24,6 +26,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --test tests/test-forecast-frame-index.mjs
+      - run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_frontend_release.py' -v
       - run: python3 scripts/build-v86-menu-europe.py
       - run: find v86-candidate/assets -name '*.js' -exec node --check {} +
       - run: |
@@ -57,9 +60,12 @@ jobs:
                   if p.is_file(): z.write(p,p.relative_to(root))
           PY
           python3 scripts/check_retired_host_files.py MetStat_V86_upload.zip
+          python3 scripts/verify_frontend_release.py MetStat_V86_upload.zip v86-baseline > v86-release-provenance.json
       - uses: actions/upload-artifact@v4
         if: success()
         with:
           name: v86-browser-verified-candidate
-          path: MetStat_V86_upload.zip
+          path: |
+            MetStat_V86_upload.zip
+            v86-release-provenance.json
           retention-days: 14

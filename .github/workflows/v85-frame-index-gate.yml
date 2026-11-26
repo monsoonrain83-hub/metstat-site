@@ -25,6 +25,7 @@ jobs:
       - run: python3 scripts/check_retired_host_files.py v85-candidate
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v85-menu-dom.cjs
       - run: node scripts/test-v85-browser.cjs
       - if: always()
         uses: actions/upload-artifact@v4

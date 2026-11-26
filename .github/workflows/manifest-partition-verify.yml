@@ -1,0 +1,40 @@
+name: Lossless manifest partition verification (read-only)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/manifest_partition.py'
+      - 'tests/test_manifest_partition.py'
+      - '.github/workflows/manifest-partition-verify.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: PYTHONPATH=scripts python -m unittest discover -s tests -p 'test_manifest_partition.py' -v
+      - name: Verify lossless partition of live public manifest
+        run: |
+          python - <<'PY'
+          import urllib.request, json
+          from pathlib import Path
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs): raise ValueError('redirect forbidden')
+          req=urllib.request.Request('https://wtafkik.ir/online/data/manifest.json',headers={'Accept-Encoding':'identity','Cache-Control':'no-cache'})
+          with urllib.request.build_opener(NoRedirect()).open(req,timeout=45) as r:
+              data=r.read(16_000_001)
+              if r.status!=200 or len(data)>16_000_000: raise ValueError('manifest unavailable or too large')
+          json.loads(data)
+          Path('public-manifest.json').write_bytes(data)
+          PY
+          python scripts/manifest_partition.py public-manifest.json > manifest-partition-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manifest-partition-report
+          path: manifest-partition-report.json
+          retention-days: 14

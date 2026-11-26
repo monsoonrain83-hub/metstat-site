@@ -39,6 +39,29 @@ class HostSnapshotGateTests(unittest.TestCase):
             self.assertEqual(core, f"assets/ms_r5_perf_core_{expected[core][:16]}.js")
             self.assertEqual(expected["online/nwp_upload.php"], gate.EXPECTED["online/nwp_upload.php"])
 
+    def test_v93_requires_three_lazy_rasters(self):
+        expected = gate.release_expected("V93")
+        rasters = {p: h for p,h in expected.items() if p.endswith(".png")}
+        self.assertEqual(len(expected), 6)
+        self.assertEqual(len(rasters), 3)
+        self.assertFalse(any(p.endswith(".png") for p in gate.release_expected("V92")))
+        for path,digest in rasters.items():
+            self.assertTrue(path.endswith(digest[:16]+".png"))
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            # Fixture expected hashes are deliberately independent of production files.
+            fixture={p:hashlib.sha256(p.encode()).hexdigest() for p in expected}
+            for p in fixture:
+                target=root/p
+                target.parent.mkdir(parents=True,exist_ok=True)
+                target.write_bytes(p.encode())
+            self.assertTrue(all(r["status"]=="match" for r in gate.check(root,fixture)))
+            first=next(iter(rasters))
+            (root/first).unlink()
+            self.assertEqual(next(r for r in gate.check(root,fixture) if r["path"]==first)["status"],"missing-or-unsafe")
+            (root/first).write_bytes(b"wrong")
+            self.assertEqual(next(r for r in gate.check(root,fixture) if r["path"]==first)["status"],"drift")
+
     def test_wrong_release_or_missing_core_fails(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

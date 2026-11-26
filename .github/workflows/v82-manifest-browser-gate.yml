@@ -49,6 +49,26 @@ jobs:
           report={'bytes':len(data),'etag_present':bool(tag),'last_modified_present':bool(modified),'conditional_status':status}
           Path('v82-live-validator-report.json').write_text(json.dumps(report,indent=2))
           print(report)
+          # Require the actual existing catalog to produce a content-hash validator.
+          import hashlib
+          cat='https://wtafkik.ir/online/model_catalog.php'
+          with opener.open(urllib.request.Request(cat,headers={'Accept-Encoding':'identity','Cache-Control':'no-cache'}),timeout=40) as r:
+              body=r.read(20_000_001);etag=r.headers.get('ETag')
+              assert r.status==200 and 0<len(body)<=20_000_000
+          assert etag=='W/"'+hashlib.sha256(body).hexdigest()+'-0"', 'catalog validator does not cover response bytes'
+          m=json.loads(body); assert isinstance(m.get('items'),list) and isinstance(m.get('items_prev'),list)
+          req=urllib.request.Request(cat,headers={'Accept-Encoding':'identity','Cache-Control':'no-cache','If-None-Match':etag})
+          try:
+              with opener.open(req,timeout=40) as r:
+                  new=r.read(20_000_001);newtag=r.headers.get('ETag')
+                  assert r.status==200 and len(new)<=20_000_000 and newtag=='W/"'+hashlib.sha256(new).hexdigest()+'-0"' and newtag!=etag
+                  catalog_status=200
+          except urllib.error.HTTPError as e:
+              assert e.code==304 and e.headers.get('ETag')==etag
+              e.close();catalog_status=304
+          report.update({'catalog_bytes':len(body),'catalog_hash_verified':True,'catalog_conditional_status':catalog_status})
+          Path('v82-live-validator-report.json').write_text(json.dumps(report,indent=2))
+          print(report)
           PY
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium

@@ -1,0 +1,29 @@
+name: Bounded public health audit
+on:
+  pull_request:
+    paths:
+      - 'scripts/public_health_audit.py'
+      - 'tests/test_public_health_audit.py'
+      - '.github/workflows/public-health-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-health-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -p 'test_public_health_audit.py' -v
+      - run: timeout 45s python scripts/public_health_audit.py > public-health-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-health-report
+          path: public-health-report.json
+          retention-days: 7

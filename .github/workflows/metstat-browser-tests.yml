@@ -1,7 +1,7 @@
 name: MetStat browser core tests
 on:
   pull_request:
-    paths: ['web/**', '.github/workflows/metstat-browser-tests.yml']
+    paths: ['web/**', 'tests/rainfall-name-scope-v75.test.cjs', '.github/workflows/metstat-browser-tests.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,3 +15,5 @@ jobs:
         with:
           node-version: '22'
       - run: node web/online/metstat-media/metstat-core.test.mjs
+
+      - run: node --test tests/rainfall-name-scope-v75.test.cjs

@@ -1,0 +1,10 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),{performance}=require('node:perf_hooks');
+const manifest=JSON.parse(fs.readFileSync(process.argv[4]));
+function context(path){const s=fs.readFileSync(path,'utf8');const x=vm.createContext({ON:{man:manifest},NV:{s:{}},LANG:'fa'});const part=(a,b)=>{const i=s.indexOf(a),j=s.indexOf(b,i);assert(i>=0&&j>i);return s.slice(i,j);};vm.runInContext(part('const nvPar=','/* ---------- داده')+part('const NV_RS={};','function nvAltSet()')+part('const NV_PEQ=','function nvEqParam(')+part('function nvPids(','function nvRegTopSync(')+'\nthis.rs=NV_RS;this.original=nvModelsOf;this.calls=0;nvModelsOf=function(tc){calls++;return original(tc)};',x);return x;}
+const a=context(process.argv[2]),b=context(process.argv[3]);let checks=0;
+const tcs=[...new Set(Object.values(manifest.models).map(m=>m.info?.tclass||'daily'))],scenarios=[];
+for(const lang of ['fa','en'])for(const tc of tcs){const models=a.nvModelsOf(tc).map(x=>x[0]);for(const m of models){let rows=a.nvMeItems(m);const sample=rows[Math.floor(rows.length/2)];for(const prev of [false,true]){if(prev&&!manifest.models[m].prev?.run)continue;scenarios.push({lang,tc,m,p:sample?.p||'',fr:sample?.v||'',prev,run:manifest.models[m].prev?.run});}}}
+assert(scenarios.length>0);
+function set(x,z){x.LANG=z.lang;x.NV.s={tc:z.tc,m:z.m,p:z.p,fr:z.fr};if(z.prev)x.rs[z.m]=z.run;else delete x.rs[z.m];}
+for(const z of scenarios){set(a,z);set(b,z);for(const all of [false,true]){assert.equal(a.wxModelChips(all),b.wxModelChips(all));checks++;}assert.equal(a.nvMState(z.m),b.nvMState(z.m));checks++;}
+const bench=x=>{const start=performance.now();x.calls=0;let size=0;for(let i=0;i<5;i++)for(const z of scenarios){set(x,z);size+=x.wxModelChips(true).length;}return {ms:performance.now()-start,calls:x.calls,size};};const old=bench(a),next=bench(b);assert.equal(old.size,next.size);assert(next.calls<=old.calls);console.log(JSON.stringify({checks,scenarios:scenarios.length,old,next},null,2));

@@ -26,6 +26,28 @@ function nvMeItems(m){
   // Preserve legacy fresh-array semantics and original row identity/order.
   return (m?(idx.byModel.get(m)||[]):idx.all).slice();
 }'''
+def patch_menu(s):
+    replacements=[
+      ('function nvBarRefresh(){ const bar=$("nvBar"); if(bar&&ON.man) bar.innerHTML=wxModelChips(); }', '''const NV_BAR_BOUND=new WeakSet(), NV_BAR_RENDERED=new WeakMap();
+function nvBindModelBar(bar){
+  if(!bar||NV_BAR_BOUND.has(bar))return;
+  bar.addEventListener("click",e=>{ const b=e.target.closest("button[data-m]"); if(!b||b.disabled||!bar.contains(b))return; NV.s.m=b.dataset.m; $("nvM").value=NV.s.m; nvFillRun(); });
+  NV_BAR_BOUND.add(bar);
+}
+function nvBarRefresh(){
+  const bar=$("nvBar"); if(!bar||!ON.man)return;
+  nvBindModelBar(bar);
+  const html=wxModelChips(), prev=NV_BAR_RENDERED.get(bar);
+  if(prev&&prev.html===html&&prev.serialized===bar.innerHTML)return;
+  bar.innerHTML=html;
+  NV_BAR_RENDERED.set(bar,{html,serialized:bar.innerHTML});
+}'''),
+      ('const bar=$("nvBar"); if(bar) bar.innerHTML=wxModelChips(); try{ const rb=', 'nvBarRefresh(); try{ const rb='),
+      ('  if(bar) bar.addEventListener("click",e=>{ const b=e.target.closest("button[data-m]"); if(b) pickModel(b.dataset.m); });','  nvBindModelBar(bar);')]
+    for old,new in replacements:
+        if s.count(old)!=1: raise ValueError('menu patch anchor mismatch: '+old[:100])
+        s=s.replace(old,new,1)
+    return s
 def sha(b): return hashlib.sha256(b).hexdigest()
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs): return None
@@ -39,7 +61,7 @@ def build(index,core):
     if sha(index)!=INDEX_SHA or sha(core)!=CORE_SHA:raise ValueError('V82 baseline mismatch')
     s=index.decode();c=core.decode()
     if c.count(OLD)!=1:raise ValueError('patch anchor mismatch')
-    c=c.replace(OLD,NEW,1);b=c.encode();name='ms_r5_perf_core_'+sha(b)[:16]+'.js'
+    c=patch_menu(c.replace(OLD,NEW,1));b=c.encode();name='ms_r5_perf_core_'+sha(b)[:16]+'.js'
     ref='<script src="/assets/'+CORE+'"></script>'
     if s.count(ref)!=1:raise ValueError('core ref mismatch')
     return s.replace(ref,'<script src="/assets/'+name+'"></script>',1).encode(),b,name

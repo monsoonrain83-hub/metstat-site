@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [.github/workflows/r5-current-release-verify.yml, scripts/patch-r5-custom-routes.py]
+    paths: [.github/workflows/r5-current-release-verify.yml, scripts/patch-r5-custom-routes.py, scripts/check_retired_host_files.py]
 permissions:
   contents: read
 concurrency:
@@ -66,6 +66,8 @@ jobs:
           (out/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
           print("26 current frontend files verified; no host writes.")
           PY
+      - name: Reject retired host files in the actual candidate archive
+        run: python3 scripts/check_retired_host_files.py current-release/metstat-r5-current-frontend-20261125.zip
       - run: find r5-candidate/assets -type f -name '*.js' -print0 | xargs -0 -n 1 node --check
       - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
       - name: Verify real live browser navigation without frontend interception

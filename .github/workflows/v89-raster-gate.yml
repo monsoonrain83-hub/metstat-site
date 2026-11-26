@@ -1,0 +1,63 @@
+name: V89 exact raster parity browser gate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'web/forecast/tile-raster.mjs'
+      - 'tests/test-forecast-tile-raster.mjs'
+      - 'scripts/*v89*'
+      - '.github/workflows/v89-raster-gate.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/test-forecast-tile-raster.mjs
+      - uses: actions/download-artifact@v4
+        with:
+          name: v88-browser-verified-candidate
+          run-id: 45807809908
+          github-token: ${{ github.token }}
+          path: v88-artifact
+      - run: python3 scripts/build-v89-tile-raster.py
+      - run: find v89-candidate/assets -name '*.js' -exec node --check {} +
+      - run: python3 scripts/check_retired_host_files.py v89-candidate
+      - run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_frontend_release.py' -v
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v89-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v89-reports
+          path: |
+            v89-live-baseline.json
+            v89-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v89-candidate')
+          with zipfile.ZipFile('MetStat_V89_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file():z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V89_upload.zip
+          python3 scripts/verify_frontend_release.py MetStat_V89_upload.zip v89-baseline > v89-release-provenance.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v89-verified-candidate
+          path: |
+            MetStat_V89_upload.zip
+            v89-release-provenance.json
+          retention-days: 14

@@ -3,6 +3,7 @@ import json
 import sys
 import urllib.error
 import urllib.request
+from check_retired_host_files import RETIRED
 
 BASE = "https://wtafkik.ir"
 CHECKS = {
@@ -18,6 +19,12 @@ CHECKS = {
     "/online/data/manifest.json": {200},
     "/": {200},
 }
+# Never request retired PHP installers: even HEAD can execute PHP.
+# Their physical absence must be checked locally in admin Structure Audit.
+for name in sorted(RETIRED):
+    if name.lower().endswith(('.js','.html','.zip')):
+        CHECKS['/'+name]={403,404}
+
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs):
         return None
@@ -37,7 +44,7 @@ def probe(path, allowed):
 
 if __name__ == "__main__":
     rows = [probe(path, allowed) for path, allowed in CHECKS.items()]
-    report = {"checks":rows, "scope":"HEAD only; no private body retrieval; 404 does not establish that a file exists or that all private routes are protected"}
+    report = {"checks":rows, "scope":"HEAD only; no private body retrieval; 404 does not prove physical deletion; retired executable PHP paths deliberately excluded; this is not a full private-route audit"}
     with open("private-boundary-report.json","w",encoding="utf8") as f:
         json.dump(report,f,indent=2)
     print(json.dumps(report,indent=2))

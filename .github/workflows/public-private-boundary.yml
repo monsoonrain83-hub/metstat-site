@@ -1,0 +1,25 @@
+name: Public/private boundary canary check (read-only)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/check-public-private-boundary.py'
+      - '.github/workflows/public-private-boundary.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/check-public-private-boundary.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-boundary-report
+          path: private-boundary-report.json
+          retention-days: 14

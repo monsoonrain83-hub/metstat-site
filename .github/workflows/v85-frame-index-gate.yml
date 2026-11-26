@@ -1,0 +1,56 @@
+name: V85 frame index browser regression gate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/*v85*'
+      - '.github/workflows/v85-frame-index-gate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v85-frame-index-gate
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/build-v85-frame-index.py
+      - run: find v85-candidate/assets -name '*.js' -exec node --check {} +
+      - run: node scripts/test-v85-frame-index.cjs
+      - run: python3 scripts/check_retired_host_files.py v85-candidate
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v85-menu-dom.cjs
+      - run: node scripts/test-v85-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v85-reports
+          path: |
+            v85-index-report.json
+            v85-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate
+        if: success()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v85-candidate')
+          with zipfile.ZipFile('MetStat_V85_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  if p.is_file(): z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V85_upload.zip
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: v85-browser-verified-candidate
+          path: MetStat_V85_upload.zip
+          retention-days: 14

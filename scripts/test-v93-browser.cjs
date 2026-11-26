@@ -205,7 +205,7 @@ const tag='W/"'+sha(manifest)+'-0"';
        const r=await grRef();
        return {ov,mask:await digest(p.baseMask),pal:JSON.stringify(PAL),edges:JSON.stringify(EDGES),rep:JSON.stringify(REP),sm:await digest(SM),ns:NS,geo:{lon:await digest(r.lon),lat:await digest(r.lat),D:await digest(r.D),I:await digest(r.I),nx:r.nx,ny:r.ny}};
      });
-     if(candidate)assert.equal(new Set(wbRequests).size,3);
+     if(candidate){assert.equal(new Set(wbRequests).size,3);assert.equal(wbRequests.length,3,'reference layer was redundantly decoded');}
      report.wbRequests=wbRequests.slice();
      report.errors=errors.slice();
      report.status='pass';

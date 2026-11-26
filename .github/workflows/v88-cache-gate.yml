@@ -1,0 +1,62 @@
+name: V88 image cache browser gate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/*v88*'
+      - 'web/forecast/image-cache.mjs'
+      - 'tests/test-forecast-image-cache.mjs'
+      - '.github/workflows/v88-cache-gate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v88-cache-gate
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/test-forecast-image-cache.mjs
+      - run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_frontend_release.py' -v
+      - run: python3 scripts/build-v88-image-cache.py
+      - run: find v88-candidate/assets -name '*.js' -exec node --check {} +
+      - run: python3 scripts/check_retired_host_files.py v88-candidate
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v88-cache-dom.cjs
+      - run: node scripts/test-v88-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v88-reports
+          path: |
+            v88-cache-report.json
+            v88-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate
+        if: success()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v88-candidate')
+          with zipfile.ZipFile('MetStat_V88_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  if p.is_file(): z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V88_upload.zip
+          python3 scripts/verify_frontend_release.py MetStat_V88_upload.zip v88-baseline > v88-release-provenance.json
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: v88-browser-verified-candidate
+          path: |
+            MetStat_V88_upload.zip
+            v88-release-provenance.json
+          retention-days: 14

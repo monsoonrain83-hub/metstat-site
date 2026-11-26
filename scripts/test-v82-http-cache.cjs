@@ -7,9 +7,9 @@ const manifest=JSON.parse(fs.readFileSync('public-manifest.json','utf8'));
 let body=Buffer.from(JSON.stringify(manifest)),fault=false;const hits=[];
 const server=http.createServer((req,res)=>{
  const u=new URL(req.url,'http://localhost');if(u.pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<html><body>HTTP cache regression</body></html>');return;}
- if(u.pathname!=='/online/data/manifest.json'){res.writeHead(404);res.end();return;}
- const etag='"'+crypto.createHash('sha256').update(body).digest('hex')+'"';
- const status=fault&&!u.search?503:req.headers['if-none-match']===etag?304:200;
+ if(!['/online/model_catalog.php','/online/data/manifest.json'].includes(u.pathname)){res.writeHead(404);res.end();return;}
+ const etag='W/"'+crypto.createHash('sha256').update(body).digest('hex')+'-0"';
+ const status=fault&&u.pathname==='/online/model_catalog.php'?503:req.headers['if-none-match']===etag?304:200;
  hits.push({status,query:!!u.search,bytes:status===200?body.length:0,conditional:!!req.headers['if-none-match']});
  res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'public, no-cache',ETag:etag});
  res.end(status===200?body:undefined);

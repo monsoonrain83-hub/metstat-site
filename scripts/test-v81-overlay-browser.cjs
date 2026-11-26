@@ -17,7 +17,8 @@ const reports=[];
  try{
   for(const profile of [{name:'desktop',viewport:{width:1440,height:900}},{name:'touch',viewport:{width:390,height:844},isMobile:true,hasTouch:true}]){
    for(const candidate of [false,true]){
-    const ctx=await browser.newContext({...profile,serviceWorkers:'block'});
+    const {name:profileName,...contextOptions}=profile;
+    const ctx=await browser.newContext({...contextOptions,serviceWorkers:'block'});
     const page=await ctx.newPage(),requests=[],errors=[],failures=[];
     const report={profile:profile.name,candidate};
     reports.push(report);
@@ -45,10 +46,11 @@ const reports=[];
      assert.equal(sha(await (await original).body()),candidate?sha(core):BASE_CORE,'unexpected JS baseline');
      await page.waitForFunction(()=>typeof wuZoomsReady==='function'&&typeof ttOvLoad==='function'&&typeof wuzRefresh==='function',null,{timeout:20000});
      await page.waitForTimeout(10000);
+     await page.waitForFunction(()=>typeof NV!=='undefined'&&NV.entry?.img?.complete&&NV.entry.img.naturalWidth>0,null,{timeout:20000});
      report.initial=await page.evaluate(()=>{
       const res=performance.getEntriesByType('resource');
       const data=res.filter(e=>{try{return new URL(e.name).origin===location.origin}catch{return false}});
-      return {resources:data.length,decodedBytes:data.reduce((n,e)=>n+e.decodedBodySize,0),transferBytes:data.reduce((n,e)=>n+e.transferSize,0),lcpMs:window.__v81perf.lcp,blockingEstimateMs:Math.round(window.__v81perf.long.reduce((n,x)=>n+Math.max(0,x-50),0)),mapImages:[...document.images].filter(x=>x.complete&&x.naturalWidth>0&&x.src.includes('/online/data/nwp/')).length,route:location.pathname};
+      return {resources:data.length,decodedBytes:data.reduce((n,e)=>n+e.decodedBodySize,0),transferBytes:data.reduce((n,e)=>n+e.transferSize,0),lcpMs:window.__v81perf.lcp,blockingEstimateMs:Math.round(window.__v81perf.long.reduce((n,x)=>n+Math.max(0,x-50),0)),mapImages:(typeof NV!=='undefined'&&NV.entry?.img?.complete&&NV.entry.img.naturalWidth>0&&document.getElementById('nvCv')?.width>0)?1:0,route:location.pathname};
      });
      report.initialOverlayRequests=requests.slice();
      report.initialErrors=errors.slice();

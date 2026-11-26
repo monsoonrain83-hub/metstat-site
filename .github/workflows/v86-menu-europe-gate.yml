@@ -1,0 +1,62 @@
+name: V86 menu and Europe index browser gate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/*v86*'
+      - 'scripts/optimize-model-chips.py'
+      - 'scripts/test-model-chips.cjs'
+      - '.github/workflows/v86-menu-europe-gate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v86-menu-europe-gate
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/build-v86-menu-europe.py
+      - run: find v86-candidate/assets -name '*.js' -exec node --check {} +
+      - run: |
+          old=$(find v86-baseline/assets -name '*.js')
+          new=$(find v86-candidate/assets -name '*.js')
+          node scripts/test-model-chips.cjs "$old" "$new" v86-manifest.json > v86-menu-report.json
+          node scripts/test-v86-europe.cjs "$old" "$new" v86-manifest.json > v86-europe-report.json
+      - run: python3 scripts/check_retired_host_files.py v86-candidate
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v86-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v86-reports
+          path: |
+            v86-menu-report.json
+            v86-europe-report.json
+            v86-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate
+        if: success()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v86-candidate')
+          with zipfile.ZipFile('MetStat_V86_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  if p.is_file(): z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V86_upload.zip
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: v86-browser-verified-candidate
+          path: MetStat_V86_upload.zip
+          retention-days: 14

@@ -1,0 +1,84 @@
+name: V82 manifest revalidation browser gate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/*v82*'
+      - '.github/workflows/v82-manifest-browser-gate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v82-manifest-browser-gate
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 scripts/build-v82-manifest-cache.py
+      - run: find v82-candidate/assets -name '*.js' -exec node --check {} +
+      - run: node scripts/test-v82-manifest-cache.cjs
+      - run: python3 scripts/check_retired_host_files.py v82-candidate
+      - name: Read-only public manifest and HTTP validators
+        run: |
+          python - <<'PY'
+          import urllib.request,urllib.error,json
+          from pathlib import Path
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*a,**kw): return None
+          opener=urllib.request.build_opener(NoRedirect())
+          url='https://wtafkik.ir/online/data/manifest.json'
+          headers={'Accept-Encoding':'identity','Cache-Control':'no-cache'}
+          with opener.open(urllib.request.Request(url,headers=headers),timeout=40) as r:
+              data=r.read(20_000_001);tag=r.headers.get('ETag');modified=r.headers.get('Last-Modified')
+              assert r.status==200 and len(data)<=20_000_000
+          json.loads(data);Path('public-manifest.json').write_bytes(data)
+          if tag: headers['If-None-Match']=tag
+          elif modified: headers['If-Modified-Since']=modified
+          if tag or modified:
+              try:
+                  with opener.open(urllib.request.Request(url,headers=headers),timeout=40) as r: status=r.status
+              except urllib.error.HTTPError as e:
+                  status=e.code;e.close()
+              assert status in (200,304)
+          else: status=None
+          report={'bytes':len(data),'etag_present':bool(tag),'last_modified_present':bool(modified),'conditional_status':status}
+          Path('v82-live-validator-report.json').write_text(json.dumps(report,indent=2))
+          print(report)
+          PY
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v82-http-cache.cjs
+      - run: node scripts/test-v82-manifest-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v82-verification-reports
+          path: |
+            v82-browser-report.json
+            v82-cache-report.json
+            v82-live-validator-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Archive verified candidate
+        if: success()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('v82-candidate')
+          with zipfile.ZipFile('MetStat_V82_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  if p.is_file(): z.write(p,p.relative_to(root))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V82_upload.zip
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: v82-browser-verified-candidate
+          path: MetStat_V82_upload.zip
+          retention-days: 14

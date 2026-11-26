@@ -2,6 +2,12 @@ import unittest
 from unittest.mock import patch
 from scripts import public_health_audit as a
 class AuditTests(unittest.TestCase):
+    def test_release_identification_is_not_asset_verification(self):
+        html,core=a.RELEASES["V93"]
+        ref="/assets/ms_r5_perf_core_"+core[:16]+".js"
+        self.assertEqual(a.identify_release(html,[ref]),{"version":"V93","status":"html-match","asset_bytes_verified":False})
+        self.assertEqual(a.identify_release(html,[])["status"],"reference-mismatch")
+        self.assertEqual(a.identify_release("0"*64,[ref])["status"],"unknown")
     def test_private_dns_rejected(self):
         for addr in ("127.0.0.1","10.0.0.1","169.254.169.254","::1","fc00::1","224.0.0.1"):
             with self.assertRaises(ValueError):a.public_ips(["8.8.8.8",addr])

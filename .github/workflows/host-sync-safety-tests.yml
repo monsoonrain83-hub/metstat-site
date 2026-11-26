@@ -4,6 +4,8 @@ on:
     paths:
       - '.github/workflows/**'
       - 'scripts/check_host_snapshot.py'
+      - 'scripts/check_rainfall_api_contract.py'
+      - 'tests/test_rainfall_api_contract.py'
       - 'scripts/check_retired_host_files.py'
       - 'tests/test_retired_host_files.py'
       - 'tests/test_host_snapshot_gate.py'
@@ -23,3 +25,5 @@ jobs:
       - run: python -m unittest discover -s tests -p test_host_snapshot_gate.py -v
 
       - run: python -m unittest discover -s tests -p test_retired_host_files.py -v
+
+      - run: python -m unittest discover -s tests -p test_rainfall_api_contract.py -v

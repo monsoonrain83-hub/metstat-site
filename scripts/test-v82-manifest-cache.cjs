@@ -1,27 +1,29 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const root='v82-candidate/assets';const core=fs.readFileSync(root+'/'+fs.readdirSync(root).find(x=>x.startsWith('ms_r5_perf_core_')),'utf8');
 const code=core.slice(core.indexOf('async function ms82FetchManifest('),core.indexOf('\nasync function onLoadManifest(){'));
-assert(code.includes('no-cache'));
 const valid={status:'downloading',models:{ecmwf:{run:'2026112600'}},items:[{m:'ecmwf',r:'iran',p:'t2m',s:24,v:'2026112700'}],items_prev:[{m:'ecmwf',r:'iran',p:'t2m',s:48,v:'2026112700'}],meta:{test:'unchanged'}};
 const waiting={status:'waiting',models:[],items:[],items_prev:[],next:'2026112612'};
-const ok=m=>({ok:true,json:async()=>m});
-async function scenario(queue,expected){
+const tag='W/"'+'a'.repeat(64)+'-0"',tag2='W/"'+'b'.repeat(64)+'-0"';
+const response=(status,m,t=tag)=>({status,ok:status>=200&&status<300,headers:{get:()=>t},text:async()=>JSON.stringify(m)});
+const good=(m,t=tag)=>response(200,m,t);
+function setup(queue){
  const calls=[],timers=new Set();let count=0;
- const ctx=vm.createContext({AbortController,Date,Error,setTimeout:()=>{timers.add(++count);return count;},clearTimeout:t=>timers.delete(t),fetch:async(url,opts)=>{calls.push({url,cache:opts.cache,signal:opts.signal});const fn=queue.shift();if(!fn)throw Error('unexpected request');return fn();}});
+ const ctx=vm.createContext({AbortController,Date,Error,JSON,setTimeout:()=>{timers.add(++count);return count;},clearTimeout:t=>timers.delete(t),fetch:async(url,opts)=>{calls.push({url,cache:opts.cache,headers:opts.headers});const fn=queue.shift();if(!fn)throw Error('unexpected request');return fn();}});
  vm.runInContext(code,ctx);
- let result,err;try{result=await ctx.ms82FetchManifest('/online/');}catch(e){err=e;}
- assert.equal(timers.size,0);assert.equal(calls[0].url,'/online/data/manifest.json');assert.equal(calls[0].cache,'no-cache');
- for(const c of calls.slice(1)){assert.match(c.url,/^\/online\/data\/manifest\.json\?\d+$/);assert.equal(c.cache,'no-store');}
- if(expected===null)assert(err);else{assert.ifError(err);assert.deepEqual(result,expected);}
- return calls.length;
+ return {ctx,calls,timers,run:async()=>{try{return await ctx.ms82FetchManifest('/online/');}finally{assert.equal(timers.size,0);}}};
 }
 (async()=>{
- assert.equal(await scenario([()=>ok(valid)],valid),1);
- assert.equal(await scenario([()=>ok(waiting)],waiting),1);
- assert.equal(await scenario([()=>({ok:false,status:503}),()=>ok(valid)],valid),2);
- assert.equal(await scenario([()=>({ok:true,json:async()=>{throw Error('invalid JSON');}}),()=>ok(valid)],valid),2);
- assert.equal(await scenario([()=>ok({status:'fake'}),()=>ok({models:{},items:{}}),()=>ok(valid)],valid),3);
- assert.equal(await scenario([()=>{throw Error('network');},()=>ok({models:{},items:[],items_prev:{}}),()=>ok(valid)],valid),3);
- assert.equal(await scenario([()=>({ok:false,status:500}),()=>({ok:false,status:502}),()=>({ok:false,status:503})],null),3);
- console.log('7 manifest tests passed: unchanged full schema, waiting, errors, fallback, timer cleanup and failure.');
+ let s=setup([()=>good(valid),()=>response(304,null),()=>good(waiting,tag2)]);
+ const a=await s.run();assert.deepEqual(a,valid);a.items.length=0;
+ assert.deepEqual(await s.run(),valid);assert.equal(s.calls[1].headers['If-None-Match'],tag);
+ assert.deepEqual(await s.run(),waiting);assert.equal(s.calls[2].headers['If-None-Match'],tag);
+ assert.equal(s.ctx.ms82FetchManifest.cache.tag,tag2);
+ for(const call of s.calls){assert.equal(call.url,'/online/model_catalog.php');assert.equal(call.cache,'no-store');}
+ s=setup([()=>response(503,null),()=>good(valid,null)]);assert.deepEqual(await s.run(),valid);assert.match(s.calls[1].url,/^\/online\/data\/manifest\.json\?\d+$/);assert.equal(s.ctx.ms82FetchManifest.cache,null);
+ s=setup([()=>good(valid,'bad-tag'),()=>good(valid,null)]);assert.deepEqual(await s.run(),valid);
+ s=setup([()=>response(304,null),()=>good(valid,null)]);assert.deepEqual(await s.run(),valid);
+ s=setup([()=>good(valid),()=>response(304,null,tag2),()=>good(waiting,null)]);await s.run();assert.deepEqual(await s.run(),waiting);assert.equal(s.ctx.ms82FetchManifest.cache,null);
+ s=setup([()=>({ok:true,status:200,headers:{get:()=>tag},text:async()=>'{'}),()=>good({models:{},items:{}}),()=>good(valid,null)]);assert.deepEqual(await s.run(),valid);
+ s=setup([()=>{throw Error('network');},()=>response(502,null),()=>response(503,null)]);await assert.rejects(s.run());
+ console.log('PASS: content hash revalidation, unchanged raw snapshot despite caller mutation, new manifest, invalid validators, missing snapshot, malformed responses, static fallback and failure.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

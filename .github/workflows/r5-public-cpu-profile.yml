@@ -1,0 +1,32 @@
+name: Public frontend CPU attribution (read-only)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/profile-public-frontend.cjs'
+      - '.github/workflows/r5-public-cpu-profile.yml'
+permissions:
+  contents: read
+concurrency:
+  group: metstat-public-cpu-profile
+  cancel-in-progress: true
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/profile-public-frontend.cjs
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/profile-public-frontend.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metstat-public-cpu-profile
+          path: metstat-cpu-profile.json
+          retention-days: 14
+          if-no-files-found: warn

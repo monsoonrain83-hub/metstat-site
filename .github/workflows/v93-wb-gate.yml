@@ -1,0 +1,71 @@
+name: V93 lazy WeatherBELL browser gate
+on:
+  pull_request:
+    paths:
+      - 'scripts/*v93*'
+      - '.github/workflows/v93-wb-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retrieve exact verified V92
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts/15128957723/zip > v92-artifact.zip
+          echo 'ec077d607c00c0bd3ec58375637e43d07164ccb8ab541648d03384c0d9562eef  v92-artifact.zip' | sha256sum -c -
+          mkdir v92-artifact
+          unzip -j v92-artifact.zip MetStat_V92_upload.zip -d v92-artifact
+      - run: python3 scripts/build-v93-wb-layers.py
+      - run: find v93-candidate/assets -name '*.js' -exec node --check {} +
+      - run: python3 scripts/check_retired_host_files.py v93-candidate
+      - run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_frontend_release.py' -v
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/test-v93-browser.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v93-reports
+          path: |
+            v93-live-baseline.json
+            v93-browser-report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Verify exact five-file release
+        run: |
+          PYTHONPATH=scripts python3 - <<'PY'
+          from pathlib import Path
+          import zipfile,json,runpy
+          b=runpy.run_path('scripts/build-v93-wb-layers.py')
+          root=Path('v93-candidate')
+          names={'index.html','assets/ms_r5_perf_core_'+b['NEXT_CORE'][:16]+'.js'}|{'assets/wb_layer_'+k+'_'+d[:16]+'.png' for k,d in b['LAYER_HASHES'].items()}
+          actual={p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file()}
+          assert actual==names
+          expected=b['build']((Path('v93-baseline')/'index.html').read_bytes(),(Path('v93-baseline')/('assets/ms_r5_perf_core_'+b['BASE_CORE'][:16]+'.js')).read_bytes())
+          with zipfile.ZipFile('MetStat_V93_upload.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for n in sorted(names):
+                  assert (root/n).read_bytes()==expected[n]
+                  z.write(root/n,n)
+          with zipfile.ZipFile('MetStat_V93_upload.zip') as z:
+              assert set(z.namelist())==names and z.testzip() is None
+              assert all(z.read(n)==expected[n] for n in names)
+          Path('v93-release-provenance.json').write_text(json.dumps({'files':{n:b['sha'](v) for n,v in expected.items()},'zip_sha256':b['sha'](Path('MetStat_V93_upload.zip').read_bytes())}))
+          PY
+          python3 scripts/check_retired_host_files.py MetStat_V93_upload.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v93-verified-candidate
+          path: |
+            MetStat_V93_upload.zip
+            v93-release-provenance.json
+          retention-days: 14

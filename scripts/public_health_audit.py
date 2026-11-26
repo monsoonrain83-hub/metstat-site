@@ -12,6 +12,17 @@ HEADERS=("content-type","content-length","content-encoding","cache-control","exp
          "x-frame-options","x-content-type-options","referrer-policy","permissions-policy",
          "access-control-allow-origin","vary")
 MAX_HTML=2_000_000
+if __package__:
+    from .check_host_snapshot import RELEASES
+else:
+    from check_host_snapshot import RELEASES
+
+def identify_release(digest, core_refs):
+    for version,(html,core) in RELEASES.items():
+        if digest==html:
+            expected="/assets/ms_r5_perf_core_"+core[:16]+".js"
+            return {"version":version,"status":"html-match" if core_refs==[expected] else "reference-mismatch","asset_bytes_verified":False}
+    return {"version":None,"status":"unknown","asset_bytes_verified":False}
 def public_ips(addresses):
     ips=[ipaddress.ip_address(a) for a in addresses]
     if not ips or any(not a.is_global or a.is_multicast or a.is_reserved for a in ips):
@@ -67,6 +78,7 @@ def audit():
         if b is not None:
             p=Resources();p.feed(b.decode("utf-8",errors="replace"))
             r.update({"sha256":hashlib.sha256(b).hexdigest(),"external_resource_count":p.external,"explicit_http_resources":p.insecure,"local_script_count":len(p.resources),"core_refs":[x for x in p.resources if __import__("re").fullmatch(r"/assets/ms_r5_perf_core_[0-9a-f]{16}\.js",x)]})
+            r["release"]=identify_release(r["sha256"],r["core_refs"])
     except (OSError,ValueError,http.client.HTTPException) as e:result["error_type"]=type(e).__name__
     return result
 if __name__=="__main__":print(json.dumps(audit(),indent=2))

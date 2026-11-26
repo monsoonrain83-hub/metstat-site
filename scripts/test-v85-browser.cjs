@@ -73,13 +73,22 @@ const tag='W/"'+sha(manifest)+'-0"';
      report.states.push(await state());assert.notEqual(report.states[1].fr,report.states[0].fr);
      report.interactionMs.push(await timed(()=>page.locator('#nvPrev').click()));
      report.states.push(await state());assert.equal(report.states[2].fr,report.states[0].fr);
-     const chip=page.locator('#nvBar button[data-m]:not(.on)').first();
-     if(await chip.count()){
-      report.interactionMs.push(await timed(()=>chip.click()));report.states.push(await state());assert.notEqual(report.states.at(-1).m,report.states[0].m);
-     }
-     const alt=page.locator('#nvWx button[data-p]:not(.on):not([disabled])').first();
-     if(await alt.isVisible()){
-      const before=report.states.at(-1).p;report.interactionMs.push(await timed(()=>alt.click()));report.states.push(await state());assert.notEqual(report.states.at(-1).p,before);
+     // Select by the actual model key, not a presentation class which other
+     // compatibility layers can change. Wait for the requested state before
+     // accepting a ready image (the previous frame can still be ready).
+     const target=await page.evaluate(()=>[...document.querySelectorAll('#nvBar button[data-m]')].find(b=>!b.disabled&&b.dataset.m!==NV.s.m&&b.getClientRects().length)?.dataset.m);
+     assert(target,'no visible alternative model button');
+     report.targetModel=target;
+     const chip=page.locator('#nvBar button[data-m="'+target+'"]:visible').first();
+     report.modelButtons=await page.locator('#nvBar button[data-m]').evaluateAll(bs=>bs.map(b=>({key:b.dataset.m,active:b.classList.contains('on'),visible:!!b.getClientRects().length})));
+     report.interactionMs.push(await timed(async()=>{await chip.click();await page.waitForFunction(m=>NV.s.m===m,target,{timeout:10000});}));
+     report.states.push(await state());assert.equal(report.states.at(-1).m,target);
+     const param=await page.evaluate(()=>[...document.querySelectorAll('#nvWx button[data-p]')].find(b=>!b.disabled&&b.dataset.p!==NV.s.p&&b.getClientRects().length)?.dataset.p);
+     if(param){
+       report.targetParameter=param;
+       const alt=page.locator('#nvWx button[data-p="'+param+'"]:visible').first();
+       report.interactionMs.push(await timed(async()=>{await alt.click();await page.waitForFunction(p=>NV.s.p===p,param,{timeout:10000});}));
+       report.states.push(await state());assert.equal(report.states.at(-1).p,param);
      }
      // Compare selected frames, model list and run; timings are observational.
      // Exercise the real model-map download function, not a synthetic canvas.

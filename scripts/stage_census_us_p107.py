@@ -44,7 +44,7 @@ def download(level):
     return path,{"url":url,"sha256":h.hexdigest(),"bytes":n}
 
 def read(path, level):
-    cols=["STATEFP","GEOID","NAME","NAMELSAD"]+(["COUNTYFP"] if level=="COUNTY" else [])
+    cols=["STATEFP","GEOID","NAME"]+(["COUNTYFP","NAMELSAD"] if level=="COUNTY" else [])
     df=pyogrio.read_dataframe(path,columns=cols)
     if df.crs is None: raise ValueError("missing source CRS")
     records={}
@@ -56,7 +56,7 @@ def read(path, level):
             raise ValueError("invalid/duplicate official ID")
         if len(code)!=(5 if level=="COUNTY" else 2) or not code.isascii() or not code.isdigit():
             raise ValueError("invalid GEOID")
-        name=str(r.NAMELSAD)
+        name=str(r.NAMELSAD if level=="COUNTY" else r.NAME)
         if not name.strip() or re.search(r"[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]",name):
             raise ValueError("missing or unexpected source English name")
         g=r.geometry

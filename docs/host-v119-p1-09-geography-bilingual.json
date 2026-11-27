@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "id": "P1-09",
+  "scope": "cumulative P1-03 geography and P1-08 locale corrections; existing geographic menu labels",
+  "compatible_baselines": [
+    "V119",
+    "P1-01",
+    "P1-02",
+    "P1-03"
+  ],
+  "candidate": {
+    "index.html": "25ba1dc107a1f257930aedc0e6e09f8fff5d61b2d59f0a131f0455b12e1f573e",
+    "assets/ms_r5_perf_core_89847944457de17d.js": "89847944457de17d14de46d188c1a89ab2fc9b6b03c415465c8604d842777489"
+  },
+  "zip_sha256": "511148ef7e5ab8108556b84d6a8a0a207b00a6701c6354bf7350efabff793097",
+  "tests": {
+    "scope_checks": 754,
+    "english_option_checks": 52238,
+    "arabic_script_leaks_in_tested_options": 0,
+    "county_display_names": 488,
+    "additional_english_labels": 32,
+    "protected_iran_files_matched": 6,
+    "chromium": "offline actual DOM five-level geography controls and standalone native selector; language changes and selected region preserved",
+    "preflight": "4 exact baselines, installed, protected-file drift, unknown baseline, conflicting asset",
+    "zip_crc": "passed",
+    "node_php_syntax": "passed"
+  },
+  "limitations": [
+    "Not a complete bilingual audit; map canvas, export and other modules remain.",
+    "English labels are display aliases. Mirabad candidate matched point inside original polygon and public references; original Persian spelling and identity untouched. Qasr/Gaz/Anzali are literal aliases.",
+    "US official geometry/catalog staging succeeded but foreign ADM1/ADM2 not wired.",
+    "No live deployment, real API or complete forecast viewer validation."
+  ],
+  "p108_catalog": {
+    "run": 46046994127,
+    "total_bytes": 336700,
+    "index_bytes": 22252,
+    "max_county_bytes": 24555,
+    "files": 57,
+    "status": "review-only"
+  },
+  "status": "locally verified partial release; exact preflight required"
+}

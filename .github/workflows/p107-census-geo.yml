@@ -1,0 +1,27 @@
+name: P1-07 official US geographic data staging
+on:
+  push:
+    branches: [audit/host-v119-p0-01-20261127]
+    paths: ['.github/workflows/p107-census-geo.yml', 'scripts/stage_census_us_p107.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyogrio==0.11.1 geopandas==1.1.1
+      - run: python scripts/stage_census_us_p107.py
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: p107-us-census-source-and-staging
+          path: census-stage/
+          retention-days: 7

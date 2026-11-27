@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "baseline_date": "2026-11-27",
+  "source": "administrator supplied host backup; file fingerprints only",
+  "site_main": "22c7c94177ee3650d38951cfffd6d837fed2c76c",
+  "nwp_main_observed": "11c5bb0ed09013d66d6dcb37fbede93807e4c8d3",
+  "baseline": {
+    "index.html": "9f8315b276a0507d4e8a450bff12506de78b57302c876e940f244ad8b156131a",
+    "assets/ms_r5_perf_core_9567dff741e9b6d3.js": "9567dff741e9b6d36fee8caa87f679d4611ce82a22a535ad0399f92373416617",
+    "online/nwp_upload.php": "f29b0d1d6387fae1621b2ee1af516ebac29510b0aa62f3e477d2c5e7b98fa4d7"
+  },
+  "candidate": {
+    "id": "P0-01",
+    "files": {
+      "online/nwp_upload.php": "2d77be00c8f94afd9c14fde19c277b806ec43f99d24a634a2c8788e498247207"
+    },
+    "zip_sha256": "fa140d78fc2f6b8b8673fe52018ebbe4040c6459b70d8fbd83d1bd3cee1345a6",
+    "changes": [
+      "optional disk capacity diagnostics",
+      "bounded lock failure handling",
+      "preserve JSON on encoding failure"
+    ],
+    "validation": "12 isolated PHP 8.4 HTTP checks and PHP syntax check passed; live not verified",
+    "status": "local candidate only; do not deploy from this branch"
+  },
+  "manifest_snapshot": {
+    "updated": "2026-11-27T15:22:52+00:00",
+    "current_items": 45596,
+    "previous_items": 57797,
+    "current_world": 22,
+    "previous_world": 22,
+    "bytes": 7008608
+  },
+  "exclusions": [
+    "private data, credentials, logs, database, raw host backup"
+  ],
+  "notes": [
+    "Legacy deploy workflow remains retired.",
+    "GitHub main is not the full installed baseline.",
+    "No automatic deployment or host replacement authorized by this record."
+  ]
+}

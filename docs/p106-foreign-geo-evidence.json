@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "id": "P1-06",
+  "p105_run": 46043351602,
+  "p105_artifact": {
+    "id": 15220693102,
+    "sha256": "dcf72958a793f8ff89345001448925c5a5fbebfff2410e9927e71e86815c469f",
+    "expires": "2026-12-04T17:38:44Z"
+  },
+  "source_revision": "8ce2700661a28ee944350e2b329bbabb58d2ff83",
+  "results": {
+    "IRQ": {
+      "ADM1": 18,
+      "ADM2": 101,
+      "exact_child_parent": 11,
+      "nonexact": 90,
+      "licenses": [
+        "Public Domain",
+        "CC0 1.0",
+        "CC BY 3.0 IGO"
+      ]
+    },
+    "JPN": {
+      "ADM1": 47,
+      "ADM2": 1742,
+      "exact_child_parent": 599,
+      "nonexact": 1143,
+      "licenses": [
+        "CC BY 4.0",
+        "ODbL 1.0",
+        "CC BY-SA 2.0"
+      ]
+    },
+    "USA": {
+      "ADM1": 56,
+      "ADM2": 3233,
+      "exact_child_parent": 1802,
+      "nonexact": 1431,
+      "licenses": [
+        "Public Domain",
+        "Public Domain",
+        "Public Domain"
+      ]
+    }
+  },
+  "coverage_note": "All nine source layers passed the existing coverage_is_valid check with default gap width zero; this does not establish absence of gaps or agreement between administrative levels. No union equality for any cross-level pair.",
+  "iran_english_names": {
+    "source": "supplied host map_layers.js and geo.json; P1-03 dictionaries",
+    "identities": 488,
+    "consistent_exact_dictionary_candidates": 456,
+    "conflicting_dictionary_spellings": 4,
+    "missing_exact_dictionary": 28,
+    "missing_with_spatial_place_candidates": 3,
+    "approved_new_names": 0,
+    "geometry_changed": false
+  },
+  "next_diagnostic": {
+    "run": 46044224850,
+    "script": "scripts/diagnose_foreign_geo_p106.py",
+    "classification_thresholds": [
+      0.995,
+      0.95
+    ],
+    "status": "running at observation",
+    "note": "Thresholds triage for review only; no automatic parent or name approval."
+  },
+  "release_status": "Not a production release; no host changes; no main changes."
+}

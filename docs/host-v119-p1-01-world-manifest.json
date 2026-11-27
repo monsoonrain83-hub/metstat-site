@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "id": "P1-01",
+  "baseline_date": "2026-11-27",
+  "baseline": {
+    "index.html": "9f8315b276a0507d4e8a450bff12506de78b57302c876e940f244ad8b156131a",
+    "assets/ms_r5_perf_core_9567dff741e9b6d3.js": "9567dff741e9b6d36fee8caa87f679d4611ce82a22a535ad0399f92373416617"
+  },
+  "candidate": {
+    "index.html": "e70ad0695cdae9eabaa2f70bd6881070fd15723c9045cc8f849bf3e487837908",
+    "assets/ms_r5_perf_core_db416d7ad86a9bae.js": "db416d7ad86a9bae64b7d5fd67d04354f7a1fd1de98c0ac1f581a891a0c35c01"
+  },
+  "zip_sha256": "a71406557cc276c7383cb6d6135722f84fcd2e833bedeb3e37f896486e0f32e3",
+  "changes": [
+    "reconcile prior V120 world controls with exact host V119 baseline",
+    "index world rows by physical/logical model once per manifest array snapshot",
+    "cache forecast family timestamps within one projection"
+  ],
+  "validation": {
+    "snapshot_rows": 103393,
+    "equivalent_comparisons": 10082,
+    "world_lookup_median_ms": {
+      "before": 44.993,
+      "after": 5.303
+    },
+    "cold_projection_plus_lookup_median_ms": {
+      "before": 230.112,
+      "after": 168.022
+    },
+    "isolated_dom_paths": 5,
+    "preflight_dependency_hashes": 11,
+    "syntax": "passed",
+    "full_browser": "navigation blocked in sandbox; not verified",
+    "live": "not deployed or verified"
+  },
+  "limitations": [
+    "World coverage remains incomplete; no synthetic frames generated",
+    "Full five-level global geography not implemented",
+    "PDO SQLite authentication changes still pending actual runtime test",
+    "No source or private backup published; this is an evidence record, not production deployment"
+  ],
+  "status": "local tested candidate, limited UI coverage"
+}

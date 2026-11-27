@@ -1,0 +1,58 @@
+name: V115 model release read-only live baseline
+on:
+  push:
+    branches: [audit/v115-world-release-baseline]
+    paths: [.github/workflows/v115-world-release-baseline.yml]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare live index and uploader against known release hashes
+        env:
+          FTPS_SERVER: ${{ secrets.FTP_SERVER }}
+          FTPS_USER: ${{ secrets.FTP_USERNAME }}
+          FTPS_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTPS_DIR: ${{ secrets.FTP_DIR }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, ssl, ftplib, urllib.request
+          from pathlib import Path
+          known={'2bef1bb9201349b41d8202785c8ebff2bb56e03139dbd9cd31de0492df8f5a7d':'V93','82cd6d47ff38b03d5fffc5051bafcf16ebe4842b9f410babb99e64062cbb1b8e':'V105','7192d357b04b03d0b027cab8b47bde1e32891bbd8ef69b339870b8f4245c0db0':'V114'}
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs):return None
+          report={'mode':'read-only','public':{},'ftps':{}}
+          try:
+              req=urllib.request.Request('https://wtafkik.ir/',headers={'Accept-Encoding':'identity','Cache-Control':'no-cache','User-Agent':'MetStat-release-baseline/1.0'})
+              with urllib.request.build_opener(NoRedirect()).open(req,timeout=25) as r:
+                  data=r.read(2*1024*1024+1)
+                  if len(data)>2*1024*1024:raise ValueError('size')
+                  digest=hashlib.sha256(data).hexdigest()
+                  report['public']={'sha256':digest,'version':known.get(digest,'unknown'),'bytes':len(data)}
+          except Exception as e:report['public']={'error_type':type(e).__name__}
+          try:
+              server,user,password=(os.environ.get(k,'') for k in ('FTPS_SERVER','FTPS_USER','FTPS_PASSWORD'))
+              if not all((server,user,password)) or any(c in server for c in '/:\r\n'):raise ValueError('settings')
+              with ftplib.FTP_TLS(context=ssl.create_default_context(),timeout=20) as ftp:
+                  ftp.connect(server,21);ftp.login(user,password);ftp.prot_p();ftp.cwd(os.environ.get('FTPS_DIR') or '/')
+                  for path,limit in [('index.html',2*1024*1024),('online/nwp_upload.php',128*1024)]:
+                      h=hashlib.sha256();count=[0]
+                      def recv(b):
+                          count[0]+=len(b)
+                          if count[0]>limit:raise ValueError('size')
+                          h.update(b)
+                      ftp.retrbinary('RETR '+path,recv)
+                      report['ftps'][path]={'sha256':h.hexdigest(),'bytes':count[0]}
+          except Exception as e:report['ftps']['error_type']=type(e).__name__
+          report['compatible']=report['public'].get('version') in ('V93','V105') and report['ftps'].get('index.html',{}).get('sha256')==report['public'].get('sha256') and report['ftps'].get('online/nwp_upload.php',{}).get('sha256')=='4b57c03a5498194efeec5bafc7a4a8e11885da7529563c3232d6f1ed10dcc9f9'
+          Path('baseline.json').write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v115-readonly-baseline
+          path: baseline.json
+          retention-days: 7

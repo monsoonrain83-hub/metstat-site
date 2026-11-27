@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "id": "P0-02",
+  "baseline_date": "2026-11-27",
+  "baseline": {
+    "admin/login_guard_v77.php": "6a5d36429d73eb6a83e987ecb58b0a33cd1bfc86e2c0005760c894b82e0bfcbd",
+    "admin/index.php": "d78a74362d78390fdb6cd3289dfb7e1f814080a3ef41feb01e3522c5bbad2826",
+    "admin/common.php": "67806a3e1ca8b89782e332cf6438a718187066835a398a35c13f39f5ddcf0a09"
+  },
+  "candidate": {
+    "admin/login_guard_v77.php": "089a6de485ad3b3fbfbe761a3b75fca1143a158eaf6ba2fd1bbca63c98546d71"
+  },
+  "zip_sha256": "510fe708734ea8843430b95cc3c8a43f88919a8898459cf2b07bec767cc86641",
+  "validation": {
+    "php": "8.4.24",
+    "checks": 16,
+    "parallel": "12 requests: 8 invalid, 4 locked",
+    "held_lock_seconds": 0.781,
+    "preflight": "exact baseline, installed, drift rejection"
+  },
+  "changes": [
+    "bounded nonblocking flock",
+    "bounded rate-state read",
+    "fail closed under contention"
+  ],
+  "unchanged": "8 failures per IP per 900 seconds; no account policy or session changes",
+  "remaining": "auth.php SQLite check-and-record not atomic; PDO SQLite unavailable locally; main server/auth/AttemptLimiter.php candidate not wired to host",
+  "status": "local tested candidate; live deployment unverified"
+}

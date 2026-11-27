@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "id": "P1-02",
+  "baseline_date": "2026-11-27",
+  "compatible_baselines": [
+    "exact V119 host backup",
+    "exact P1-01 candidate"
+  ],
+  "candidate": {
+    "index.html": "4d5c0a03f1da0c48055ad44e8cbb498b6eb1a84a91fe78231208340a487cde2d",
+    "assets/ms_r5_perf_core_deab200de6eb727c.js": "deab200de6eb727cdfc7f8462816ad5af8b421fbc5f43e6dc8ebfbdc334afb3b"
+  },
+  "zip_sha256": "b076c0ed0b258dfe4b5b465873a14411f7eb89b0ade3c4e6f827129e5301b74d",
+  "changes": [
+    "native hierarchical zoom for existing scopes",
+    "province and county polygon hit testing including holes",
+    "remembered hierarchy navigation",
+    "preserve parameter and valid time during scope transitions",
+    "remove Europe to Middle East fallback",
+    "separate ordinary and fullscreen zoom"
+  ],
+  "validation": {
+    "province_count": 31,
+    "county_features": 489,
+    "unique_county_ids": 488,
+    "isolated_chromium": "passed geography, polygon, menu, forward/reverse, unavailable frame, Europe no fallback, fullscreen, click/double click",
+    "preflight": "passed exact V119, P1-01, unknown, installed, dependency drift",
+    "syntax": "passed"
+  },
+  "limitations": [
+    "full continent and global ADM1/ADM2 coverage not implemented",
+    "existing county data not certified current official administrative divisions",
+    "isolated browser tests are not full site or live verification",
+    "scientific NWP formulas unchanged"
+  ],
+  "status": "local tested candidate; no live deployment"
+}

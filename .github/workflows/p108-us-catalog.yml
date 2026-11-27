@@ -1,0 +1,32 @@
+name: P1-08 lightweight US navigation catalog
+on:
+  push:
+    branches: [audit/host-v119-p0-01-20261127]
+    paths: ['.github/workflows/p108-us-catalog.yml', 'scripts/build_us_navigation_catalog_p108.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: p107-us-census-source-and-staging
+          run-id: 46044875968
+          github-token: ${{ github.token }}
+          path: census-stage
+      - run: python scripts/build_us_navigation_catalog_p108.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p108-us-navigation-review
+          path: census-catalog/
+          retention-days: 14

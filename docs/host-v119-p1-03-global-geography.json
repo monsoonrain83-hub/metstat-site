@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "id": "P1-03",
+  "baseline_date": "2026-11-27",
+  "compatible_baselines": [
+    "exact V119",
+    "P1-01",
+    "P1-02"
+  ],
+  "candidate": {
+    "index.html": "56924cbe36f19f0cb9db4ac1db0a93e5bc26c45a9f7738e7f43aa06fcd0b99e6",
+    "assets/ms_r5_perf_core_825f50e1e952f65c.js": "825f50e1e952f65c6c2d4e0294786729e78d000acbc4012645f51b3e3431b841"
+  },
+  "zip_sha256": "f599be26a89181bae493a65a8bdd706d02341c3b93d8372a43061045a8ecae04",
+  "changes": [
+    "native continent and region scope records, five cascading menus",
+    "r203 grouping and country labels; local Natural Earth low-resolution polygons for country navigation only",
+    "scope-specific exact existing global frames, no silent regional data substitution",
+    "preserve Iran hierarchy, source tile validation and existing displayed borders"
+  ],
+  "validation": {
+    "continents": 7,
+    "regions": 25,
+    "catalog_codes": 200,
+    "supported_country_territory_codes": 169,
+    "disabled_codes": 31,
+    "isolated_chromium": "passed Iran, Japan, US, forward/back, missing frame, legacy Europe and fullscreen behaviors",
+    "syntax": "passed main JS and inline scripts",
+    "preflight": "11 dependencies; V119, P1-01, P1-02, installed, drift and unknown tests passed"
+  },
+  "limitations": [
+    "Geographic windows are navigation extents, not official region boundaries",
+    "Outside Iran ADM1 and ADM2 unavailable",
+    "Russia, Fiji and Antarctica have very wide bounds in non-wrapping world canvas",
+    "Overlapping region click may require menu selection; Iran canonical path via Middle East",
+    "No live or full-site verification, no global NWP coverage expansion",
+    "Existing global low-resolution rendered borders unchanged; scientific formulas untouched"
+  ],
+  "status": "local tested candidate only"
+}
